@@ -159,6 +159,28 @@ const initialForm = {
 
 
 // =========================================================
+// Shared Input Base Class (accent-aware)
+// =========================================================
+
+const INPUT_BASE = `
+    h-11
+    w-full
+    rounded-xl
+    border
+    bg-[var(--input-bg)]
+    px-4
+    text-sm
+    text-[var(--text)]
+    outline-none
+    transition-all
+    duration-200
+    placeholder:text-[var(--text-soft)]
+    disabled:cursor-not-allowed
+    disabled:opacity-50
+`;
+
+
+// =========================================================
 // Product Form
 // =========================================================
 
@@ -742,18 +764,7 @@ function ProductForm({
     ) => {
 
         return `
-            h-11
-            w-full
-            rounded-xl
-            border
-            bg-[var(--surface-muted)]
-            px-4
-            text-sm
-            text-[var(--text-primary)]
-            outline-none
-            transition-all
-            duration-200
-            placeholder:text-[var(--text-muted)]
+            ${INPUT_BASE}
             ${
                 hasError
                     ? `
@@ -761,14 +772,11 @@ function ProductForm({
                         dark:border-rose-500/50
                     `
                     : `
-                        border-[var(--border)]
-                        focus:border-emerald-500/50
-                        focus:ring-2
-                        focus:ring-emerald-500/10
+                        border-[var(--input-border)]
+                        focus:border-[var(--input-border-focus)]
+                        focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
                     `
             }
-            disabled:cursor-not-allowed
-            disabled:opacity-50
         `;
 
     };
@@ -783,18 +791,7 @@ function ProductForm({
     ) => {
 
         return `
-            h-11
-            w-full
-            rounded-xl
-            border
-            bg-[var(--surface-muted)]
-            px-4
-            text-sm
-            text-[var(--text-primary)]
-            outline-none
-            transition-all
-            duration-200
-            placeholder:text-[var(--text-muted)]
+            ${INPUT_BASE}
             ${
                 hasError
                     ? `
@@ -802,14 +799,11 @@ function ProductForm({
                         dark:border-rose-500/50
                     `
                     : `
-                        border-[var(--border)]
-                        focus:border-emerald-500/50
-                        focus:ring-2
-                        focus:ring-emerald-500/10
+                        border-[var(--input-border)]
+                        focus:border-[var(--input-border-focus)]
+                        focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
                     `
             }
-            disabled:cursor-not-allowed
-            disabled:opacity-50
         `;
 
     };
@@ -837,12 +831,19 @@ function ProductForm({
                 flex
                 items-center
                 justify-center
-                bg-slate-950/[0.45]
                 p-2
                 backdrop-blur-[20px]
-                dark:bg-black/[0.58]
                 sm:p-4
             "
+            style={{
+                background: `
+                    radial-gradient(
+                        circle at 50% 50%,
+                        rgba(0, 0, 0, 0.45),
+                        rgba(0, 0, 0, 0.62)
+                    )
+                `,
+            }}
         >
 
             <div
@@ -856,11 +857,25 @@ function ProductForm({
                     overflow-hidden
                     rounded-2xl
                     border
-                    border-[var(--border)]
-                    bg-[var(--surface)]
-                    shadow-2xl
+                    border-[var(--glass-border)]
+                    shadow-[var(--shadow-xl)]
                     sm:max-h-[90vh]
                 "
+                style={{
+                    background: `
+                        linear-gradient(
+                            135deg,
+                            var(--glass-active-tint),
+                            var(--glass-active-tint-soft) 70%,
+                            transparent 100%
+                        ),
+                        var(--glass-bg-strong)
+                    `,
+                    backdropFilter:
+                        'blur(var(--glass-blur-strong)) saturate(220%) brightness(1.12)',
+                    WebkitBackdropFilter:
+                        'blur(var(--glass-blur-strong)) saturate(220%) brightness(1.12)',
+                }}
             >
 
                 {/* =================================================
@@ -876,25 +891,13 @@ function ProductForm({
                         justify-between
                         gap-4
                         border-b
-                        border-[var(--border)]
-                        bg-[var(--surface)]
+                        border-[var(--border-subtle)]
                         px-4
                         py-3.5
                         sm:px-5
                         sm:py-4
                     "
                 >
-
-                    <div
-                        className="
-                            absolute
-                            inset-x-0
-                            top-0
-                            h-px
-                            bg-emerald-500/70
-                        "
-                    />
-
 
                     <div
                         className="
@@ -915,8 +918,8 @@ function ProductForm({
                                 justify-center
                                 rounded-xl
                                 border
-                                border-emerald-500/10
-                                bg-emerald-500/10
+                                border-[var(--accent-border)]
+                                bg-[var(--accent-soft)]
                                 sm:h-11
                                 sm:w-11
                             "
@@ -925,8 +928,7 @@ function ProductForm({
                             <Package
                                 size={19}
                                 className="
-                                    text-emerald-500
-                                    dark:text-emerald-400
+                                    text-[var(--accent-500)]
                                 "
                             />
 
@@ -944,7 +946,7 @@ function ProductForm({
                                     truncate
                                     text-sm
                                     font-semibold
-                                    text-[var(--text-primary)]
+                                    text-[var(--text)]
                                 "
                             >
                                 {
@@ -1170,7 +1172,7 @@ function ProductForm({
                                                     ? 'left-3'
                                                     : 'right-3'
                                             }
-                                            text-[var(--text-muted)]
+                                            text-[var(--text-soft)]
                                         `}
                                     />
 
@@ -1193,18 +1195,18 @@ function ProductForm({
                                             appearance-none
                                             rounded-xl
                                             border
-                                            border-[var(--border)]
-                                            bg-[var(--surface-muted)]
+                                            border-[var(--input-border)]
+                                            bg-[var(--input-bg)]
                                             px-10
                                             text-sm
-                                            text-[var(--text-primary)]
+                                            text-[var(--text)]
                                             outline-none
                                             transition-all
-                                            focus:border-emerald-500/50
-                                            focus:ring-2
-                                            focus:ring-emerald-500/10
+                                            focus:border-[var(--input-border-focus)]
+                                            focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
                                             disabled:cursor-not-allowed
                                             disabled:opacity-50
+                                            cursor-pointer
                                         "
                                     >
 
@@ -1259,7 +1261,7 @@ function ProductForm({
                                                     ? 'right-3'
                                                     : 'left-3'
                                             }
-                                            text-[var(--text-muted)]
+                                            text-[var(--text-soft)]
                                         `}
                                     />
 
@@ -1306,7 +1308,7 @@ function ProductForm({
                                                     ? 'left-3'
                                                     : 'right-3'
                                             }
-                                            text-[var(--text-muted)]
+                                            text-[var(--text-soft)]
                                         `}
                                     />
 
@@ -1328,18 +1330,18 @@ function ProductForm({
                                             appearance-none
                                             rounded-xl
                                             border
-                                            border-[var(--border)]
-                                            bg-[var(--surface-muted)]
+                                            border-[var(--input-border)]
+                                            bg-[var(--input-bg)]
                                             px-10
                                             text-sm
-                                            text-[var(--text-primary)]
+                                            text-[var(--text)]
                                             outline-none
                                             transition-all
-                                            focus:border-emerald-500/50
-                                            focus:ring-2
-                                            focus:ring-emerald-500/10
+                                            focus:border-[var(--input-border-focus)]
+                                            focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
                                             disabled:cursor-not-allowed
                                             disabled:opacity-50
+                                            cursor-pointer
                                         "
                                     >
 
@@ -1379,7 +1381,7 @@ function ProductForm({
                                                     ? 'right-3'
                                                     : 'left-3'
                                             }
-                                            text-[var(--text-muted)]
+                                            text-[var(--text-soft)]
                                         `}
                                     />
 
@@ -1722,6 +1724,7 @@ function ProductForm({
                                         size={12}
                                         className="
                                             text-amber-500
+                                            dark:text-amber-400
                                         "
                                     />
 
@@ -1812,20 +1815,19 @@ function ProductForm({
                                     resize-none
                                     rounded-xl
                                     border
-                                    border-[var(--border)]
-                                    bg-[var(--surface-muted)]
+                                    border-[var(--input-border)]
+                                    bg-[var(--input-bg)]
                                     px-4
                                     py-3
                                     text-sm
                                     leading-6
-                                    text-[var(--text-primary)]
+                                    text-[var(--text)]
                                     outline-none
                                     transition-all
                                     duration-200
-                                    placeholder:text-[var(--text-muted)]
-                                    focus:border-emerald-500/50
-                                    focus:ring-2
-                                    focus:ring-emerald-500/10
+                                    placeholder:text-[var(--text-soft)]
+                                    focus:border-[var(--input-border-focus)]
+                                    focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
                                     disabled:cursor-not-allowed
                                     disabled:opacity-50
                                 "
@@ -1844,7 +1846,7 @@ function ProductForm({
                                 flex-col-reverse
                                 gap-3
                                 border-t
-                                border-[var(--border)]
+                                border-[var(--border-subtle)]
                                 pt-4
                                 sm:flex-row
                                 sm:justify-end
@@ -1880,26 +1882,8 @@ function ProductForm({
                                     loadingCategories
                                 }
                                 className="
-                                    flex
-                                    h-11
+                                    ui-button-primary
                                     w-full
-                                    items-center
-                                    justify-center
-                                    gap-2
-                                    rounded-xl
-                                    bg-emerald-500
-                                    px-6
-                                    text-sm
-                                    font-semibold
-                                    text-slate-950
-                                    shadow-lg
-                                    shadow-emerald-500/20
-                                    transition-all
-                                    duration-200
-                                    hover:bg-emerald-400
-                                    active:scale-[0.98]
-                                    disabled:cursor-not-allowed
-                                    disabled:opacity-50
                                     sm:w-auto
                                 "
                             >
@@ -1914,8 +1898,8 @@ function ProductForm({
                                                 w-4
                                                 rounded-full
                                                 border-2
-                                                border-slate-950/30
-                                                border-t-slate-950
+                                                border-white/30
+                                                border-t-white
                                                 animate-spin
                                             "
                                         />
@@ -1996,15 +1980,15 @@ function FormSectionHeader({
                     justify-center
                     rounded-lg
                     border
-                    border-[var(--border)]
-                    bg-[var(--surface-muted)]
+                    border-[var(--accent-border)]
+                    bg-[var(--accent-soft)]
                 "
             >
 
                 <Icon
                     size={13}
                     className="
-                        text-[var(--text-muted)]
+                        text-[var(--accent-500)]
                     "
                 />
 

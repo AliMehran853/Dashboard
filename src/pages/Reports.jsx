@@ -1,7 +1,11 @@
 import {
     useEffect,
+    useLayoutEffect,
+    useRef,
     useState,
 } from 'react';
+
+import { createPortal } from 'react-dom';
 
 import {
     BarChart3,
@@ -54,50 +58,25 @@ import {
 const createDefaultReportData = () => ({
 
     statistics: {
-
-        totalSales:
-            0,
-
-        totalTransactions:
-            0,
-
-        cashSales:
-            0,
-
-        creditSales:
-            0,
-
-        totalRevenue:
-            0,
-
+        totalSales: 0,
+        totalTransactions: 0,
+        cashSales: 0,
+        creditSales: 0,
+        totalRevenue: 0,
     },
-
 
     salesTrend: [],
 
-
     paymentDistribution: [],
-
 
     categorySales: [],
 
-
     summary: {
-
-        bestCategory:
-            '-',
-
-        bestCategorySales:
-            0,
-
-        averageSale:
-            0,
-
-        totalItems:
-            0,
-
+        bestCategory: '-',
+        bestCategorySales: 0,
+        averageSale: 0,
+        totalItems: 0,
     },
-
 
     rawSales: [],
 
@@ -129,55 +108,32 @@ const normalizeReportData = (
     return {
 
         statistics: {
-
             ...fallback.statistics,
-
             ...(result.statistics || {}),
-
         },
 
-
         salesTrend:
-
-            Array.isArray(
-                result.salesTrend
-            )
+            Array.isArray(result.salesTrend)
                 ? result.salesTrend
                 : [],
 
-
         paymentDistribution:
-
-            Array.isArray(
-                result.paymentDistribution
-            )
+            Array.isArray(result.paymentDistribution)
                 ? result.paymentDistribution
                 : [],
 
-
         categorySales:
-
-            Array.isArray(
-                result.categorySales
-            )
+            Array.isArray(result.categorySales)
                 ? result.categorySales
                 : [],
 
-
         summary: {
-
             ...fallback.summary,
-
             ...(result.summary || {}),
-
         },
 
-
         rawSales:
-
-            Array.isArray(
-                result.rawSales
-            )
+            Array.isArray(result.rawSales)
                 ? result.rawSales
                 : [],
 
@@ -207,9 +163,7 @@ function Reports() {
 
 
     const isEnglish =
-        String(
-            language
-        )
+        String(language)
             .toLowerCase()
             .startsWith('en');
 
@@ -240,6 +194,35 @@ function Reports() {
         exportError,
         setExportError,
     ] = useState('');
+
+
+    // =====================================================
+    // Refs
+    // =====================================================
+
+    const exportButtonRef =
+        useRef(null);
+
+
+    const exportMenuRef =
+        useRef(null);
+
+
+    // =====================================================
+    // Menu Position
+    // =====================================================
+
+    const [
+        menuStyle,
+        setMenuStyle,
+    ] = useState({
+
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        visibility: 'hidden',
+
+    });
 
 
     // =====================================================
@@ -318,8 +301,7 @@ function Reports() {
 
     useEffect(() => {
 
-        let cancelled =
-            false;
+        let cancelled = false;
 
 
         const loadCategories =
@@ -331,26 +313,18 @@ function Reports() {
                         await getReportCategories();
 
 
-                    if (
-                        cancelled
-                    ) {
-
+                    if (cancelled) {
                         return;
-
                     }
 
 
                     setCategories(
-                        Array.isArray(
-                            result
-                        )
+                        Array.isArray(result)
                             ? result
                             : []
                     );
 
-                } catch (
-                    loadError
-                ) {
+                } catch (loadError) {
 
                     console.error(
                         'Failed to load report categories:',
@@ -358,12 +332,8 @@ function Reports() {
                     );
 
 
-                    if (
-                        !cancelled
-                    ) {
-
+                    if (!cancelled) {
                         setCategories([]);
-
                     }
 
                 }
@@ -375,10 +345,7 @@ function Reports() {
 
 
         return () => {
-
-            cancelled =
-                true;
-
+            cancelled = true;
         };
 
     }, []);
@@ -390,8 +357,7 @@ function Reports() {
 
     useEffect(() => {
 
-        let cancelled =
-            false;
+        let cancelled = false;
 
 
         const loadReport =
@@ -399,45 +365,29 @@ function Reports() {
 
                 try {
 
-                    setLoading(
-                        true
-                    );
-
+                    setLoading(true);
                     setError('');
 
 
                     const result =
                         await getSalesReport({
-
                             period,
-
                             paymentType,
-
                             category,
-
                             search,
-
                         });
 
 
-                    if (
-                        cancelled
-                    ) {
-
+                    if (cancelled) {
                         return;
-
                     }
 
 
                     setReportData(
-                        normalizeReportData(
-                            result
-                        )
+                        normalizeReportData(result)
                     );
 
-                } catch (
-                    loadError
-                ) {
+                } catch (loadError) {
 
                     console.error(
                         'Failed to load report:',
@@ -445,33 +395,22 @@ function Reports() {
                     );
 
 
-                    if (
-                        !cancelled
-                    ) {
+                    if (!cancelled) {
 
                         setReportData(
                             createDefaultReportData()
                         );
 
-
                         setError(
-                            t(
-                                'reports.errors.load'
-                            )
+                            t('reports.errors.load')
                         );
 
                     }
 
                 } finally {
 
-                    if (
-                        !cancelled
-                    ) {
-
-                        setLoading(
-                            false
-                        );
-
+                    if (!cancelled) {
+                        setLoading(false);
                     }
 
                 }
@@ -483,10 +422,7 @@ function Reports() {
 
 
         return () => {
-
-            cancelled =
-                true;
-
+            cancelled = true;
         };
 
     }, [
@@ -499,46 +435,258 @@ function Reports() {
 
 
     // =====================================================
+    // Compute Menu Position
+    //
+    // Uses viewport coordinates from getBoundingClientRect
+    // so that `position: fixed` on the portal-aligned menu
+    // sits exactly under the button.
+    // =====================================================
+
+    const computeMenuPosition =
+        () => {
+
+            const button =
+                exportButtonRef.current;
+
+
+            if (!button) {
+
+                return {
+
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    visibility: 'hidden',
+
+                };
+
+            }
+
+
+            const rect =
+                button.getBoundingClientRect();
+
+
+            const margin = 8;
+
+
+            const next = {
+
+                position: 'fixed',
+
+                top:
+                    rect.bottom + margin,
+
+                zIndex:
+                    9999,
+
+                visibility:
+                    'visible',
+
+            };
+
+
+            if (isEnglish) {
+
+                // LTR — align dropdown's right edge to button's right edge
+
+                next.right =
+                    Math.max(
+                        margin,
+                        window.innerWidth - rect.right
+                    );
+
+                next.left =
+                    'auto';
+
+            } else {
+
+                // RTL — align dropdown's left edge to button's left edge
+
+                next.left =
+                    Math.max(
+                        margin,
+                        rect.left
+                    );
+
+                next.right =
+                    'auto';
+
+            }
+
+
+            return next;
+
+        };
+
+
+    // =====================================================
+    // Position Menu On Open + Track Resize / Scroll
+    //
+    // `useLayoutEffect` runs synchronously after DOM mutation
+    // so the very first frame already has the correct position.
+    // =====================================================
+
+    useLayoutEffect(() => {
+
+        if (!exportOpen) {
+            return undefined;
+        }
+
+
+        setMenuStyle(
+            computeMenuPosition()
+        );
+
+
+        const handleReposition = () => {
+
+            setMenuStyle(
+                computeMenuPosition()
+            );
+
+        };
+
+
+        window.addEventListener(
+            'resize',
+            handleReposition
+        );
+
+
+        window.addEventListener(
+            'scroll',
+            handleReposition,
+            true
+        );
+
+
+        return () => {
+
+            window.removeEventListener(
+                'resize',
+                handleReposition
+            );
+
+
+            window.removeEventListener(
+                'scroll',
+                handleReposition,
+                true
+            );
+
+        };
+
+    }, [
+        exportOpen,
+        isEnglish,
+    ]);
+
+
+    // =====================================================
+    // Close On Outside Click + ESC
+    // =====================================================
+
+    useEffect(() => {
+
+        if (!exportOpen) {
+            return undefined;
+        }
+
+
+        const handleClickOutside = (event) => {
+
+            if (
+                exportMenuRef.current &&
+                exportMenuRef.current.contains(
+                    event.target
+                )
+            ) {
+                return;
+            }
+
+
+            if (
+                exportButtonRef.current &&
+                exportButtonRef.current.contains(
+                    event.target
+                )
+            ) {
+                return;
+            }
+
+
+            setExportOpen(false);
+
+        };
+
+
+        const handleKeyDown = (event) => {
+
+            if (event.key === 'Escape') {
+                setExportOpen(false);
+            }
+
+        };
+
+
+        document.addEventListener(
+            'mousedown',
+            handleClickOutside
+        );
+
+
+        document.addEventListener(
+            'keydown',
+            handleKeyDown
+        );
+
+
+        return () => {
+
+            document.removeEventListener(
+                'mousedown',
+                handleClickOutside
+            );
+
+
+            document.removeEventListener(
+                'keydown',
+                handleKeyDown
+            );
+
+        };
+
+    }, [exportOpen]);
+
+
+    // =====================================================
     // Clear Filters
     // =====================================================
 
-    const handleClearFilters =
-        () => {
+    const handleClearFilters = () => {
 
-            setSearch('');
+        setSearch('');
+        setPeriod('week');
+        setPaymentType('all');
+        setCategory('all');
 
-            setPeriod(
-                'week'
-            );
-
-            setPaymentType(
-                'all'
-            );
-
-            setCategory(
-                'all'
-            );
-
-        };
+    };
 
 
     // =====================================================
-    // Open Export
+    // Toggle Export
     // =====================================================
 
-    const handleExportClick =
-        () => {
+    const handleExportClick = () => {
 
-            setExportError('');
+        setExportError('');
 
-            setExportOpen(
-                (
-                    current
-                ) =>
-                    !current
-            );
+        setExportOpen(
+            (current) => !current
+        );
 
-        };
+    };
 
 
     // =====================================================
@@ -548,49 +696,30 @@ function Reports() {
     const handleExportExcel =
         async () => {
 
-            if (
-                exporting
-            ) {
-
+            if (exporting) {
                 return;
-
             }
 
 
             try {
 
-                setExporting(
-                    true
-                );
-
+                setExporting(true);
                 setExportError('');
 
 
                 exportReportToExcel({
-
                     reportData,
-
                     period,
-
                     paymentType,
-
                     category,
-
                     search,
-
-                    language:
-                        i18n.language,
-
+                    language: i18n.language,
                 });
 
 
-                setExportOpen(
-                    false
-                );
+                setExportOpen(false);
 
-            } catch (
-                exportException
-            ) {
+            } catch (exportException) {
 
                 console.error(
                     'Excel export failed:',
@@ -612,9 +741,7 @@ function Reports() {
 
             } finally {
 
-                setExporting(
-                    false
-                );
+                setExporting(false);
 
             }
 
@@ -628,49 +755,30 @@ function Reports() {
     const handleExportPDF =
         async () => {
 
-            if (
-                exporting
-            ) {
-
+            if (exporting) {
                 return;
-
             }
 
 
             try {
 
-                setExporting(
-                    true
-                );
-
+                setExporting(true);
                 setExportError('');
 
 
                 await exportReportToPDF({
-
                     reportData,
-
                     period,
-
                     paymentType,
-
                     category,
-
                     search,
-
-                    language:
-                        i18n.language,
-
+                    language: i18n.language,
                 });
 
 
-                setExportOpen(
-                    false
-                );
+                setExportOpen(false);
 
-            } catch (
-                exportException
-            ) {
+            } catch (exportException) {
 
                 console.error(
                     'PDF export failed:',
@@ -692,13 +800,294 @@ function Reports() {
 
             } finally {
 
-                setExporting(
-                    false
-                );
+                setExporting(false);
 
             }
 
         };
+
+
+    // =====================================================
+    // Render Export Menu (Portal)
+    // =====================================================
+
+    const renderExportMenu = () => {
+
+        if (!exportOpen) {
+            return null;
+        }
+
+
+        return createPortal(
+
+            <div
+                ref={exportMenuRef}
+                style={menuStyle}
+                className="
+                    w-64
+                    max-w-[calc(100vw-1rem)]
+
+                    sm:w-72
+
+                    overflow-hidden
+
+                    rounded-2xl
+
+                    border
+                    border-[var(--glass-border)]
+
+                    p-1.5
+
+                    shadow-2xl
+                    shadow-black/25
+                "
+            >
+
+                {/* Glass Background */}
+
+                <div
+                    aria-hidden="true"
+                    className="
+                        pointer-events-none
+                        absolute
+                        inset-0
+                    "
+                    style={{
+                        background: `
+                            linear-gradient(
+                                135deg,
+                                var(--glass-active-tint),
+                                var(--glass-active-tint-soft) 70%,
+                                transparent 100%
+                            ),
+                            var(--glass-bg-strong)
+                        `,
+                        backdropFilter:
+                            'blur(var(--glass-blur-strong)) saturate(220%) brightness(1.12)',
+                        WebkitBackdropFilter:
+                            'blur(var(--glass-blur-strong)) saturate(220%) brightness(1.12)',
+                    }}
+                />
+
+
+                <div className="relative z-10">
+
+                    {/* Header */}
+
+                    <div
+                        className="
+                            border-b
+                            border-[var(--border-subtle)]
+                            px-3
+                            py-3
+                        "
+                    >
+
+                        <p
+                            className="
+                                text-sm
+                                font-semibold
+                                text-[var(--text)]
+                            "
+                        >
+                            {t('reports.actions.export')}
+                        </p>
+
+
+                        <p
+                            className="
+                                mt-1
+                                text-[10px]
+                                leading-5
+                                text-[var(--text-muted)]
+                            "
+                        >
+                            {
+                                isEnglish
+                                    ? 'Choose a format for the current report.'
+                                    : 'فرمت مناسب برای گزارش فعلی را انتخاب کنید.'
+                            }
+                        </p>
+
+                    </div>
+
+
+                    {/* Items */}
+
+                    <div className="space-y-1 p-1">
+
+                        {/* Excel */}
+
+                        <button
+                            type="button"
+                            onClick={handleExportExcel}
+                            disabled={exporting}
+                            className="
+                                flex
+                                w-full
+                                items-center
+                                gap-3
+                                rounded-xl
+                                p-3
+                                text-start
+                                transition-all
+                                duration-200
+                                hover:bg-[var(--accent-soft)]
+                                disabled:cursor-not-allowed
+                                disabled:opacity-50
+                            "
+                        >
+
+                            <div
+                                className="
+                                    flex
+                                    h-10
+                                    w-10
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-xl
+                                    border
+                                    border-emerald-500/20
+                                    bg-emerald-500/10
+                                "
+                            >
+
+                                <FileSpreadsheet
+                                    size={18}
+                                    className="
+                                        text-emerald-500
+                                        dark:text-emerald-400
+                                    "
+                                />
+
+                            </div>
+
+
+                            <div className="min-w-0 flex-1">
+
+                                <p
+                                    className="
+                                        text-sm
+                                        font-semibold
+                                        text-[var(--text)]
+                                    "
+                                >
+                                    Excel
+                                </p>
+
+
+                                <p
+                                    className="
+                                        mt-0.5
+                                        truncate
+                                        text-[10px]
+                                        text-[var(--text-muted)]
+                                    "
+                                >
+                                    {
+                                        isEnglish
+                                            ? 'Editable report with detailed sales'
+                                            : 'گزارش قابل ویرایش با جزئیات فروش'
+                                    }
+                                </p>
+
+                            </div>
+
+                        </button>
+
+
+                        {/* PDF */}
+
+                        <button
+                            type="button"
+                            onClick={handleExportPDF}
+                            disabled={exporting}
+                            className="
+                                flex
+                                w-full
+                                items-center
+                                gap-3
+                                rounded-xl
+                                p-3
+                                text-start
+                                transition-all
+                                duration-200
+                                hover:bg-[var(--accent-soft)]
+                                disabled:cursor-not-allowed
+                                disabled:opacity-50
+                            "
+                        >
+
+                            <div
+                                className="
+                                    flex
+                                    h-10
+                                    w-10
+                                    shrink-0
+                                    items-center
+                                    justify-center
+                                    rounded-xl
+                                    border
+                                    border-rose-500/20
+                                    bg-rose-500/10
+                                "
+                            >
+
+                                <FileText
+                                    size={18}
+                                    className="
+                                        text-rose-500
+                                        dark:text-rose-400
+                                    "
+                                />
+
+                            </div>
+
+
+                            <div className="min-w-0 flex-1">
+
+                                <p
+                                    className="
+                                        text-sm
+                                        font-semibold
+                                        text-[var(--text)]
+                                    "
+                                >
+                                    PDF
+                                </p>
+
+
+                                <p
+                                    className="
+                                        mt-0.5
+                                        truncate
+                                        text-[10px]
+                                        text-[var(--text-muted)]
+                                    "
+                                >
+                                    {
+                                        isEnglish
+                                            ? 'Printable management report'
+                                            : 'گزارش مدیریتی مناسب چاپ'
+                                    }
+                                </p>
+
+                            </div>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>,
+
+            document.body
+
+        );
+
+    };
 
 
     // =====================================================
@@ -708,10 +1097,7 @@ function Reports() {
     return (
 
         <div
-            dir={
-                direction
-            }
-
+            dir={direction}
             className="
                 min-h-full
                 space-y-5
@@ -727,14 +1113,11 @@ function Reports() {
             <section
                 className="
                     relative
-                    overflow-hidden
 
                     rounded-2xl
 
                     border
                     border-[var(--border-subtle)]
-
-                    bg-[var(--surface)]
 
                     p-4
 
@@ -746,69 +1129,77 @@ function Reports() {
                     sm:p-5
                     md:p-6
                 "
+                style={{
+                    background: `
+                        linear-gradient(
+                            135deg,
+                            var(--glass-active-tint),
+                            var(--glass-active-tint-soft) 70%,
+                            transparent 100%
+                        ),
+                        var(--surface)
+                    `,
+                }}
             >
 
-                {/* Accent glow */}
+                {/* Glow wrapper (clips glows to rounded corners) */}
 
                 <div
                     aria-hidden="true"
                     className="
                         pointer-events-none
-
                         absolute
-                        -start-16
-                        -top-20
-
-                        h-48
-                        w-48
-
-                        rounded-full
-
-                        bg-emerald-500/[0.06]
-
-                        blur-3xl
-
-                        dark:bg-emerald-400/[0.055]
+                        inset-0
+                        overflow-hidden
+                        rounded-2xl
                     "
-                />
+                >
+
+                    <div
+                        className="
+                            absolute
+                            -start-20
+                            -top-20
+                            h-52
+                            w-52
+                            rounded-full
+                            bg-[var(--accent-soft-heavy)]
+                            blur-3xl
+                        "
+                    />
 
 
-                <div
-                    aria-hidden="true"
-                    className="
-                        pointer-events-none
+                    <div
+                        className="
+                            absolute
+                            -end-16
+                            -bottom-24
+                            h-44
+                            w-44
+                            rounded-full
+                            bg-[var(--accent-soft)]
+                            blur-3xl
+                        "
+                    />
 
-                        absolute
-                        -end-16
-                        -bottom-24
+                </div>
 
-                        h-44
-                        w-44
 
-                        rounded-full
-
-                        bg-indigo-500/[0.025]
-
-                        blur-3xl
-
-                        dark:bg-indigo-400/[0.035]
-                    "
-                />
-
+                {/* Content */}
 
                 <div
                     className="
                         relative
-
                         flex
                         flex-col
                         gap-4
-
-                        lg:flex-row
-                        lg:items-center
-                        lg:justify-between
+                        sm:flex-row
+                        sm:items-center
+                        sm:justify-between
                     "
                 >
+
+                    {/* Title */}
 
                     <div
                         className="
@@ -827,32 +1218,23 @@ function Reports() {
                                 shrink-0
                                 items-center
                                 justify-center
-
                                 rounded-xl
-
                                 border
-                                border-emerald-500/10
-
-                                bg-emerald-500/10
+                                border-[var(--accent-border)]
+                                bg-[var(--accent-soft)]
+                                text-[var(--accent-500)]
                             "
                         >
 
                             <BarChart3
                                 size={20}
-                                className="
-                                    text-emerald-500
-                                    dark:text-emerald-400
-                                "
+                                strokeWidth={1.9}
                             />
 
                         </div>
 
 
-                        <div
-                            className="
-                                min-w-0
-                            "
-                        >
+                        <div className="min-w-0">
 
                             <div
                                 className="
@@ -868,8 +1250,8 @@ function Reports() {
                                         w-2
                                         shrink-0
                                         rounded-full
-                                        bg-emerald-500
-                                        shadow-[0_0_12px_rgba(16,185,129,0.35)]
+                                        bg-[var(--accent-500)]
+                                        shadow-[0_0_12px_var(--accent-glow)]
                                     "
                                 />
 
@@ -879,8 +1261,7 @@ function Reports() {
                                         font-medium
                                         uppercase
                                         tracking-[0.12em]
-                                        text-emerald-600
-                                        dark:text-emerald-400
+                                        text-[var(--accent-600)]
                                     "
                                 >
                                     Taqwa
@@ -892,46 +1273,30 @@ function Reports() {
                             <h1
                                 className="
                                     mt-2
-
                                     truncate
-
                                     text-xl
                                     font-semibold
                                     tracking-[-0.02em]
-
                                     text-[var(--text)]
-
                                     sm:text-2xl
                                     lg:text-3xl
                                 "
                             >
-                                {
-                                    t(
-                                        'reports.page.title'
-                                    )
-                                }
+                                {t('reports.page.title')}
                             </h1>
 
 
                             <p
                                 className="
                                     mt-1.5
-
                                     max-w-2xl
-
                                     text-xs
                                     leading-5
-
                                     text-[var(--text-muted)]
-
                                     sm:text-sm
                                 "
                             >
-                                {
-                                    t(
-                                        'reports.page.description'
-                                    )
-                                }
+                                {t('reports.page.description')}
                             </p>
 
                         </div>
@@ -939,63 +1304,31 @@ function Reports() {
                     </div>
 
 
-                    {/* =================================================
-                        Export Area
-                    ================================================== */}
+                    {/* Export Button */}
 
                     <div
+                        ref={exportButtonRef}
                         className="
                             relative
-                            z-[60]
                             w-full
-                            lg:w-auto
+                            sm:w-auto
                         "
                     >
 
                         <button
                             type="button"
-                            onClick={
-                                handleExportClick
-                            }
-                            disabled={
-                                loading ||
-                                exporting
-                            }
+                            onClick={handleExportClick}
+                            disabled={loading || exporting}
+                            aria-haspopup="menu"
+                            aria-expanded={exportOpen}
                             className="
-                                flex
-                                h-10
+                                ui-button-secondary
+                                group
                                 w-full
-                                items-center
-                                justify-center
-                                gap-2
-
-                                rounded-xl
-
-                                border
-                                border-[var(--border)]
-
-                                bg-[var(--surface-muted)]
-
+                                sm:w-auto
                                 px-4
-
                                 text-xs
                                 font-medium
-
-                                text-[var(--text-secondary)]
-
-                                transition-all
-                                duration-200
-
-                                hover:border-emerald-500/20
-                                hover:bg-emerald-500/5
-                                hover:text-emerald-600
-
-                                dark:hover:text-emerald-400
-
-                                disabled:cursor-not-allowed
-                                disabled:opacity-50
-
-                                lg:w-auto
                             "
                         >
 
@@ -1004,399 +1337,30 @@ function Reports() {
                                     ? (
                                         <Loader2
                                             size={15}
-                                            className="
-                                                animate-spin
-                                            "
+                                            className="animate-spin"
                                         />
                                     )
                                     : (
-                                        <Download
-                                            size={15}
-                                        />
+                                        <Download size={15} />
                                     )
                             }
 
 
                             {
                                 exporting
-                                    ? (
-                                        t(
-                                            'reports.actions.exporting',
-                                            {
-                                                defaultValue:
-                                                    isEnglish
-                                                        ? 'Preparing...'
-                                                        : 'در حال آماده‌سازی...',
-                                            }
-                                        )
+                                    ? t(
+                                        'reports.actions.exporting',
+                                        {
+                                            defaultValue:
+                                                isEnglish
+                                                    ? 'Preparing...'
+                                                    : 'در حال آماده‌سازی...',
+                                        }
                                     )
-                                    : (
-                                        t(
-                                            'reports.actions.export'
-                                        )
-                                    )
+                                    : t('reports.actions.export')
                             }
 
                         </button>
-
-
-                        {/* =================================================
-                            Export Menu
-                        ================================================== */}
-
-                        {
-                            exportOpen && (
-
-                                <>
-
-                                    {/* Backdrop */}
-
-                                    <button
-                                        type="button"
-                                        aria-label={
-                                            t(
-                                                'common.closeMenu',
-                                                {
-                                                    defaultValue:
-                                                        isEnglish
-                                                            ? 'Close menu'
-                                                            : 'بستن منو',
-                                                }
-                                            )
-                                        }
-                                        onClick={() =>
-                                            setExportOpen(
-                                                false
-                                            )
-                                        }
-                                        className="
-                                            fixed
-                                            inset-0
-                                            z-40
-                                            cursor-default
-                                            bg-black/5
-                                        "
-                                    />
-
-
-                                    {/* =================================================
-                                        Export Dropdown
-                                    ================================================== */}
-
-                                    <div
-                                        className={`
-                                            absolute
-                                            top-full
-                                            z-[70]
-                                            mt-2
-
-                                            overflow-hidden
-
-                                            rounded-2xl
-
-                                            border
-                                            border-[var(--border)]
-
-                                            bg-[var(--surface)]/95
-
-                                            p-1.5
-
-                                            shadow-2xl
-                                            shadow-black/15
-
-                                            backdrop-blur-md
-                                            backdrop-saturate-150
-
-                                            w-64
-                                            max-w-[calc(100vw-1rem)]
-
-                                            sm:w-72
-                                            sm:max-w-none
-
-                                            ${
-                                                isEnglish
-                                                    ? `
-                                                        right-0
-                                                        left-auto
-                                                    `
-                                                    : `
-                                                        left-0
-                                                        right-auto
-                                                    `
-                                            }
-                                        `}
-                                    >
-
-                                        {/* Glass Overlay */}
-
-                                        <div
-                                            className="
-                                                pointer-events-none
-                                                absolute
-                                                inset-0
-                                                bg-white/20
-                                                dark:bg-white/[0.015]
-                                            "
-                                        />
-
-
-                                        <div
-                                            className="
-                                                relative
-                                                z-10
-                                            "
-                                        >
-
-                                            {/* =================================================
-                                                Menu Header
-                                            ================================================== */}
-
-                                            <div
-                                                className="
-                                                    border-b
-                                                    border-[var(--border)]
-                                                    px-3
-                                                    py-3
-                                                "
-                                            >
-
-                                                <p
-                                                    className="
-                                                        text-sm
-                                                        font-semibold
-                                                        text-[var(--text-primary)]
-                                                    "
-                                                >
-                                                    {
-                                                        t(
-                                                            'reports.actions.export'
-                                                        )
-                                                    }
-                                                </p>
-
-
-                                                <p
-                                                    className="
-                                                        mt-1
-                                                        text-[10px]
-                                                        leading-5
-                                                        text-[var(--text-muted)]
-                                                    "
-                                                >
-                                                    {
-                                                        isEnglish
-                                                            ? 'Choose a format for the current report.'
-                                                            : 'فرمت مناسب برای گزارش فعلی را انتخاب کنید.'
-                                                    }
-                                                </p>
-
-                                            </div>
-
-
-                                            {/* =================================================
-                                                Menu Items
-                                            ================================================== */}
-
-                                            <div
-                                                className="
-                                                    space-y-1
-                                                    p-1
-                                                "
-                                            >
-
-                                                {/* =================================================
-                                                    Excel
-                                                ================================================== */}
-
-                                                <button
-                                                    type="button"
-                                                    onClick={
-                                                        handleExportExcel
-                                                    }
-                                                    disabled={
-                                                        exporting
-                                                    }
-                                                    className="
-                                                        flex
-                                                        w-full
-                                                        items-center
-                                                        gap-3
-                                                        rounded-xl
-                                                        p-3
-                                                        text-start
-                                                        transition-all
-                                                        duration-200
-                                                        hover:bg-emerald-500/5
-                                                        disabled:cursor-not-allowed
-                                                        disabled:opacity-50
-                                                    "
-                                                >
-
-                                                    <div
-                                                        className="
-                                                            flex
-                                                            h-10
-                                                            w-10
-                                                            shrink-0
-                                                            items-center
-                                                            justify-center
-                                                            rounded-xl
-                                                            border
-                                                            border-emerald-500/10
-                                                            bg-emerald-500/10
-                                                        "
-                                                    >
-
-                                                        <FileSpreadsheet
-                                                            size={18}
-                                                            className="
-                                                                text-emerald-500
-                                                                dark:text-emerald-400
-                                                            "
-                                                        />
-
-                                                    </div>
-
-
-                                                    <div
-                                                        className="
-                                                            min-w-0
-                                                            flex-1
-                                                        "
-                                                    >
-
-                                                        <p
-                                                            className="
-                                                                text-sm
-                                                                font-semibold
-                                                                text-[var(--text-primary)]
-                                                            "
-                                                        >
-                                                            Excel
-                                                        </p>
-
-
-                                                        <p
-                                                            className="
-                                                                mt-0.5
-                                                                truncate
-                                                                text-[10px]
-                                                                text-[var(--text-muted)]
-                                                            "
-                                                        >
-                                                            {
-                                                                isEnglish
-                                                                    ? 'Editable report with detailed sales'
-                                                                    : 'گزارش قابل ویرایش با جزئیات فروش'
-                                                            }
-                                                        </p>
-
-                                                    </div>
-
-                                                </button>
-
-
-                                                {/* =================================================
-                                                    PDF
-                                                ================================================== */}
-
-                                                <button
-                                                    type="button"
-                                                    onClick={
-                                                        handleExportPDF
-                                                    }
-                                                    disabled={
-                                                        exporting
-                                                    }
-                                                    className="
-                                                        flex
-                                                        w-full
-                                                        items-center
-                                                        gap-3
-                                                        rounded-xl
-                                                        p-3
-                                                        text-start
-                                                        transition-all
-                                                        duration-200
-                                                        hover:bg-rose-500/5
-                                                        disabled:cursor-not-allowed
-                                                        disabled:opacity-50
-                                                    "
-                                                >
-
-                                                    <div
-                                                        className="
-                                                            flex
-                                                            h-10
-                                                            w-10
-                                                            shrink-0
-                                                            items-center
-                                                            justify-center
-                                                            rounded-xl
-                                                            border
-                                                            border-rose-500/10
-                                                            bg-rose-500/10
-                                                        "
-                                                    >
-
-                                                        <FileText
-                                                            size={18}
-                                                            className="
-                                                                text-rose-500
-                                                                dark:text-rose-400
-                                                            "
-                                                        />
-
-                                                    </div>
-
-
-                                                    <div
-                                                        className="
-                                                            min-w-0
-                                                            flex-1
-                                                        "
-                                                    >
-
-                                                        <p
-                                                            className="
-                                                                text-sm
-                                                                font-semibold
-                                                                text-[var(--text-primary)]
-                                                            "
-                                                        >
-                                                            PDF
-                                                        </p>
-
-
-                                                        <p
-                                                            className="
-                                                                mt-0.5
-                                                                truncate
-                                                                text-[10px]
-                                                                text-[var(--text-muted)]
-                                                            "
-                                                        >
-                                                            {
-                                                                isEnglish
-                                                                    ? 'Printable management report'
-                                                                    : 'گزارش مدیریتی مناسب چاپ'
-                                                            }
-                                                        </p>
-
-                                                    </div>
-
-                                                </button>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-                                </>
-
-                            )
-                        }
 
                     </div>
 
@@ -1406,40 +1370,38 @@ function Reports() {
 
 
             {/* =================================================
+                Export Menu (Portal)
+            ================================================== */}
+
+            {renderExportMenu()}
+
+
+            {/* =================================================
                 Export Error
             ================================================== */}
 
-            {
-                exportError && (
+            {exportError && (
 
-                    <div
-                        role="alert"
-                        className="
-                            rounded-2xl
+                <div
+                    role="alert"
+                    className="
+                        rounded-2xl
+                        border
+                        border-red-500/20
+                        bg-red-500/[0.06]
+                        px-4
+                        py-3
+                        text-xs
+                        leading-5
+                        text-red-500
+                        dark:text-red-400
+                        sm:text-sm
+                    "
+                >
+                    {exportError}
+                </div>
 
-                            border
-                            border-red-500/20
-
-                            bg-red-500/[0.06]
-
-                            px-4
-                            py-3
-
-                            text-xs
-                            leading-5
-
-                            text-[var(--danger)]
-
-                            sm:text-sm
-                        "
-                    >
-                        {
-                            exportError
-                        }
-                    </div>
-
-                )
-            }
+            )}
 
 
             {/* =================================================
@@ -1447,47 +1409,16 @@ function Reports() {
             ================================================== */}
 
             <ReportsFilters
-
-                search={
-                    search
-                }
-
-                period={
-                    period
-                }
-
-                paymentType={
-                    paymentType
-                }
-
-                category={
-                    category
-                }
-
-                categories={
-                    categories
-                }
-
-                onSearchChange={
-                    setSearch
-                }
-
-                onPeriodChange={
-                    setPeriod
-                }
-
-                onPaymentTypeChange={
-                    setPaymentType
-                }
-
-                onCategoryChange={
-                    setCategory
-                }
-
-                onClearFilters={
-                    handleClearFilters
-                }
-
+                search={search}
+                period={period}
+                paymentType={paymentType}
+                category={category}
+                categories={categories}
+                onSearchChange={setSearch}
+                onPeriodChange={setPeriod}
+                onPaymentTypeChange={setPaymentType}
+                onCategoryChange={setCategory}
+                onClearFilters={handleClearFilters}
             />
 
 
@@ -1495,157 +1426,119 @@ function Reports() {
                 Error
             ================================================== */}
 
-            {
-                error && (
+            {error && (
 
-                    <div
-                        role="alert"
-                        className="
-                            rounded-2xl
+                <div
+                    role="alert"
+                    className="
+                        rounded-2xl
+                        border
+                        border-red-500/20
+                        bg-red-500/[0.06]
+                        px-4
+                        py-3
+                        text-xs
+                        leading-5
+                        text-red-500
+                        dark:text-red-400
+                        sm:text-sm
+                    "
+                >
+                    {error}
+                </div>
 
-                            border
-                            border-red-500/20
-
-                            bg-red-500/[0.06]
-
-                            px-4
-                            py-3
-
-                            text-xs
-                            leading-5
-
-                            text-[var(--danger)]
-
-                            sm:text-sm
-                        "
-                    >
-                        {
-                            error
-                        }
-                    </div>
-
-                )
-            }
+            )}
 
 
             {/* =================================================
                 Loading / Report
             ================================================== */}
 
-            {
-                loading
-
-                    ? (
+            {loading
+                ? (
+                    <div
+                        className="
+                            flex
+                            min-h-[400px]
+                            flex-col
+                            items-center
+                            justify-center
+                            gap-3
+                            text-[var(--text-muted)]
+                        "
+                    >
 
                         <div
                             className="
                                 flex
-                                min-h-[400px]
-                                flex-col
+                                h-14
+                                w-14
                                 items-center
                                 justify-center
-                                gap-3
-                                text-[var(--text-muted)]
+                                rounded-2xl
+                                border
+                                border-[var(--accent-border)]
+                                bg-[var(--accent-soft)]
                             "
                         >
 
-                            <div
+                            <Loader2
+                                size={26}
                                 className="
-                                    flex
-                                    h-14
-                                    w-14
-                                    items-center
-                                    justify-center
-
-                                    rounded-2xl
-
-                                    border
-                                    border-emerald-500/10
-
-                                    bg-emerald-500/5
+                                    animate-spin
+                                    text-[var(--accent-500)]
                                 "
-                            >
-
-                                <Loader2
-                                    size={26}
-                                    className="
-                                        animate-spin
-                                        text-emerald-500
-                                        dark:text-emerald-400
-                                    "
-                                />
-
-                            </div>
-
-
-                            <span
-                                className="
-                                    text-sm
-                                "
-                            >
-                                {
-                                    t(
-                                        'reports.loading'
-                                    )
-                                }
-                            </span>
+                            />
 
                         </div>
 
-                    )
 
-                    : (
+                        <span className="text-sm">
+                            {t('reports.loading')}
+                        </span>
 
-                        <>
+                    </div>
+                )
+                : (
+                    <>
 
-                            <ReportsStats
-                                statistics={
-                                    reportData.statistics
-                                }
+                        <ReportsStats
+                            statistics={reportData.statistics}
+                        />
+
+
+                        <div
+                            className="
+                                grid
+                                grid-cols-1
+                                gap-5
+                                xl:grid-cols-2
+                            "
+                        >
+
+                            <SalesTrendChart
+                                data={reportData.salesTrend}
                             />
 
 
-                            <div
-                                className="
-                                    grid
-                                    grid-cols-1
-                                    gap-5
-                                    xl:grid-cols-2
-                                "
-                            >
-
-                                <SalesTrendChart
-                                    data={
-                                        reportData.salesTrend
-                                    }
-                                />
-
-
-                                <PaymentDistributionChart
-                                    data={
-                                        reportData.paymentDistribution
-                                    }
-                                />
-
-                            </div>
-
-
-                            <CategorySalesChart
-                                data={
-                                    reportData.categorySales
-                                }
+                            <PaymentDistributionChart
+                                data={reportData.paymentDistribution}
                             />
 
+                        </div>
 
-                            <ReportsSummary
-                                summary={
-                                    reportData.summary
-                                }
-                            />
 
-                        </>
+                        <CategorySalesChart
+                            data={reportData.categorySales}
+                        />
 
-                    )
+
+                        <ReportsSummary
+                            summary={reportData.summary}
+                        />
+
+                    </>
+                )
             }
 
         </div>

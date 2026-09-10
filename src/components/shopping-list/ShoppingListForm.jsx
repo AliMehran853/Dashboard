@@ -19,6 +19,96 @@ import {
 
 
 // =========================================================
+// Shared Field Class (accent-aware)
+// =========================================================
+
+const FIELD_CLASS = `
+    w-full
+    h-11
+
+    px-3
+
+    rounded-xl
+
+    border
+    border-[var(--input-border)]
+
+    bg-[var(--input-bg)]
+
+    text-sm
+
+    text-[var(--text)]
+
+    placeholder:text-[var(--text-soft)]
+
+    outline-none
+
+    focus:border-[var(--input-border-focus)]
+    focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
+
+    disabled:opacity-60
+
+    transition
+`;
+
+
+const TEXTAREA_CLASS = `
+    w-full
+
+    px-3
+    py-3
+
+    rounded-xl
+
+    border
+    border-[var(--input-border)]
+
+    bg-[var(--input-bg)]
+
+    text-sm
+
+    text-[var(--text)]
+
+    placeholder:text-[var(--text-soft)]
+
+    outline-none
+    resize-none
+
+    focus:border-[var(--input-border-focus)]
+    focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
+
+    disabled:opacity-60
+
+    leading-6
+
+    transition
+`;
+
+
+// =========================================================
+// Modal Panel Style
+// =========================================================
+
+const MODAL_PANEL_STYLE = {
+    background: `
+        linear-gradient(
+            135deg,
+            var(--glass-active-tint),
+            var(--glass-active-tint-soft) 70%,
+            transparent 100%
+        ),
+        var(--glass-bg-strong)
+    `,
+    backdropFilter:
+        'blur(var(--glass-blur-strong)) saturate(220%) brightness(1.12)',
+    WebkitBackdropFilter:
+        'blur(var(--glass-blur-strong)) saturate(220%) brightness(1.12)',
+    boxShadow:
+        'var(--shadow-xl), var(--glass-inner-shadow)',
+};
+
+
+// =========================================================
 // Shopping List Form
 // =========================================================
 
@@ -383,10 +473,7 @@ function ShoppingListForm({
                 inset-0
                 z-50
 
-                bg-black/60
-                dark:bg-black/70
-
-                backdrop-blur-sm
+                backdrop-blur-md
 
                 flex
                 items-center
@@ -395,6 +482,16 @@ function ShoppingListForm({
                 p-3
                 sm:p-4
             "
+
+            style={{
+                background: `
+                    radial-gradient(
+                        circle at 50% 50%,
+                        rgba(0, 0, 0, 0.55),
+                        rgba(0, 0, 0, 0.72)
+                    )
+                `,
+            }}
 
             onMouseDown={(event) => {
 
@@ -418,35 +515,34 @@ function ShoppingListForm({
                 dir={i18n.dir()}
 
                 className="
+                    relative
+                    flex flex-col
+
                     w-full
                     max-w-lg
 
                     max-h-[calc(100vh-1.5rem)]
                     sm:max-h-[90vh]
 
-                    overflow-y-auto
+                    overflow-hidden
 
                     rounded-2xl
 
                     border
-                    border-slate-200
-                    dark:border-slate-700
-
-                    bg-white
-                    dark:bg-slate-900
-
-                    shadow-2xl
-                    shadow-slate-900/10
-                    dark:shadow-black/50
+                    border-[var(--glass-border)]
                 "
+
+                style={MODAL_PANEL_STYLE}
             >
 
                 {/* =================================================
-                    Header
+                    Header (fixed)
                 ================================================== */}
 
                 <div
                     className="
+                        flex-shrink-0
+
                         flex
                         items-center
                         justify-between
@@ -459,8 +555,7 @@ function ShoppingListForm({
                         sm:px-5
 
                         border-b
-                        border-slate-200
-                        dark:border-slate-800
+                        border-[var(--border-subtle)]
                     "
                 >
 
@@ -482,7 +577,10 @@ function ShoppingListForm({
 
                                 rounded-xl
 
-                                bg-emerald-500/10
+                                bg-[var(--accent-soft)]
+
+                                border
+                                border-[var(--accent-border)]
 
                                 flex
                                 items-center
@@ -494,8 +592,7 @@ function ShoppingListForm({
                                 size={19}
 
                                 className="
-                                    text-emerald-600
-                                    dark:text-emerald-400
+                                    text-[var(--accent-500)]
                                 "
                             />
 
@@ -513,8 +610,7 @@ function ShoppingListForm({
                                     text-sm
                                     font-bold
 
-                                    text-slate-900
-                                    dark:text-white
+                                    text-[var(--text)]
 
                                     truncate
                                 "
@@ -536,7 +632,7 @@ function ShoppingListForm({
                                 className="
                                     text-[11px]
 
-                                    text-slate-500
+                                    text-[var(--text-muted)]
 
                                     mt-1
 
@@ -565,28 +661,12 @@ function ShoppingListForm({
                         )}
 
                         className="
-                            w-9
+                            ui-icon-button
+
                             h-9
-                            shrink-0
+                            w-9
 
                             rounded-lg
-
-                            flex
-                            items-center
-                            justify-center
-
-                            text-slate-400
-                            dark:text-slate-500
-
-                            hover:text-slate-900
-                            dark:hover:text-white
-
-                            hover:bg-slate-100
-                            dark:hover:bg-slate-800
-
-                            disabled:opacity-50
-
-                            transition
                         "
                     >
 
@@ -600,13 +680,18 @@ function ShoppingListForm({
 
 
                 {/* =================================================
-                    Form
+                    Form (scrollable body)
                 ================================================== */}
 
                 <form
                     onSubmit={handleSubmit}
 
                     className="
+                        flex-1
+                        min-h-0
+                        overflow-y-auto
+                        main-scrollbar
+
                         p-4
                         sm:p-5
 
@@ -625,7 +710,7 @@ function ShoppingListForm({
                                 rounded-xl
 
                                 border
-                                border-red-500/20
+                                border-red-500/25
 
                                 bg-red-500/10
 
@@ -634,7 +719,7 @@ function ShoppingListForm({
 
                                 text-xs
 
-                                text-red-600
+                                text-red-500
                                 dark:text-red-400
 
                                 leading-5
@@ -659,8 +744,7 @@ function ShoppingListForm({
                                 text-xs
                                 font-medium
 
-                                text-slate-600
-                                dark:text-slate-400
+                                text-[var(--text-muted)]
 
                                 mb-2
                             "
@@ -694,37 +778,7 @@ function ShoppingListForm({
 
                             dir={i18n.dir()}
 
-                            className="
-                                w-full
-                                h-11
-
-                                px-3
-
-                                rounded-xl
-
-                                bg-slate-50
-                                dark:bg-slate-950
-
-                                border
-                                border-slate-200
-                                dark:border-slate-800
-
-                                text-sm
-
-                                text-slate-900
-                                dark:text-white
-
-                                placeholder:text-slate-400
-                                dark:placeholder:text-slate-600
-
-                                outline-none
-
-                                focus:border-emerald-500/50
-
-                                disabled:opacity-60
-
-                                transition
-                            "
+                            className={FIELD_CLASS}
                         />
 
                     </div>
@@ -755,8 +809,7 @@ function ShoppingListForm({
                                     text-xs
                                     font-medium
 
-                                    text-slate-600
-                                    dark:text-slate-400
+                                    text-[var(--text-muted)]
 
                                     mb-2
                                 "
@@ -788,34 +841,10 @@ function ShoppingListForm({
 
                                 dir="ltr"
 
-                                className="
-                                    w-full
-                                    h-11
-
-                                    px-3
-
-                                    rounded-xl
-
-                                    bg-slate-50
-                                    dark:bg-slate-950
-
-                                    border
-                                    border-slate-200
-                                    dark:border-slate-800
-
-                                    text-sm
-
-                                    text-slate-900
-                                    dark:text-white
-
+                                className={`
+                                    ${FIELD_CLASS}
                                     text-left
-
-                                    outline-none
-
-                                    focus:border-emerald-500/50
-
-                                    disabled:opacity-60
-                                "
+                                `}
                             />
 
                         </div>
@@ -832,8 +861,7 @@ function ShoppingListForm({
                                     text-xs
                                     font-medium
 
-                                    text-slate-600
-                                    dark:text-slate-400
+                                    text-[var(--text-muted)]
 
                                     mb-2
                                 "
@@ -859,32 +887,10 @@ function ShoppingListForm({
 
                                 dir={i18n.dir()}
 
-                                className="
-                                    w-full
-                                    h-11
-
-                                    px-3
-
-                                    rounded-xl
-
-                                    bg-slate-50
-                                    dark:bg-slate-950
-
-                                    border
-                                    border-slate-200
-                                    dark:border-slate-800
-
-                                    text-sm
-
-                                    text-slate-900
-                                    dark:text-white
-
-                                    outline-none
-
-                                    focus:border-emerald-500/50
-
-                                    disabled:opacity-60
-                                "
+                                className={`
+                                    ${FIELD_CLASS}
+                                    cursor-pointer
+                                `}
                             >
 
                                 {units.map(
@@ -927,8 +933,7 @@ function ShoppingListForm({
                                 text-xs
                                 font-medium
 
-                                text-slate-600
-                                dark:text-slate-400
+                                text-[var(--text-muted)]
 
                                 mb-2
                             "
@@ -964,35 +969,7 @@ function ShoppingListForm({
 
                             dir={i18n.dir()}
 
-                            className="
-                                w-full
-                                h-11
-
-                                px-3
-
-                                rounded-xl
-
-                                bg-slate-50
-                                dark:bg-slate-950
-
-                                border
-                                border-slate-200
-                                dark:border-slate-800
-
-                                text-sm
-
-                                text-slate-900
-                                dark:text-white
-
-                                placeholder:text-slate-400
-                                dark:placeholder:text-slate-600
-
-                                outline-none
-
-                                focus:border-emerald-500/50
-
-                                disabled:opacity-60
-                            "
+                            className={FIELD_CLASS}
                         />
 
 
@@ -1056,8 +1033,7 @@ function ShoppingListForm({
 
                                 text-[10px]
 
-                                text-slate-500
-                                dark:text-slate-600
+                                text-[var(--text-muted)]
 
                                 leading-5
                             "
@@ -1083,8 +1059,7 @@ function ShoppingListForm({
                                 text-xs
                                 font-medium
 
-                                text-slate-600
-                                dark:text-slate-400
+                                text-[var(--text-muted)]
 
                                 mb-2
                             "
@@ -1110,32 +1085,10 @@ function ShoppingListForm({
 
                             dir={i18n.dir()}
 
-                            className="
-                                w-full
-                                h-11
-
-                                px-3
-
-                                rounded-xl
-
-                                bg-slate-50
-                                dark:bg-slate-950
-
-                                border
-                                border-slate-200
-                                dark:border-slate-800
-
-                                text-sm
-
-                                text-slate-900
-                                dark:text-white
-
-                                outline-none
-
-                                focus:border-emerald-500/50
-
-                                disabled:opacity-60
-                            "
+                            className={`
+                                ${FIELD_CLASS}
+                                cursor-pointer
+                            `}
                         >
 
                             <option value="low">
@@ -1180,8 +1133,7 @@ function ShoppingListForm({
                                 text-xs
                                 font-medium
 
-                                text-slate-600
-                                dark:text-slate-400
+                                text-[var(--text-muted)]
 
                                 mb-2
                             "
@@ -1213,39 +1165,7 @@ function ShoppingListForm({
 
                             dir={i18n.dir()}
 
-                            className="
-                                w-full
-
-                                px-3
-                                py-3
-
-                                rounded-xl
-
-                                bg-slate-50
-                                dark:bg-slate-950
-
-                                border
-                                border-slate-200
-                                dark:border-slate-800
-
-                                text-sm
-
-                                text-slate-900
-                                dark:text-white
-
-                                placeholder:text-slate-400
-                                dark:placeholder:text-slate-600
-
-                                outline-none
-
-                                resize-none
-
-                                focus:border-emerald-500/50
-
-                                disabled:opacity-60
-
-                                leading-6
-                            "
+                            className={TEXTAREA_CLASS}
                         />
 
                     </div>
@@ -1273,29 +1193,12 @@ function ShoppingListForm({
                             disabled={saving}
 
                             className="
-                                w-full
+                                ui-button-primary
 
+                                w-full
                                 h-11
 
-                                rounded-xl
-
-                                bg-emerald-500
-                                hover:bg-emerald-400
-
-                                disabled:opacity-50
-                                disabled:cursor-not-allowed
-
-                                text-slate-950
-
                                 text-sm
-                                font-semibold
-
-                                flex
-                                items-center
-                                justify-center
-                                gap-2
-
-                                transition
                             "
                         >
 
@@ -1328,29 +1231,15 @@ function ShoppingListForm({
                             disabled={saving}
 
                             className="
+                                ui-button-secondary
+
                                 w-full
                                 sm:w-auto
 
                                 h-11
-
                                 px-5
 
-                                rounded-xl
-
-                                bg-slate-100
-                                dark:bg-slate-800
-
-                                hover:bg-slate-200
-                                dark:hover:bg-slate-700
-
-                                disabled:opacity-50
-
-                                text-slate-700
-                                dark:text-slate-300
-
                                 text-sm
-
-                                transition
                             "
                         >
                             {t(

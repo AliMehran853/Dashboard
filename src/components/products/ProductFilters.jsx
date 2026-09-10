@@ -40,6 +40,36 @@ const toEnglishNumbers = (value) => {
 
 
 // =========================================================
+// Shared Field Class (accent-aware)
+// =========================================================
+
+const FIELD_CLASS = `
+    w-full
+    h-11
+
+    rounded-xl
+
+    border
+    border-[var(--input-border)]
+
+    bg-[var(--input-bg)]
+
+    text-sm
+
+    text-[var(--text)]
+
+    placeholder:text-[var(--text-soft)]
+
+    outline-none
+
+    focus:border-[var(--input-border-focus)]
+    focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
+
+    transition
+`;
+
+
+// =========================================================
 // Product Filters
 // =========================================================
 
@@ -202,29 +232,76 @@ function ProductFilters({
 
         <section
             className="
+                group
                 relative
                 overflow-hidden
 
                 rounded-2xl
 
                 border
-                border-slate-200
-                dark:border-slate-800
-
-                bg-white
-                dark:bg-slate-900
+                border-[var(--border)]
 
                 p-4
 
-                shadow-sm
-                shadow-slate-200/40
-                dark:shadow-none
+                shadow-[var(--shadow-card)]
+
+                transition-all
+                duration-300
+                ease-[var(--ease-out)]
+
+                hover:border-[var(--glass-border-hover)]
+                hover:shadow-[var(--shadow-card-hover)]
             "
+            style={{
+                background: `
+                    linear-gradient(
+                        135deg,
+                        var(--glass-active-tint),
+                        var(--glass-active-tint-soft) 70%,
+                        transparent 100%
+                    ),
+                    var(--surface)
+                `,
+            }}
         >
 
-            {/* Accent */}
+            {/* =================================================
+                Hover Tint Overlay
+                Fades in on hover, follows accent color.
+            ================================================= */}
 
             <div
+                aria-hidden="true"
+                className="
+                    pointer-events-none
+                    absolute
+                    inset-0
+                    rounded-2xl
+                    opacity-0
+                    transition-opacity
+                    duration-300
+                    ease-[var(--ease-out)]
+                    group-hover:opacity-100
+                "
+                style={{
+                    background: `
+                        linear-gradient(
+                            135deg,
+                            var(--glass-hover-tint),
+                            var(--glass-hover-tint-soft) 70%,
+                            transparent 100%
+                        )
+                    `,
+                }}
+            />
+
+
+            {/* =================================================
+                Accent Top Line
+            ================================================= */}
+
+            <div
+                aria-hidden="true"
                 className="
                     absolute
                     top-0
@@ -232,17 +309,22 @@ function ProductFilters({
 
                     h-px
 
-                    bg-emerald-500
+                    bg-[var(--accent-500)]
 
-                    opacity-20
+                    opacity-40
                 "
             />
 
 
-            {/* Header */}
+            {/* =================================================
+                Header
+            ================================================= */}
 
             <div
                 className="
+                    relative
+                    z-10
+
                     flex
                     flex-col
                     xs:flex-row
@@ -274,12 +356,10 @@ function ProductFilters({
 
                             rounded-xl
 
-                            bg-slate-100
-                            dark:bg-slate-800
+                            bg-[var(--accent-soft)]
 
                             border
-                            border-slate-200
-                            dark:border-slate-700
+                            border-[var(--accent-border)]
 
                             flex
                             items-center
@@ -291,8 +371,7 @@ function ProductFilters({
                             size={16}
 
                             className="
-                                text-slate-500
-                                dark:text-slate-400
+                                text-[var(--accent-500)]
                             "
                         />
 
@@ -306,8 +385,7 @@ function ProductFilters({
                                 text-sm
                                 font-semibold
 
-                                text-slate-900
-                                dark:text-white
+                                text-[var(--text)]
 
                                 truncate
                             "
@@ -324,8 +402,7 @@ function ProductFilters({
 
                                 text-[10px]
 
-                                text-slate-400
-                                dark:text-slate-500
+                                text-[var(--text-muted)]
                             "
                         >
                             {t(
@@ -364,7 +441,7 @@ function ProductFilters({
 
                             text-[11px]
 
-                            text-slate-500
+                            text-[var(--text-muted)]
 
                             hover:text-red-500
                             hover:bg-red-500/5
@@ -388,10 +465,15 @@ function ProductFilters({
             </div>
 
 
-            {/* Filters */}
+            {/* =================================================
+                Filters
+            ================================================= */}
 
             <div
                 className="
+                    relative
+                    z-10
+
                     grid
 
                     grid-cols-1
@@ -421,8 +503,7 @@ function ProductFilters({
 
                             -translate-y-1/2
 
-                            text-slate-400
-                            dark:text-slate-600
+                            text-[var(--text-soft)]
 
                             pointer-events-none
                         "
@@ -444,38 +525,11 @@ function ProductFilters({
                             )
                         }
 
-                        className="
-                            w-full
-                            h-11
-
-                            rounded-xl
-
-                            border
-                            border-slate-200
-                            dark:border-slate-800
-
-                            bg-slate-50
-                            dark:bg-slate-950/60
-
+                        className={`
+                            ${FIELD_CLASS}
                             ps-10
                             pe-4
-
-                            text-sm
-
-                            text-slate-700
-                            dark:text-slate-200
-
-                            placeholder:text-slate-400
-                            dark:placeholder:text-slate-600
-
-                            outline-none
-
-                            focus:border-emerald-500/50
-                            focus:ring-2
-                            focus:ring-emerald-500/10
-
-                            transition
-                        "
+                        `}
                     />
 
                 </div>
@@ -499,39 +553,13 @@ function ProductFilters({
                             )
                         }
 
-                        className="
+                        className={`
+                            ${FIELD_CLASS}
                             appearance-none
-
-                            w-full
-                            h-11
-
-                            rounded-xl
-
-                            border
-                            border-slate-200
-                            dark:border-slate-800
-
-                            bg-slate-50
-                            dark:bg-slate-950/60
-
                             ps-4
                             pe-10
-
-                            text-sm
-
-                            text-slate-700
-                            dark:text-slate-300
-
-                            outline-none
-
-                            focus:border-emerald-500/50
-                            focus:ring-2
-                            focus:ring-emerald-500/10
-
-                            transition
-
                             cursor-pointer
-                        "
+                        `}
                     >
 
                         {categoryOptions.map(
@@ -561,8 +589,7 @@ function ProductFilters({
 
                             -translate-y-1/2
 
-                            text-slate-400
-                            dark:text-slate-600
+                            text-[var(--text-soft)]
 
                             pointer-events-none
                         "
@@ -589,39 +616,13 @@ function ProductFilters({
                             )
                         }
 
-                        className="
+                        className={`
+                            ${FIELD_CLASS}
                             appearance-none
-
-                            w-full
-                            h-11
-
-                            rounded-xl
-
-                            border
-                            border-slate-200
-                            dark:border-slate-800
-
-                            bg-slate-50
-                            dark:bg-slate-950/60
-
                             ps-4
                             pe-10
-
-                            text-sm
-
-                            text-slate-700
-                            dark:text-slate-300
-
-                            outline-none
-
-                            focus:border-emerald-500/50
-                            focus:ring-2
-                            focus:ring-emerald-500/10
-
-                            transition
-
                             cursor-pointer
-                        "
+                        `}
                     >
 
                         {stockStatuses.map(
@@ -651,8 +652,7 @@ function ProductFilters({
 
                             -translate-y-1/2
 
-                            text-slate-400
-                            dark:text-slate-600
+                            text-[var(--text-soft)]
 
                             pointer-events-none
                         "
@@ -663,12 +663,17 @@ function ProductFilters({
             </div>
 
 
-            {/* Active Filters */}
+            {/* =================================================
+                Active Filters
+            ================================================= */}
 
             {hasFilters && (
 
                 <div
                     className="
+                        relative
+                        z-10
+
                         flex
                         flex-wrap
 
@@ -680,8 +685,7 @@ function ProductFilters({
                         pt-4
 
                         border-t
-                        border-slate-200
-                        dark:border-slate-800
+                        border-[var(--border-subtle)]
                     "
                 >
 
@@ -689,8 +693,7 @@ function ProductFilters({
                         className="
                             text-[10px]
 
-                            text-slate-400
-                            dark:text-slate-500
+                            text-[var(--text-muted)]
                         "
                     >
                         {t(
@@ -716,15 +719,16 @@ function ProductFilters({
 
                                 rounded-lg
 
-                                bg-emerald-500/10
+                                bg-[var(--accent-soft)]
 
                                 border
-                                border-emerald-500/10
+                                border-[var(--accent-border)]
 
                                 text-[10px]
 
-                                text-emerald-600
-                                dark:text-emerald-400
+                                text-[var(--accent-600)]
+
+                                dark:text-[var(--accent-300)]
                             "
                         >
 
@@ -765,13 +769,14 @@ function ProductFilters({
 
                                 rounded-lg
 
-                                bg-slate-100
-                                dark:bg-slate-800
+                                bg-[var(--surface-muted)]
+
+                                border
+                                border-[var(--border-subtle)]
 
                                 text-[10px]
 
-                                text-slate-500
-                                dark:text-slate-400
+                                text-[var(--text-muted)]
                             "
                         >
 
@@ -784,8 +789,7 @@ function ProductFilters({
                                     max-w-[10rem]
                                     truncate
 
-                                    text-slate-700
-                                    dark:text-slate-300
+                                    text-[var(--text-secondary)]
                                 "
                             >
                                 {
@@ -818,13 +822,14 @@ function ProductFilters({
 
                                 rounded-lg
 
-                                bg-slate-100
-                                dark:bg-slate-800
+                                bg-[var(--surface-muted)]
+
+                                border
+                                border-[var(--border-subtle)]
 
                                 text-[10px]
 
-                                text-slate-500
-                                dark:text-slate-400
+                                text-[var(--text-muted)]
                             "
                         >
 
@@ -834,8 +839,7 @@ function ProductFilters({
 
                             <span
                                 className="
-                                    text-slate-700
-                                    dark:text-slate-300
+                                    text-[var(--text-secondary)]
                                 "
                             >
                                 {
@@ -863,4 +867,3 @@ function ProductFilters({
 
 
 export default ProductFilters;
-

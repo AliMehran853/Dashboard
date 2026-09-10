@@ -147,7 +147,7 @@ function QuickActions() {
 
 
     // =====================================================
-    // Tone Classes
+    // Tone Styles
     // =====================================================
 
     const toneStyles = {
@@ -173,11 +173,6 @@ function QuickActions() {
             arrow:
                 `
                     text-[var(--accent-500)]
-                `,
-
-            glow:
-                `
-                    group-hover:shadow-[0_12px_32px_var(--accent-glow)]
                 `,
 
         },
@@ -210,11 +205,6 @@ function QuickActions() {
                     dark:text-violet-400
                 `,
 
-            glow:
-                `
-                    group-hover:shadow-violet-500/10
-                `,
-
         },
 
 
@@ -245,11 +235,6 @@ function QuickActions() {
                     dark:text-amber-400
                 `,
 
-            glow:
-                `
-                    group-hover:shadow-amber-500/10
-                `,
-
         },
 
 
@@ -278,11 +263,6 @@ function QuickActions() {
                 `
                     text-cyan-500
                     dark:text-cyan-400
-                `,
-
-            glow:
-                `
-                    group-hover:shadow-cyan-500/10
                 `,
 
         },
@@ -401,7 +381,7 @@ function QuickActions() {
                                     action.href
                                 }
 
-                                className={`
+                                className="
                                     group
                                     relative
                                     min-w-0
@@ -412,28 +392,70 @@ function QuickActions() {
                                     border
                                     border-[var(--border)]
 
-                                    bg-[var(--surface)]
-
                                     p-4
                                     sm:p-5
 
-                                    shadow-sm
+                                    shadow-[var(--shadow-card)]
 
                                     transition-all
                                     duration-300
+                                    ease-[var(--ease-out)]
 
                                     hover:-translate-y-0.5
+                                    hover:border-[var(--glass-border-hover)]
+                                    hover:shadow-[var(--shadow-card-hover)]
+                                "
 
-                                    hover:border-slate-300
-                                    dark:hover:border-slate-700
-
-                                    hover:shadow-lg
-
-                                    ${styles.glow}
-                                `}
+                                style={{
+                                    background: `
+                                        linear-gradient(
+                                            135deg,
+                                            var(--glass-active-tint),
+                                            var(--glass-active-tint-soft) 70%,
+                                            transparent 100%
+                                        ),
+                                        var(--surface)
+                                    `,
+                                }}
                             >
 
-                                {/* Accent */}
+                                {/* =================================================
+                                    Hover Tint Overlay
+                                    Fades in on hover, follows accent color.
+                                ================================================== */}
+
+                                <div
+                                    className="
+                                        pointer-events-none
+                                        absolute
+                                        inset-0
+                                        rounded-2xl
+
+                                        opacity-0
+
+                                        transition-opacity
+                                        duration-300
+                                        ease-[var(--ease-out)]
+
+                                        group-hover:opacity-100
+                                    "
+
+                                    style={{
+                                        background: `
+                                            linear-gradient(
+                                                135deg,
+                                                var(--glass-hover-tint),
+                                                var(--glass-hover-tint-soft) 70%,
+                                                transparent 100%
+                                            )
+                                        `,
+                                    }}
+                                />
+
+
+                                {/* =================================================
+                                    Accent Top Line
+                                ================================================== */}
 
                                 <div
                                     className={`
@@ -454,7 +476,9 @@ function QuickActions() {
                                 />
 
 
-                                {/* Decorative Glow */}
+                                {/* =================================================
+                                    Decorative Glow
+                                ================================================== */}
 
                                 <div
                                     className="
@@ -476,7 +500,9 @@ function QuickActions() {
                                 />
 
 
-                                {/* Top */}
+                                {/* =================================================
+                                    Top Row
+                                ================================================== */}
 
                                 <div
                                     className="
@@ -546,7 +572,9 @@ function QuickActions() {
                                 </div>
 
 
-                                {/* Content */}
+                                {/* =================================================
+                                    Content
+                                ================================================== */}
 
                                 <div
                                     className="
@@ -607,7 +635,9 @@ function QuickActions() {
                                 </div>
 
 
-                                {/* Bottom indicator */}
+                                {/* =================================================
+                                    Bottom Indicator
+                                ================================================== */}
 
                                 <div
                                     className="

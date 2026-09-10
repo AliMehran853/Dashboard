@@ -35,6 +35,7 @@ function Sales() {
 
     const {
         t,
+        i18n,
     } = useTranslation();
 
 
@@ -158,7 +159,7 @@ function Sales() {
     return (
 
         <div
-            dir="auto"
+            dir={i18n.dir()}
 
             className="
                 min-h-full
@@ -192,8 +193,6 @@ function Sales() {
                     border
                     border-[var(--border-subtle)]
 
-                    bg-[var(--surface)]
-
                     p-4
                     sm:p-5
                     md:p-6
@@ -203,9 +202,21 @@ function Sales() {
                     transition-colors
                     duration-300
                 "
+
+                style={{
+                    background: `
+                        linear-gradient(
+                            135deg,
+                            var(--glass-active-tint),
+                            var(--glass-active-tint-soft) 70%,
+                            transparent 100%
+                        ),
+                        var(--surface)
+                    `,
+                }}
             >
 
-                {/* Background Glow */}
+                {/* Accent Glow */}
 
                 <div
                     aria-hidden="true"
@@ -214,7 +225,6 @@ function Sales() {
                         pointer-events-none
 
                         absolute
-
                         -start-20
                         -top-20
 
@@ -230,6 +240,8 @@ function Sales() {
                 />
 
 
+                {/* Secondary Ambient Glow */}
+
                 <div
                     aria-hidden="true"
 
@@ -237,20 +249,17 @@ function Sales() {
                         pointer-events-none
 
                         absolute
-
-                        -end-10
+                        -end-16
                         -bottom-24
 
-                        h-48
-                        w-48
+                        h-44
+                        w-44
 
                         rounded-full
 
-                        bg-cyan-500/[0.035]
+                        bg-[var(--accent-soft)]
 
                         blur-3xl
-
-                        dark:bg-cyan-400/[0.045]
                     "
                 />
 
@@ -264,11 +273,11 @@ function Sales() {
                         flex
                         flex-col
 
-                        gap-5
+                        gap-4
 
-                        lg:flex-row
-                        lg:items-center
-                        lg:justify-between
+                        sm:flex-row
+                        sm:items-center
+                        sm:justify-between
                     "
                 >
 
@@ -279,10 +288,9 @@ function Sales() {
                             flex
                             min-w-0
 
-                            items-start
+                            items-center
 
                             gap-3
-                            sm:gap-4
                         "
                     >
 
@@ -296,7 +304,7 @@ function Sales() {
                                 items-center
                                 justify-center
 
-                                rounded-2xl
+                                rounded-xl
 
                                 border
                                 border-[var(--accent-border)]
@@ -304,30 +312,12 @@ function Sales() {
                                 bg-[var(--accent-soft)]
 
                                 text-[var(--accent-500)]
-
-                                sm:h-14
-                                sm:w-14
                             "
                         >
 
                             <ShoppingBag
-                                size={22}
-                                strokeWidth={1.8}
-
-                                className="
-                                    sm:hidden
-                                "
-                            />
-
-
-                            <ShoppingBag
-                                size={24}
-                                strokeWidth={1.8}
-
-                                className="
-                                    hidden
-                                    sm:block
-                                "
+                                size={20}
+                                strokeWidth={1.9}
                             />
 
                         </div>
@@ -349,8 +339,8 @@ function Sales() {
 
                                 <span
                                     className="
-                                        h-1.5
-                                        w-1.5
+                                        h-2
+                                        w-2
 
                                         shrink-0
 
@@ -358,7 +348,7 @@ function Sales() {
 
                                         bg-[var(--accent-500)]
 
-                                        shadow-[0_0_10px_var(--accent-glow)]
+                                        shadow-[0_0_12px_var(--accent-glow)]
                                     "
                                 />
 
@@ -368,13 +358,13 @@ function Sales() {
                                         text-[10px]
                                         font-medium
 
-                                        tracking-[0.08em]
                                         uppercase
+                                        tracking-[0.12em]
 
                                         text-[var(--accent-600)]
                                     "
                                 >
-                                    Sales
+                                    Taqwa
                                 </span>
 
                             </div>
@@ -394,7 +384,7 @@ function Sales() {
                                     text-[var(--text)]
 
                                     sm:text-2xl
-                                    md:text-3xl
+                                    lg:text-3xl
                                 "
                             >
                                 {
@@ -408,7 +398,6 @@ function Sales() {
                             <p
                                 className="
                                     mt-1.5
-                                    sm:mt-2
 
                                     max-w-2xl
 
@@ -432,7 +421,7 @@ function Sales() {
                     </div>
 
 
-                    {/* Add Sale */}
+                    {/* Add Sale — ui-button-primary handles accent, gradient, glow */}
 
                     <button
                         type="button"
@@ -442,48 +431,20 @@ function Sales() {
                         }
 
                         className="
+                            ui-button-primary
+
                             group
 
                             w-full
-                            lg:w-auto
-
-                            min-h-11
-
-                            rounded-xl
-
-                            border
-                            border-[var(--accent-border)]
-
-                            bg-[var(--accent-500)]
+                            sm:w-auto
 
                             px-5
-                            py-2.5
-
-                            text-sm
-                            font-medium
-
-                            text-white
-
-                            shadow-[var(--shadow-accent)]
-
-                            flex
-                            items-center
-                            justify-center
-                            gap-2
-
-                            transition-all
-                            duration-200
-
-                            hover:bg-[var(--accent-600)]
-                            hover:-translate-y-px
-
-                            active:translate-y-0
                         "
                     >
 
                         <Plus
-                            size={18}
-                            strokeWidth={2}
+                            size={17}
+                            strokeWidth={2.2}
 
                             className="
                                 transition-transform

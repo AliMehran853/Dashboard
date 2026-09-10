@@ -32,6 +32,36 @@ const DEFAULT_FILTERS = {
 
 
 // =========================================================
+// Shared Field Class (accent-aware)
+// =========================================================
+
+const FIELD_CLASS = `
+    w-full
+    h-11
+
+    rounded-xl
+
+    border
+    border-[var(--input-border)]
+
+    bg-[var(--input-bg)]
+
+    text-sm
+
+    text-[var(--text)]
+
+    placeholder:text-[var(--text-soft)]
+
+    outline-none
+
+    focus:border-[var(--input-border-focus)]
+    focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
+
+    transition
+`;
+
+
+// =========================================================
 // Sales Filters
 // =========================================================
 
@@ -441,29 +471,79 @@ function SalesFilters({
         <section
             dir={isEnglish ? 'ltr' : 'rtl'}
             className="
+                group
                 relative
                 overflow-hidden
 
                 rounded-2xl
 
                 border
-                border-slate-200
-                dark:border-slate-800
-
-                bg-white
-                dark:bg-slate-900
+                border-[var(--border)]
 
                 p-4
 
-                shadow-sm
-                shadow-slate-200/40
-                dark:shadow-none
+                shadow-[var(--shadow-card)]
+
+                transition-all
+                duration-300
+                ease-[var(--ease-out)]
+
+                hover:border-[var(--glass-border-hover)]
+                hover:shadow-[var(--shadow-card-hover)]
             "
+            style={{
+                background: `
+                    linear-gradient(
+                        135deg,
+                        var(--glass-active-tint),
+                        var(--glass-active-tint-soft) 70%,
+                        transparent 100%
+                    ),
+                    var(--surface)
+                `,
+            }}
         >
 
-            {/* Accent */}
+            {/* =================================================
+                Hover Tint Overlay
+                Fades in on hover, follows accent color.
+            ================================================= */}
 
             <div
+                aria-hidden="true"
+                className="
+                    pointer-events-none
+                    absolute
+                    inset-0
+                    rounded-2xl
+
+                    opacity-0
+
+                    transition-opacity
+                    duration-300
+                    ease-[var(--ease-out)]
+
+                    group-hover:opacity-100
+                "
+                style={{
+                    background: `
+                        linear-gradient(
+                            135deg,
+                            var(--glass-hover-tint),
+                            var(--glass-hover-tint-soft) 70%,
+                            transparent 100%
+                        )
+                    `,
+                }}
+            />
+
+
+            {/* =================================================
+                Accent Top Line
+            ================================================= */}
+
+            <div
+                aria-hidden="true"
                 className="
                     absolute
                     top-0
@@ -471,9 +551,9 @@ function SalesFilters({
 
                     h-px
 
-                    bg-emerald-500
+                    bg-[var(--accent-500)]
 
-                    opacity-20
+                    opacity-40
                 "
             />
 
@@ -484,6 +564,9 @@ function SalesFilters({
 
             <div
                 className="
+                    relative
+                    z-10
+
                     flex
 
                     flex-col
@@ -516,12 +599,10 @@ function SalesFilters({
 
                             rounded-xl
 
-                            bg-slate-100
-                            dark:bg-slate-800
+                            bg-[var(--accent-soft)]
 
                             border
-                            border-slate-200
-                            dark:border-slate-700
+                            border-[var(--accent-border)]
 
                             flex
                             items-center
@@ -533,8 +614,7 @@ function SalesFilters({
                             size={16}
 
                             className="
-                                text-slate-500
-                                dark:text-slate-400
+                                text-[var(--accent-500)]
                             "
                         />
 
@@ -552,8 +632,7 @@ function SalesFilters({
                                 text-sm
                                 font-semibold
 
-                                text-slate-900
-                                dark:text-white
+                                text-[var(--text)]
 
                                 truncate
                             "
@@ -570,8 +649,7 @@ function SalesFilters({
 
                                 text-[10px]
 
-                                text-slate-400
-                                dark:text-slate-500
+                                text-[var(--text-muted)]
                             "
                         >
                             {t(
@@ -611,7 +689,7 @@ function SalesFilters({
 
                             text-[11px]
 
-                            text-slate-500
+                            text-[var(--text-muted)]
 
                             hover:text-red-500
                             hover:bg-red-500/5
@@ -641,6 +719,9 @@ function SalesFilters({
 
             <div
                 className="
+                    relative
+                    z-10
+
                     grid
 
                     grid-cols-1
@@ -670,8 +751,7 @@ function SalesFilters({
 
                             -translate-y-1/2
 
-                            text-slate-400
-                            dark:text-slate-600
+                            text-[var(--text-soft)]
 
                             pointer-events-none
                         "
@@ -693,38 +773,11 @@ function SalesFilters({
                             )
                         }
 
-                        className="
-                            w-full
-                            h-11
-
-                            rounded-xl
-
-                            border
-                            border-slate-200
-                            dark:border-slate-800
-
-                            bg-slate-50
-                            dark:bg-slate-950/60
-
+                        className={`
+                            ${FIELD_CLASS}
                             ps-10
                             pe-4
-
-                            text-sm
-
-                            text-slate-700
-                            dark:text-slate-200
-
-                            placeholder:text-slate-400
-                            dark:placeholder:text-slate-600
-
-                            outline-none
-
-                            focus:border-emerald-500/50
-                            focus:ring-2
-                            focus:ring-emerald-500/10
-
-                            transition
-                        "
+                        `}
                     />
 
                 </div>
@@ -746,39 +799,13 @@ function SalesFilters({
                             handlePaymentChange
                         }
 
-                        className="
+                        className={`
+                            ${FIELD_CLASS}
                             appearance-none
-
-                            w-full
-                            h-11
-
-                            rounded-xl
-
-                            border
-                            border-slate-200
-                            dark:border-slate-800
-
-                            bg-slate-50
-                            dark:bg-slate-950/60
-
                             ps-4
                             pe-10
-
-                            text-sm
-
-                            text-slate-700
-                            dark:text-slate-300
-
-                            outline-none
-
-                            focus:border-emerald-500/50
-                            focus:ring-2
-                            focus:ring-emerald-500/10
-
-                            transition
-
                             cursor-pointer
-                        "
+                        `}
                     >
 
                         {paymentTypes.map(
@@ -808,8 +835,7 @@ function SalesFilters({
 
                             -translate-y-1/2
 
-                            text-slate-400
-                            dark:text-slate-600
+                            text-[var(--text-soft)]
 
                             pointer-events-none
                         "
@@ -846,42 +872,15 @@ function SalesFilters({
                             loadingCategories
                         }
 
-                        className="
+                        className={`
+                            ${FIELD_CLASS}
                             appearance-none
-
-                            w-full
-                            h-11
-
-                            rounded-xl
-
-                            border
-                            border-slate-200
-                            dark:border-slate-800
-
-                            bg-slate-50
-                            dark:bg-slate-950/60
-
                             ps-4
                             pe-10
-
-                            text-sm
-
-                            text-slate-700
-                            dark:text-slate-300
-
-                            outline-none
-
-                            focus:border-emerald-500/50
-                            focus:ring-2
-                            focus:ring-emerald-500/10
-
-                            transition
-
                             cursor-pointer
-
                             disabled:opacity-50
                             disabled:cursor-not-allowed
-                        "
+                        `}
                     >
 
                         {categoryOptions.map(
@@ -911,8 +910,7 @@ function SalesFilters({
 
                             -translate-y-1/2
 
-                            text-slate-400
-                            dark:text-slate-600
+                            text-[var(--text-soft)]
 
                             pointer-events-none
                         "
@@ -931,6 +929,9 @@ function SalesFilters({
 
                 <div
                     className="
+                        relative
+                        z-10
+
                         flex
                         flex-wrap
 
@@ -942,8 +943,7 @@ function SalesFilters({
                         pt-4
 
                         border-t
-                        border-slate-200
-                        dark:border-slate-800
+                        border-[var(--border-subtle)]
                     "
                 >
 
@@ -951,8 +951,7 @@ function SalesFilters({
                         className="
                             text-[10px]
 
-                            text-slate-400
-                            dark:text-slate-500
+                            text-[var(--text-muted)]
                         "
                     >
                         {t(
@@ -978,15 +977,16 @@ function SalesFilters({
 
                                 rounded-lg
 
-                                bg-emerald-500/10
+                                bg-[var(--accent-soft)]
 
                                 border
-                                border-emerald-500/10
+                                border-[var(--accent-border)]
 
                                 text-[10px]
 
-                                text-emerald-600
-                                dark:text-emerald-400
+                                text-[var(--accent-600)]
+
+                                dark:text-[var(--accent-300)]
                             "
                         >
 
@@ -1025,13 +1025,14 @@ function SalesFilters({
 
                                 rounded-lg
 
-                                bg-slate-100
-                                dark:bg-slate-800
+                                bg-[var(--surface-muted)]
+
+                                border
+                                border-[var(--border-subtle)]
 
                                 text-[10px]
 
-                                text-slate-500
-                                dark:text-slate-400
+                                text-[var(--text-muted)]
                             "
                         >
 
@@ -1041,8 +1042,7 @@ function SalesFilters({
 
                             <span
                                 className="
-                                    text-slate-700
-                                    dark:text-slate-300
+                                    text-[var(--text-secondary)]
                                 "
                             >
                                 {
@@ -1076,13 +1076,14 @@ function SalesFilters({
 
                                 rounded-lg
 
-                                bg-slate-100
-                                dark:bg-slate-800
+                                bg-[var(--surface-muted)]
+
+                                border
+                                border-[var(--border-subtle)]
 
                                 text-[10px]
 
-                                text-slate-500
-                                dark:text-slate-400
+                                text-[var(--text-muted)]
                             "
                         >
 
@@ -1096,8 +1097,7 @@ function SalesFilters({
 
                                     truncate
 
-                                    text-slate-700
-                                    dark:text-slate-300
+                                    text-[var(--text-secondary)]
                                 "
                             >
                                 {

@@ -13,6 +13,9 @@ import {
     Eye,
     EyeOff,
     Store,
+    ArrowRight,
+    ArrowLeft,
+    ShieldCheck,
 } from 'lucide-react';
 
 import {
@@ -38,6 +41,10 @@ function Login() {
         isAuthenticated,
         loading,
     } = useAuth();
+
+
+    const isRTL =
+        i18n.dir() === 'rtl';
 
 
     // =========================================================
@@ -291,23 +298,23 @@ function Login() {
             dir={i18n.dir()}
 
             className="
-                min-h-screen
-
-                bg-slate-50
-                dark:bg-slate-950
-
-                text-slate-900
-                dark:text-white
+                relative
 
                 flex
+                min-h-screen
                 items-center
                 justify-center
 
+                overflow-hidden
+
+                bg-[var(--page-bg)]
+
                 px-4
                 py-8
+                sm:px-6
+                sm:py-10
 
-                relative
-                overflow-hidden
+                text-[var(--text)]
 
                 transition-colors
                 duration-300
@@ -315,82 +322,110 @@ function Login() {
         >
 
             {/* =================================================
-                Background
-            ================================================= */}
+                Ambient Background
+            ================================================== */}
 
             <div
                 className="
+                    pointer-events-none
                     absolute
                     inset-0
-
                     overflow-hidden
-
-                    pointer-events-none
                 "
             >
 
+                {/* Top Right Glow */}
+
                 <div
                     className="
                         absolute
 
-                        -top-40
-                        -right-40
+                        -right-28
+                        -top-28
 
-                        w-72
                         h-72
+                        w-72
 
-                        sm:w-96
                         sm:h-96
-
-                        bg-emerald-500/10
+                        sm:w-96
 
                         rounded-full
+
+                        bg-emerald-500/[0.08]
+
                         blur-3xl
                     "
                 />
 
 
+                {/* Bottom Left Glow */}
+
                 <div
                     className="
                         absolute
 
-                        -bottom-40
-                        -left-40
+                        -bottom-28
+                        -left-28
 
-                        w-72
                         h-72
+                        w-72
 
-                        sm:w-96
                         sm:h-96
-
-                        bg-cyan-500/10
+                        sm:w-96
 
                         rounded-full
+
+                        bg-cyan-500/[0.07]
+
                         blur-3xl
                     "
                 />
 
 
+                {/* Center Glow */}
+
                 <div
                     className="
                         absolute
 
-                        top-1/2
                         left-1/2
+                        top-1/2
+
+                        h-[22rem]
+                        w-[22rem]
+
+                        sm:h-[30rem]
+                        sm:w-[30rem]
 
                         -translate-x-1/2
                         -translate-y-1/2
 
-                        w-[400px]
-                        h-[400px]
-
-                        sm:w-[500px]
-                        sm:h-[500px]
-
-                        bg-emerald-500/5
-
                         rounded-full
+
+                        bg-emerald-500/[0.035]
+
                         blur-3xl
+                    "
+                />
+
+
+                {/* Subtle Grid */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        opacity-[0.025]
+
+                        dark:opacity-[0.035]
+
+                        [background-image:linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)]
+
+                        [background-size:32px_32px]
+
+                        text-slate-900
+                        dark:text-white
                     "
                 />
 
@@ -399,630 +434,385 @@ function Login() {
 
             {/* =================================================
                 Main Container
-            ================================================= */}
+            ================================================== */}
 
             <div
                 className="
                     relative
+                    z-10
 
                     w-full
-                    max-w-md
+                    max-w-[27rem]
                 "
             >
 
                 {/* =================================================
-                    Logo
-                ================================================= */}
+                    Brand
+                ================================================== */}
 
                 <div
                     className="
-                        flex
-                        justify-center
-
                         mb-6
+                        text-center
+
+                        sm:mb-7
                     "
                 >
 
+                    {/* =================================================
+                        Logo
+                    ================================================== */}
+
                     <div
                         className="
-                            relative
+                            mb-4
+
+                            flex
+                            justify-center
                         "
                     >
 
                         <div
                             className="
-                                absolute
-                                inset-0
-
-                                bg-emerald-400/20
-
-                                blur-xl
-                                rounded-2xl
-                            "
-                        />
-
-
-                        <div
-                            className="
                                 relative
-
-                                w-16
-                                h-16
-
-                                rounded-2xl
-
-                                bg-gradient-to-br
-                                from-emerald-400
-                                to-emerald-600
-
-                                flex
-                                items-center
-                                justify-center
-
-                                shadow-xl
-                                shadow-emerald-900/30
                             "
                         >
 
-                            <Store
-                                size={32}
-                                strokeWidth={1.8}
-
+                            <div
                                 className="
-                                    text-white
+                                    absolute
+                                    -inset-2
+
+                                    rounded-2xl
+
+                                    bg-emerald-500/[0.12]
+
+                                    blur-xl
                                 "
                             />
+
+
+                            <div
+                                className="
+                                    relative
+
+                                    flex
+
+                                    h-14
+                                    w-14
+
+                                    sm:h-16
+                                    sm:w-16
+
+                                    items-center
+                                    justify-center
+
+                                    overflow-hidden
+
+                                    rounded-2xl
+
+                                    border
+                                    border-emerald-400/30
+
+                                    bg-gradient-to-br
+                                    from-emerald-400
+                                    via-emerald-500
+                                    to-emerald-600
+
+                                    shadow-[0_12px_35px_rgba(16,185,129,0.22)]
+                                "
+                            >
+
+                                <div
+                                    className="
+                                        absolute
+                                        inset-0
+
+                                        bg-white/[0.07]
+                                    "
+                                />
+
+
+                                <div
+                                    className="
+                                        absolute
+
+                                        -right-3
+                                        -top-3
+
+                                        h-8
+                                        w-8
+
+                                        rounded-full
+
+                                        bg-white/[0.12]
+
+                                        blur-lg
+                                    "
+                                />
+
+
+                                <Store
+                                    size={27}
+
+                                    strokeWidth={1.8}
+
+                                    className="
+                                        relative
+                                        z-10
+
+                                        text-white
+                                    "
+                                />
+
+                            </div>
 
                         </div>
 
                     </div>
 
-                </div>
 
-
-                {/* =================================================
-                    Heading
-                ================================================= */}
-
-                <div
-                    className="
-                        text-center
-
-                        mb-7
-                        sm:mb-8
-                    "
-                >
+                    {/* =================================================
+                        Heading
+                    ================================================== */}
 
                     <h1
                         className="
-                            text-2xl
-                            sm:text-3xl
+                            px-3
 
-                            font-bold
-                            tracking-tight
+                            text-[1.35rem]
+                            sm:text-[1.5rem]
 
-                            text-slate-900
-                            dark:text-white
+                            font-semibold
+
+                            leading-tight
+
+                            tracking-[-0.02em]
+
+                            text-[var(--text)]
                         "
                     >
-                        {t(
-                            'login.brand.title'
-                        )}
+
+                        {
+                            t(
+                                'login.brand.title'
+                            )
+                        }
+
                     </h1>
 
 
                     <p
                         className="
-                            text-slate-500
-                            dark:text-slate-400
-
+                            mx-auto
                             mt-2
 
-                            text-xs
-                            sm:text-sm
+                            max-w-[24rem]
+
+                            px-3
+
+                            text-[11px]
+                            sm:text-xs
+
+                            leading-5
+
+                            text-[var(--text-muted)]
                         "
                     >
-                        {t(
-                            'login.brand.description'
-                        )}
+
+                        {
+                            t(
+                                'login.brand.description'
+                            )
+                        }
+
                     </p>
 
                 </div>
 
 
                 {/* =================================================
-                    Card
-                ================================================= */}
+                    Login Card
+                ================================================== */}
 
-                <div
+                <section
                     className="
-                        bg-white/90
-                        dark:bg-slate-900/70
-
-                        backdrop-blur-xl
-
-                        border
-                        border-slate-200
-                        dark:border-slate-800/80
+                        relative
+                        overflow-hidden
 
                         rounded-3xl
 
-                        p-5
-                        sm:p-7
+                        border
+                        border-[var(--glass-border)]
 
-                        shadow-2xl
+                        bg-[var(--surface)]
 
-                        shadow-slate-300/20
-                        dark:shadow-black/30
+                        shadow-[var(--shadow-xl)]
+
+                        backdrop-blur-xl
+
+                        transition-colors
+                        duration-300
                     "
                 >
 
+                    {/* =================================================
+                        Card Accent
+                    ================================================== */}
+
                     <div
                         className="
-                            mb-6
-                            sm:mb-7
+                            pointer-events-none
+
+                            absolute
+                            inset-x-0
+                            top-0
+
+                            h-px
+
+                            bg-gradient-to-r
+                            from-transparent
+                            via-emerald-500/60
+                            to-transparent
+
+                            opacity-80
                         "
-                    >
-
-                        <h2
-                            className="
-                                text-lg
-                                sm:text-xl
-
-                                font-semibold
-
-                                text-slate-900
-                                dark:text-white
-                            "
-                        >
-                            {t(
-                                'login.form.title'
-                            )}
-                        </h2>
-
-
-                        <p
-                            className="
-                                text-slate-500
-                                dark:text-slate-400
-
-                                text-xs
-                                sm:text-sm
-
-                                mt-1
-                            "
-                        >
-                            {t(
-                                'login.form.description'
-                            )}
-                        </p>
-
-                    </div>
+                    />
 
 
                     {/* =================================================
-                        Error
-                    ================================================= */}
+                        Card Glow
+                    ================================================== */}
 
-                    {error && (
+                    <div
+                        className="
+                            pointer-events-none
+
+                            absolute
+
+                            -right-16
+                            -top-16
+
+                            h-32
+                            w-32
+
+                            rounded-full
+
+                            bg-emerald-500/[0.04]
+
+                            blur-3xl
+                        "
+                    />
+
+
+                    <div
+                        className="
+                            relative
+
+                            p-5
+                            sm:p-6
+                            md:p-7
+                        "
+                    >
+
+                        {/* =================================================
+                            Form Header
+                        ================================================== */}
 
                         <div
-                            role="alert"
-
                             className="
                                 mb-5
-
-                                rounded-xl
-
-                                border
-                                border-red-500/20
-
-                                bg-red-500/5
-
-                                px-4
-                                py-3
-
-                                text-sm
-                                text-red-500
-                                dark:text-red-400
-
-                                leading-5
+                                sm:mb-6
                             "
                         >
-                            {error}
-                        </div>
-
-                    )}
-
-
-                    {/* =================================================
-                        Form
-                    ================================================= */}
-
-                    <form
-                        onSubmit={
-                            handleSubmit
-                        }
-
-                        className="
-                            space-y-5
-                        "
-                    >
-
-                        {/* =================================================
-                            Email
-                        ================================================= */}
-
-                        <div>
-
-                            <label
-                                htmlFor="email"
-
-                                className="
-                                    block
-
-                                    text-sm
-                                    font-medium
-
-                                    text-slate-700
-                                    dark:text-slate-300
-
-                                    mb-2
-                                "
-                            >
-                                {t(
-                                    'login.fields.email.label'
-                                )}
-                            </label>
-
-
-                            <div
-                                className="
-                                    relative
-                                "
-                            >
-
-                                <Mail
-                                    size={19}
-
-                                    className={`
-                                        absolute
-
-                                        top-1/2
-                                        -translate-y-1/2
-
-                                        text-slate-400
-                                        dark:text-slate-500
-
-                                        pointer-events-none
-
-                                        ${
-                                            i18n.dir() === 'rtl'
-                                                ? 'right-4'
-                                                : 'left-4'
-                                        }
-                                    `}
-                                />
-
-
-                                <input
-                                    id="email"
-
-                                    name="email"
-
-                                    type="email"
-
-                                    value={email}
-
-                                    onChange={(
-                                        event
-                                    ) => {
-
-                                        setEmail(
-                                            event.target.value
-                                        );
-
-
-                                        if (error) {
-                                            setError('');
-                                        }
-
-                                    }}
-
-                                    placeholder={t(
-                                        'login.fields.email.placeholder'
-                                    )}
-
-                                    autoComplete="email"
-
-                                    dir="ltr"
-
-                                    disabled={isLoading}
-
-                                    className="
-                                        w-full
-
-                                        bg-slate-50
-                                        dark:bg-slate-950/70
-
-                                        border
-                                        border-slate-200
-                                        dark:border-slate-800
-
-                                        rounded-xl
-
-                                        py-3.5
-
-                                        pr-4
-                                        pl-11
-
-                                        rtl:pr-11
-                                        rtl:pl-4
-
-                                        text-sm
-
-                                        text-slate-900
-                                        dark:text-white
-
-                                        placeholder:text-slate-400
-                                        dark:placeholder:text-slate-600
-
-                                        outline-none
-
-                                        transition
-
-                                        focus:border-emerald-500/60
-                                        focus:ring-2
-                                        focus:ring-emerald-500/10
-
-                                        disabled:opacity-60
-                                        disabled:cursor-not-allowed
-                                    "
-                                />
-
-                            </div>
-
-                        </div>
-
-
-                        {/* =================================================
-                            Password
-                        ================================================= */}
-
-                        <div>
 
                             <div
                                 className="
                                     flex
-
                                     items-center
-                                    justify-between
 
-                                    gap-3
-
-                                    mb-2
+                                    gap-2
                                 "
                             >
 
-                                <label
-                                    htmlFor="password"
-
+                                <div
                                     className="
-                                        text-sm
-                                        font-medium
+                                        flex
+                                        h-8
+                                        w-8
 
-                                        text-slate-700
-                                        dark:text-slate-300
-                                    "
-                                >
-                                    {t(
-                                        'login.fields.password.label'
-                                    )}
-                                </label>
-
-
-                                <button
-                                    type="button"
-
-                                    disabled={isLoading}
-
-                                    className="
                                         shrink-0
 
-                                        text-xs
+                                        items-center
+                                        justify-center
+
+                                        rounded-lg
+
+                                        bg-emerald-500/10
 
                                         text-emerald-600
                                         dark:text-emerald-400
-
-                                        hover:text-emerald-500
-                                        dark:hover:text-emerald-300
-
-                                        transition
-
-                                        disabled:opacity-50
                                     "
                                 >
-                                    {t(
-                                        'login.actions.forgotPassword'
-                                    )}
-                                </button>
 
-                            </div>
+                                    <ShieldCheck
+                                        size={16}
+                                        strokeWidth={2}
+                                    />
 
-
-                            <div
-                                className="
-                                    relative
-                                "
-                            >
-
-                                <LockKeyhole
-                                    size={19}
-
-                                    className={`
-                                        absolute
-
-                                        top-1/2
-                                        -translate-y-1/2
-
-                                        text-slate-400
-                                        dark:text-slate-500
-
-                                        pointer-events-none
-
-                                        ${
-                                            i18n.dir() === 'rtl'
-                                                ? 'right-4'
-                                                : 'left-4'
-                                        }
-                                    `}
-                                />
+                                </div>
 
 
-                                <input
-                                    id="password"
-
-                                    name="password"
-
-                                    type={
-                                        showPassword
-                                            ? 'text'
-                                            : 'password'
-                                    }
-
-                                    value={
-                                        password
-                                    }
-
-                                    onChange={(
-                                        event
-                                    ) => {
-
-                                        setPassword(
-                                            event.target.value
-                                        );
-
-
-                                        if (error) {
-                                            setError('');
-                                        }
-
-                                    }}
-
-                                    placeholder={t(
-                                        'login.fields.password.placeholder'
-                                    )}
-
-                                    autoComplete="current-password"
-
-                                    dir="ltr"
-
-                                    disabled={isLoading}
-
+                                <div
                                     className="
-                                        w-full
-
-                                        bg-slate-50
-                                        dark:bg-slate-950/70
-
-                                        border
-                                        border-slate-200
-                                        dark:border-slate-800
-
-                                        rounded-xl
-
-                                        py-3.5
-
-                                        pr-12
-                                        pl-12
-
-                                        text-sm
-
-                                        text-slate-900
-                                        dark:text-white
-
-                                        placeholder:text-slate-400
-                                        dark:placeholder:text-slate-600
-
-                                        outline-none
-
-                                        transition
-
-                                        focus:border-emerald-500/60
-                                        focus:ring-2
-                                        focus:ring-emerald-500/10
-
-                                        disabled:opacity-60
-                                        disabled:cursor-not-allowed
+                                        min-w-0
                                     "
-                                />
-
-
-                                <button
-                                    type="button"
-
-                                    onClick={() =>
-                                        setShowPassword(
-                                            (
-                                                previous
-                                            ) =>
-                                                !previous
-                                        )
-                                    }
-
-                                    disabled={isLoading}
-
-                                    className={`
-                                        absolute
-
-                                        top-1/2
-                                        -translate-y-1/2
-
-                                        p-1.5
-
-                                        text-slate-400
-                                        dark:text-slate-500
-
-                                        hover:text-slate-700
-                                        dark:hover:text-slate-300
-
-                                        transition
-
-                                        disabled:opacity-50
-
-                                        ${
-                                            i18n.dir() === 'rtl'
-                                                ? 'left-3'
-                                                : 'right-3'
-                                        }
-                                    `}
-
-                                    aria-label={
-                                        showPassword
-                                            ? t(
-                                                'login.actions.hidePassword'
-                                            )
-                                            : t(
-                                                'login.actions.showPassword'
-                                            )
-                                    }
                                 >
 
-                                    {showPassword ? (
+                                    <h2
+                                        className="
+                                            truncate
 
-                                        <EyeOff
-                                            size={18}
-                                        />
+                                            text-sm
+                                            sm:text-[15px]
 
-                                    ) : (
+                                            font-semibold
 
-                                        <Eye
-                                            size={18}
-                                        />
+                                            text-[var(--text)]
+                                        "
+                                    >
 
-                                    )}
+                                        {
+                                            t(
+                                                'login.form.title'
+                                            )
+                                        }
 
-                                </button>
+                                    </h2>
+
+
+                                    <p
+                                        className="
+                                            mt-0.5
+
+                                            text-[10px]
+                                            sm:text-[11px]
+
+                                            leading-4
+
+                                            text-[var(--text-muted)]
+                                        "
+                                    >
+
+                                        {
+                                            t(
+                                                'login.form.description'
+                                            )
+                                        }
+
+                                    </p>
+
+                                </div>
 
                             </div>
 
@@ -1030,197 +820,750 @@ function Login() {
 
 
                         {/* =================================================
-                            Remember Me
-                        ================================================= */}
+                            Error
+                        ================================================== */}
 
-                        <label
+                        {error && (
+
+                            <div
+                                role="alert"
+
+                                className="
+                                    mb-5
+
+                                    rounded-xl
+
+                                    border
+                                    border-rose-500/20
+
+                                    bg-rose-500/[0.06]
+                                    dark:bg-rose-500/[0.08]
+
+                                    px-3.5
+                                    py-3
+
+                                    text-[11px]
+                                    sm:text-xs
+
+                                    leading-5
+
+                                    text-rose-600
+                                    dark:text-rose-400
+                                "
+                            >
+
+                                {error}
+
+                            </div>
+
+                        )}
+
+
+                        {/* =================================================
+                            Form
+                        ================================================== */}
+
+                        <form
+                            onSubmit={
+                                handleSubmit
+                            }
+
                             className="
-                                flex
-                                items-center
-                                gap-2
-
-                                cursor-pointer
-                                select-none
-
-                                pt-1
+                                space-y-4.5
                             "
                         >
 
-                            <input
-                                type="checkbox"
+                            {/* =================================================
+                                Email
+                            ================================================== */}
 
-                                checked={
-                                    rememberMe
-                                }
+                            <div>
 
-                                onChange={(
-                                    event
-                                ) =>
-                                    setRememberMe(
-                                        event.target.checked
-                                    )
-                                }
+                                <label
+                                    htmlFor="email"
+
+                                    className="
+                                        mb-2
+
+                                        block
+
+                                        text-[11px]
+                                        sm:text-xs
+
+                                        font-medium
+
+                                        text-[var(--text-muted)]
+                                    "
+                                >
+
+                                    {
+                                        t(
+                                            'login.fields.email.label'
+                                        )
+                                    }
+
+                                </label>
+
+
+                                <div
+                                    className="
+                                        relative
+                                    "
+                                >
+
+                                    <Mail
+                                        size={17}
+
+                                        strokeWidth={1.9}
+
+                                        className={`
+                                            pointer-events-none
+
+                                            absolute
+
+                                            top-1/2
+
+                                            -translate-y-1/2
+
+                                            text-[var(--text-soft)]
+
+                                            ${
+                                                isRTL
+                                                    ? 'right-3.5'
+                                                    : 'left-3.5'
+                                            }
+                                        `}
+                                    />
+
+
+                                    <input
+                                        id="email"
+
+                                        name="email"
+
+                                        type="email"
+
+                                        value={
+                                            email
+                                        }
+
+                                        onChange={(
+                                            event
+                                        ) => {
+
+                                            setEmail(
+                                                event.target.value
+                                            );
+
+
+                                            if (error) {
+                                                setError('');
+                                            }
+
+                                        }}
+
+                                        placeholder={t(
+                                            'login.fields.email.placeholder'
+                                        )}
+
+                                        autoComplete="email"
+
+                                        dir="ltr"
+
+                                        disabled={
+                                            isLoading
+                                        }
+
+                                        className="
+                                            block
+
+                                            w-full
+
+                                            rounded-xl
+
+                                            border
+                                            border-[var(--border)]
+
+                                            bg-[var(--surface-muted)]
+
+                                            py-3
+
+                                            pl-11
+                                            pr-4
+
+                                            text-sm
+
+                                            text-[var(--text)]
+
+                                            placeholder:text-[var(--text-soft)]
+
+                                            outline-none
+
+                                            transition-all
+                                            duration-200
+
+                                            hover:border-[var(--border-hover)]
+
+                                            focus:border-emerald-500/55
+
+                                            focus:bg-[var(--surface)]
+
+                                            focus:ring-2
+                                            focus:ring-emerald-500/10
+
+                                            disabled:cursor-not-allowed
+                                            disabled:opacity-60
+                                        "
+                                    />
+
+                                </div>
+
+                            </div>
+
+
+                            {/* =================================================
+                                Password
+                            ================================================== */}
+
+                            <div>
+
+                                <div
+                                    className="
+                                        mb-2
+
+                                        flex
+
+                                        items-center
+                                        justify-between
+
+                                        gap-3
+                                    "
+                                >
+
+                                    <label
+                                        htmlFor="password"
+
+                                        className="
+                                            text-[11px]
+                                            sm:text-xs
+
+                                            font-medium
+
+                                            text-[var(--text-muted)]
+                                        "
+                                    >
+
+                                        {
+                                            t(
+                                                'login.fields.password.label'
+                                            )
+                                        }
+
+                                    </label>
+
+
+                                    <button
+                                        type="button"
+
+                                        disabled={
+                                            isLoading
+                                        }
+
+                                        className="
+                                            shrink-0
+
+                                            text-[10px]
+                                            sm:text-[11px]
+
+                                            font-medium
+
+                                            text-emerald-600
+                                            dark:text-emerald-400
+
+                                            transition-colors
+
+                                            hover:text-emerald-500
+                                            dark:hover:text-emerald-300
+
+                                            disabled:cursor-not-allowed
+                                            disabled:opacity-50
+                                        "
+                                    >
+
+                                        {
+                                            t(
+                                                'login.actions.forgotPassword'
+                                            )
+                                        }
+
+                                    </button>
+
+                                </div>
+
+
+                                <div
+                                    className="
+                                        relative
+                                    "
+                                >
+
+                                    <LockKeyhole
+                                        size={17}
+
+                                        strokeWidth={1.9}
+
+                                        className={`
+                                            pointer-events-none
+
+                                            absolute
+
+                                            top-1/2
+
+                                            -translate-y-1/2
+
+                                            text-[var(--text-soft)]
+
+                                            ${
+                                                isRTL
+                                                    ? 'right-3.5'
+                                                    : 'left-3.5'
+                                            }
+                                        `}
+                                    />
+
+
+                                    <input
+                                        id="password"
+
+                                        name="password"
+
+                                        type={
+                                            showPassword
+                                                ? 'text'
+                                                : 'password'
+                                        }
+
+                                        value={
+                                            password
+                                        }
+
+                                        onChange={(
+                                            event
+                                        ) => {
+
+                                            setPassword(
+                                                event.target.value
+                                            );
+
+
+                                            if (error) {
+                                                setError('');
+                                            }
+
+                                        }}
+
+                                        placeholder={t(
+                                            'login.fields.password.placeholder'
+                                        )}
+
+                                        autoComplete="current-password"
+
+                                        dir="ltr"
+
+                                        disabled={
+                                            isLoading
+                                        }
+
+                                        className="
+                                            block
+
+                                            w-full
+
+                                            rounded-xl
+
+                                            border
+                                            border-[var(--border)]
+
+                                            bg-[var(--surface-muted)]
+
+                                            py-3
+
+                                            pl-11
+                                            pr-12
+
+                                            text-sm
+
+                                            text-[var(--text)]
+
+                                            placeholder:text-[var(--text-soft)]
+
+                                            outline-none
+
+                                            transition-all
+                                            duration-200
+
+                                            hover:border-[var(--border-hover)]
+
+                                            focus:border-emerald-500/55
+
+                                            focus:bg-[var(--surface)]
+
+                                            focus:ring-2
+                                            focus:ring-emerald-500/10
+
+                                            disabled:cursor-not-allowed
+                                            disabled:opacity-60
+                                        "
+                                    />
+
+
+                                    <button
+                                        type="button"
+
+                                        onClick={() =>
+                                            setShowPassword(
+                                                (
+                                                    previous
+                                                ) =>
+                                                    !previous
+                                            )
+                                        }
+
+                                        disabled={
+                                            isLoading
+                                        }
+
+                                        className={`
+                                            absolute
+
+                                            top-1/2
+
+                                            -translate-y-1/2
+
+                                            rounded-lg
+
+                                            p-1.5
+
+                                            text-[var(--text-soft)]
+
+                                            transition-all
+                                            duration-200
+
+                                            hover:bg-[var(--surface-muted)]
+
+                                            hover:text-[var(--text)]
+
+                                            disabled:cursor-not-allowed
+                                            disabled:opacity-50
+
+                                            ${
+                                                isRTL
+                                                    ? 'left-2.5'
+                                                    : 'right-2.5'
+                                            }
+                                        `}
+
+                                        aria-label={
+                                            showPassword
+                                                ? t(
+                                                    'login.actions.hidePassword'
+                                                )
+                                                : t(
+                                                    'login.actions.showPassword'
+                                                )
+                                        }
+                                    >
+
+                                        {showPassword ? (
+
+                                            <EyeOff
+                                                size={17}
+                                            />
+
+                                        ) : (
+
+                                            <Eye
+                                                size={17}
+                                            />
+
+                                        )}
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+                            {/* =================================================
+                                Remember Me
+                            ================================================== */}
+
+                            <label
+                                className="
+                                    flex
+                                    items-center
+
+                                    gap-2.5
+
+                                    cursor-pointer
+                                    select-none
+
+                                    pt-1
+                                "
+                            >
+
+                                <input
+                                    type="checkbox"
+
+                                    checked={
+                                        rememberMe
+                                    }
+
+                                    onChange={(
+                                        event
+                                    ) =>
+                                        setRememberMe(
+                                            event.target.checked
+                                        )
+                                    }
+
+                                    disabled={
+                                        isLoading
+                                    }
+
+                                    className="
+                                        h-4
+                                        w-4
+
+                                        shrink-0
+
+                                        cursor-pointer
+
+                                        rounded
+
+                                        border
+
+                                        accent-emerald-500
+
+                                        disabled:cursor-not-allowed
+                                    "
+                                />
+
+
+                                <span
+                                    className="
+                                        text-[11px]
+                                        sm:text-xs
+
+                                        text-[var(--text-muted)]
+                                    "
+                                >
+
+                                    {
+                                        t(
+                                            'login.fields.rememberMe'
+                                        )
+                                    }
+
+                                </span>
+
+                            </label>
+
+
+                            {/* =================================================
+                                Submit
+                            ================================================== */}
+
+                            <button
+                                type="submit"
 
                                 disabled={
                                     isLoading
                                 }
 
                                 className="
-                                    w-4
-                                    h-4
+                                    group
 
-                                    rounded
+                                    flex
+                                    w-full
 
-                                    accent-emerald-500
+                                    items-center
+                                    justify-center
 
-                                    cursor-pointer
+                                    gap-2
 
-                                    disabled:cursor-not-allowed
-                                "
-                            />
+                                    rounded-xl
 
+                                    border
+                                    border-emerald-400/20
 
-                            <span
-                                className="
+                                    bg-gradient-to-r
+                                    from-emerald-500
+                                    to-emerald-600
+
+                                    py-3
+
                                     text-sm
 
-                                    text-slate-600
-                                    dark:text-slate-400
+                                    font-semibold
+
+                                    text-white
+
+                                    shadow-[0_10px_25px_rgba(16,185,129,0.18)]
+
+                                    transition-all
+                                    duration-200
+
+                                    hover:-translate-y-0.5
+
+                                    hover:from-emerald-400
+                                    hover:to-emerald-500
+
+                                    hover:shadow-[0_14px_30px_rgba(16,185,129,0.22)]
+
+                                    active:translate-y-0
+
+                                    disabled:cursor-not-allowed
+                                    disabled:opacity-60
+                                    disabled:hover:translate-y-0
                                 "
                             >
-                                {t(
-                                    'login.fields.rememberMe'
-                                )}
-                            </span>
 
-                        </label>
+                                <span>
+                                    {
+                                        isLoading
+                                            ? t(
+                                                'login.actions.loggingIn'
+                                            )
+                                            : t(
+                                                'login.actions.login'
+                                            )
+                                    }
+                                </span>
+
+
+                                {!isLoading && (
+
+                                    isRTL ? (
+
+                                        <ArrowLeft
+                                            size={16}
+                                            strokeWidth={2}
+                                            className="
+                                                transition-transform
+                                                duration-200
+
+                                                group-hover:-translate-x-0.5
+                                            "
+                                        />
+
+                                    ) : (
+
+                                        <ArrowRight
+                                            size={16}
+                                            strokeWidth={2}
+                                            className="
+                                                transition-transform
+                                                duration-200
+
+                                                group-hover:translate-x-0.5
+                                            "
+                                        />
+
+                                    )
+
+                                )}
+
+                            </button>
+
+                        </form>
 
 
                         {/* =================================================
-                            Submit
-                        ================================================= */}
-
-                        <button
-                            type="submit"
-
-                            disabled={
-                                isLoading
-                            }
-
-                            className="
-                                w-full
-
-                                py-3.5
-
-                                rounded-xl
-
-                                bg-gradient-to-l
-                                from-emerald-500
-                                to-emerald-600
-
-                                hover:from-emerald-400
-                                hover:to-emerald-500
-
-                                disabled:opacity-60
-                                disabled:cursor-not-allowed
-
-                                active:scale-[0.99]
-
-                                text-slate-950
-                                dark:text-white
-
-                                font-semibold
-
-                                shadow-lg
-                                shadow-emerald-900/20
-
-                                transition
-                                duration-200
-                            "
-                        >
-
-                            {isLoading
-                                ? t(
-                                    'login.actions.loggingIn'
-                                )
-                                : t(
-                                    'login.actions.login'
-                                )
-                            }
-
-                        </button>
-
-                    </form>
-
-
-                    {/* =================================================
-                        Security
-                    ================================================= */}
-
-                    <div
-                        className="
-                            mt-6
-                            pt-5
-
-                            border-t
-                            border-slate-200
-                            dark:border-slate-800/80
-                        "
-                    >
+                            Security
+                        ================================================== */}
 
                         <div
                             className="
-                                flex
-                                items-center
-                                justify-center
+                                mt-5
+                                pt-4
 
-                                gap-2
-
-                                text-xs
-                                text-slate-500
-
-                                text-center
+                                border-t
+                                border-[var(--border-subtle)]
                             "
                         >
 
-                            <LockKeyhole
-                                size={14}
-                                className="shrink-0"
-                            />
+                            <div
+                                className="
+                                    flex
+                                    items-center
+                                    justify-center
+
+                                    gap-2
+
+                                    text-center
+
+                                    text-[10px]
+                                    sm:text-[11px]
+
+                                    leading-4
+
+                                    text-[var(--text-soft)]
+                                "
+                            >
+
+                                <LockKeyhole
+                                    size={13}
+
+                                    className="
+                                        shrink-0
+                                    "
+                                />
 
 
-                            <span>
-                                {t(
-                                    'login.security'
-                                )}
-                            </span>
+                                <span>
+                                    {
+                                        t(
+                                            'login.security'
+                                        )
+                                    }
+                                </span>
+
+                            </div>
 
                         </div>
 
                     </div>
 
-                </div>
+                </section>
 
 
                 {/* =================================================
                     Footer
-                ================================================= */}
+                ================================================== */}
 
                 <p
                     className="
+                        mt-5
+
                         text-center
 
-                        text-xs
+                        text-[10px]
+                        sm:text-[11px]
 
-                        text-slate-500
-                        dark:text-slate-600
+                        leading-4
 
-                        mt-6
+                        text-[var(--text-soft)]
                     "
                 >
-                    {t(
-                        'login.footer'
-                    )}
+
+                    {
+                        t(
+                            'login.footer'
+                        )
+                    }
+
                 </p>
 
             </div>

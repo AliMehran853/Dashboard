@@ -1,3 +1,7 @@
+// =========================================================
+// Header.jsx
+// =========================================================
+
 import { 
     useEffect, 
     useMemo, 
@@ -985,7 +989,7 @@ function Header({
  
         <header 
             className=" 
-                glass-panel 
+                glass-strong 
  
                 relative 
  
@@ -1004,7 +1008,7 @@ function Header({
                 border-t-0 
                 border-b-0 
  
-                border-[var(--border-subtle)] 
+                border-[var(--glass-border)] 
  
                 px-3 
                 sm:px-4 
@@ -1018,7 +1022,40 @@ function Header({
         > 
  
             {/* ================================================= 
-                Accent Top Line 
+                Accent Ambient Glow 
+            ================================================== */} 
+ 
+            <div 
+                className=" 
+                    pointer-events-none 
+ 
+                    absolute 
+                    inset-0 
+ 
+                    opacity-70 
+                " 
+ 
+                style={{ 
+                    background: ` 
+                        radial-gradient( 
+                            520px 90px 
+                            at 0% 50%, 
+                            var(--accent-soft), 
+                            transparent 72% 
+                        ), 
+                        radial-gradient( 
+                            520px 90px 
+                            at 100% 50%, 
+                            var(--accent-soft), 
+                            transparent 72% 
+                        ) 
+                    `, 
+                }} 
+            /> 
+ 
+ 
+            {/* ================================================= 
+                Accent Gradient Top Line 
             ================================================== */} 
  
             <div 
@@ -1030,11 +1067,25 @@ function Header({
                     top-0 
  
                     h-px 
- 
-                    bg-[var(--accent-500)] 
- 
-                    opacity-20 
                 " 
+ 
+                style={{ 
+                    background: ` 
+                        linear-gradient( 
+                            90deg, 
+                            transparent 0%, 
+                            var(--accent-500) 22%, 
+                            var(--accent-400) 50%, 
+                            var(--accent-500) 78%, 
+                            transparent 100% 
+                        ) 
+                    `, 
+                    opacity: 0.65, 
+                    boxShadow: ` 
+                        0 0 12px 
+                        var(--accent-glow-strong) 
+                    `, 
+                }} 
             /> 
  
  
@@ -1044,6 +1095,9 @@ function Header({
  
             <div 
                 className=" 
+                    relative 
+                    z-10 
+ 
                     flex 
                     min-w-0 
  
@@ -1163,7 +1217,7 @@ function Header({
  
                                 bg-[var(--accent-500)] 
  
-                                opacity-65 
+                                shadow-[0_0_8px_var(--accent-glow)] 
                             " 
                         /> 
  
@@ -1204,6 +1258,9 @@ function Header({
  
             <div 
                 className=" 
+                    relative 
+                    z-10 
+ 
                     flex 
                     shrink-0 
  
@@ -1340,8 +1397,6 @@ function Header({
                                     ? ` 
                                         border-[var(--accent-border-hover)] 
  
-                                        bg-[var(--accent-soft)] 
- 
                                         text-[var(--accent-500)] 
  
                                         shadow-[var(--shadow-accent)] 
@@ -1349,6 +1404,20 @@ function Header({
                                     : '' 
                             } 
                         `} 
+ 
+                        style={ 
+                            notificationOpen 
+                                ? { 
+                                    background: ` 
+                                        linear-gradient( 
+                                            135deg, 
+                                            var(--accent-soft-strong), 
+                                            var(--accent-soft) 
+                                        ) 
+                                    `, 
+                                } 
+                                : undefined 
+                        } 
                     > 
  
                         <Bell 
@@ -1392,8 +1461,6 @@ function Header({
  
                                     rounded-full 
  
-                                    bg-[var(--danger)] 
- 
                                     px-1 
  
                                     text-[9px] 
@@ -1403,6 +1470,16 @@ function Header({
  
                                     shadow-[0_0_0_2px_var(--surface-solid)] 
                                 " 
+ 
+                                style={{ 
+                                    background: ` 
+                                        linear-gradient( 
+                                            135deg, 
+                                            var(--danger), 
+                                            #b91c1c 
+                                        ) 
+                                    `, 
+                                }} 
                             > 
  
                                 { 
@@ -1450,11 +1527,38 @@ function Header({
                         > 
  
                             {/* ================================================= 
+                                Accent Ambient Glow 
+                            ================================================== */} 
+ 
+                            <div 
+                                className=" 
+                                    pointer-events-none 
+ 
+                                    absolute 
+                                    inset-0 
+                                " 
+ 
+                                style={{ 
+                                    background: ` 
+                                        radial-gradient( 
+                                            320px 120px 
+                                            at 50% 0%, 
+                                            var(--accent-soft-strong), 
+                                            transparent 75% 
+                                        ) 
+                                    `, 
+                                }} 
+                            /> 
+ 
+ 
+                            {/* ================================================= 
                                 Panel Header 
                             ================================================== */} 
  
                             <div 
                                 className=" 
+                                    relative 
+ 
                                     flex 
  
                                     items-center 
@@ -1467,9 +1571,18 @@ function Header({
  
                                     px-4 
                                     py-3 
- 
-                                    bg-[var(--glass-highlight)] 
                                 " 
+ 
+                                style={{ 
+                                    background: ` 
+                                        linear-gradient( 
+                                            135deg, 
+                                            var(--accent-soft), 
+                                            transparent 65% 
+                                        ), 
+                                        var(--glass-highlight) 
+                                    `, 
+                                }} 
                             > 
  
                                 <div 
@@ -1496,10 +1609,20 @@ function Header({
  
                                             rounded-lg 
  
-                                            bg-[var(--accent-soft)] 
+                                            text-white 
  
-                                            text-[var(--accent-500)] 
+                                            shadow-[0_4px_14px_var(--accent-glow)] 
                                         " 
+ 
+                                        style={{ 
+                                            background: ` 
+                                                linear-gradient( 
+                                                    135deg, 
+                                                    var(--accent-400), 
+                                                    var(--accent-600) 
+                                                ) 
+                                            `, 
+                                        }} 
                                     > 
  
                                         <Bell 
@@ -1572,6 +1695,8 @@ function Header({
  
                             <div 
                                 className=" 
+                                    relative 
+ 
                                     main-scrollbar 
  
                                     max-h-[22rem] 
@@ -1827,9 +1952,18 @@ function Header({
  
                         h-7 
                         w-px 
- 
-                        bg-[var(--border-subtle)] 
                     " 
+ 
+                    style={{ 
+                        background: ` 
+                            linear-gradient( 
+                                180deg, 
+                                transparent, 
+                                var(--border), 
+                                transparent 
+                            ) 
+                        `, 
+                    }} 
                 /> 
  
  

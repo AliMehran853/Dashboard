@@ -354,15 +354,6 @@ function ProductStats({
 
             iconBg:
                 'border-emerald-500/10 bg-emerald-500/10',
-
-            glow:
-                'bg-emerald-500/10',
-
-            accent:
-                'bg-emerald-500',
-
-            hover:
-                'hover:border-emerald-500/25 dark:hover:border-emerald-500/20',
         },
 
 
@@ -396,15 +387,6 @@ function ProductStats({
 
             iconBg:
                 'border-cyan-500/10 bg-cyan-500/10',
-
-            glow:
-                'bg-cyan-500/10',
-
-            accent:
-                'bg-cyan-500',
-
-            hover:
-                'hover:border-cyan-500/25 dark:hover:border-cyan-500/20',
         },
 
 
@@ -453,15 +435,6 @@ function ProductStats({
 
             iconBg:
                 'border-amber-500/10 bg-amber-500/10',
-
-            glow:
-                'bg-amber-500/10',
-
-            accent:
-                'bg-amber-500',
-
-            hover:
-                'hover:border-amber-500/25 dark:hover:border-amber-500/20',
         },
 
 
@@ -495,15 +468,6 @@ function ProductStats({
 
             iconBg:
                 'border-violet-500/10 bg-violet-500/10',
-
-            glow:
-                'bg-violet-500/10',
-
-            accent:
-                'bg-violet-500',
-
-            hover:
-                'hover:border-violet-500/25 dark:hover:border-violet-500/20',
         },
 
     ];
@@ -540,7 +504,7 @@ function ProductStats({
                                 key={
                                     stat.id
                                 }
-                                className={`
+                                className="
                                     group
                                     relative
                                     min-w-0
@@ -548,23 +512,69 @@ function ProductStats({
                                     rounded-2xl
                                     border
                                     border-[var(--border)]
-                                    bg-[var(--surface)]
                                     p-4
-                                    shadow-sm
+                                    sm:p-5
+                                    shadow-[var(--shadow-card)]
                                     transition-all
                                     duration-300
+                                    ease-[var(--ease-out)]
                                     hover:-translate-y-0.5
-                                    hover:shadow-lg
-                                    dark:hover:shadow-black/20
-                                    sm:p-5
-                                    ${stat.hover}
-                                `}
+                                    hover:border-[var(--glass-border-hover)]
+                                    hover:shadow-[var(--shadow-card-hover)]
+                                "
+                                style={{
+                                    background: `
+                                        linear-gradient(
+                                            135deg,
+                                            var(--glass-active-tint),
+                                            var(--glass-active-tint-soft) 70%,
+                                            transparent 100%
+                                        ),
+                                        var(--surface)
+                                    `,
+                                }}
                             >
 
-                                {/* Background Glow */}
+                                {/* =================================================
+                                    Hover Tint Overlay
+                                    Fades in on hover, follows accent color.
+                                ================================================== */}
 
                                 <div
-                                    className={`
+                                    aria-hidden="true"
+                                    className="
+                                        pointer-events-none
+                                        absolute
+                                        inset-0
+                                        rounded-2xl
+                                        opacity-0
+                                        transition-opacity
+                                        duration-300
+                                        ease-[var(--ease-out)]
+                                        group-hover:opacity-100
+                                    "
+                                    style={{
+                                        background: `
+                                            linear-gradient(
+                                                135deg,
+                                                var(--glass-hover-tint),
+                                                var(--glass-hover-tint-soft) 70%,
+                                                transparent 100%
+                                            )
+                                        `,
+                                    }}
+                                />
+
+
+                                {/* =================================================
+                                    Hover Background Glow
+                                    Fades in on hover, follows ACCENT color
+                                    (not the card's own tone).
+                                ================================================== */}
+
+                                <div
+                                    aria-hidden="true"
+                                    className="
                                         pointer-events-none
                                         absolute
                                         -end-10
@@ -577,29 +587,42 @@ function ProductStats({
                                         transition-opacity
                                         duration-500
                                         group-hover:opacity-100
-                                        ${stat.glow}
-                                    `}
+                                    "
+                                    style={{
+                                        background: `
+                                            radial-gradient(
+                                                circle,
+                                                var(--accent-soft-heavy),
+                                                transparent 70%
+                                            )
+                                        `,
+                                    }}
                                 />
 
 
-                                {/* Accent Line */}
+                                {/* =================================================
+                                    Accent Top Line (per-tone, for icon identity)
+                                ================================================== */}
 
                                 <div
-                                    className={`
+                                    aria-hidden="true"
+                                    className="
                                         absolute
                                         inset-x-0
                                         top-0
                                         h-px
-                                        opacity-60
+                                        bg-[var(--accent-500)]
+                                        opacity-40
                                         transition-opacity
                                         duration-300
-                                        group-hover:opacity-100
-                                        ${stat.accent}
-                                    `}
+                                        group-hover:opacity-80
+                                    "
                                 />
 
 
-                                {/* Content */}
+                                {/* =================================================
+                                    Content
+                                ================================================== */}
 
                                 <div
                                     className="
@@ -680,7 +703,7 @@ function ProductStats({
                                     </div>
 
 
-                                    {/* Icon */}
+                                    {/* Icon (per-tone, for identity) */}
 
                                     <div
                                         className={`
@@ -716,7 +739,9 @@ function ProductStats({
                                 </div>
 
 
-                                {/* Bottom Indicator */}
+                                {/* =================================================
+                                    Bottom Indicator (accent-driven)
+                                ================================================== */}
 
                                 <div
                                     className="
@@ -731,17 +756,17 @@ function ProductStats({
                                 >
 
                                     <div
-                                        className={`
+                                        className="
                                             h-full
                                             w-8
                                             rounded-full
+                                            bg-[var(--accent-500)]
                                             opacity-60
                                             transition-all
                                             duration-500
                                             group-hover:w-16
                                             group-hover:opacity-100
-                                            ${stat.accent}
-                                        `}
+                                        "
                                     />
 
                                 </div>

@@ -271,21 +271,6 @@ function ShoppingListFilters({
             "
         >
 
-            {/* Accent */}
-
-            <div
-                className="
-                    pointer-events-none
-                    absolute
-                    inset-x-0
-                    top-0
-                    h-px
-                    rounded-full
-                    bg-emerald-500/40
-                "
-            />
-
-
             {/* =================================================
                 Header
             ================================================== */}

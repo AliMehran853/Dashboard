@@ -178,13 +178,17 @@ function ReportsSummary({
                 "
             >
 
+                {/* Accent Top Line */}
+
                 <div
+                    aria-hidden="true"
                     className="
                         absolute
                         inset-x-0
                         top-0
                         h-px
-                        bg-emerald-500/50
+                        bg-[var(--accent-500)]
+                        opacity-50
                     "
                 />
 
@@ -199,16 +203,15 @@ function ReportsSummary({
                         justify-center
                         rounded-xl
                         border
-                        border-emerald-500/10
-                        bg-emerald-500/10
+                        border-[var(--accent-border)]
+                        bg-[var(--accent-soft)]
                     "
                 >
 
                     <BarChart3
                         size={17}
                         className="
-                            text-emerald-500
-                            dark:text-emerald-400
+                            text-[var(--accent-500)]
                         "
                     />
 
@@ -500,6 +503,7 @@ function ReportsSummary({
                     icon={
                         CreditCard
                     }
+                    highlight
                     label={t(
                         'reports.summary.bestCategorySales',
                         {
@@ -523,8 +527,7 @@ function ReportsSummary({
                             number-font
                             text-base
                             font-bold
-                            text-emerald-600
-                            dark:text-emerald-400
+                            text-[var(--accent-500)]
                         "
                     >
 
@@ -570,6 +573,7 @@ function ReportsSummary({
 function SummaryCard({
     icon: Icon,
     label,
+    highlight = false,
     children,
 }) {
 
@@ -584,15 +588,60 @@ function SummaryCard({
                 rounded-xl
                 border
                 border-[var(--border)]
-                bg-[var(--surface-muted)]
                 p-4
+                shadow-[var(--shadow-xs)]
                 transition-all
-                duration-200
-                hover:border-emerald-500/15
+                duration-300
+                ease-[var(--ease-out)]
+                hover:-translate-y-0.5
+                hover:border-[var(--glass-border-hover)]
+                hover:shadow-[var(--shadow-card)]
             "
+            style={{
+                background: `
+                    linear-gradient(
+                        135deg,
+                        var(--glass-active-tint),
+                        var(--glass-active-tint-soft) 70%,
+                        transparent 100%
+                    ),
+                    var(--surface-muted)
+                `,
+            }}
         >
 
+            {/* Hover Tint Overlay */}
+
             <div
+                aria-hidden="true"
+                className="
+                    pointer-events-none
+                    absolute
+                    inset-0
+                    rounded-xl
+                    opacity-0
+                    transition-opacity
+                    duration-300
+                    ease-[var(--ease-out)]
+                    group-hover:opacity-100
+                "
+                style={{
+                    background: `
+                        linear-gradient(
+                            135deg,
+                            var(--glass-hover-tint),
+                            var(--glass-hover-tint-soft) 70%,
+                            transparent 100%
+                        )
+                    `,
+                }}
+            />
+
+
+            {/* Hover Background Glow (accent-based) */}
+
+            <div
+                aria-hidden="true"
                 className="
                     pointer-events-none
                     absolute
@@ -601,15 +650,48 @@ function SummaryCard({
                     h-20
                     w-20
                     rounded-full
-                    bg-emerald-500/5
                     blur-2xl
                     opacity-0
                     transition-opacity
-                    duration-300
+                    duration-500
                     group-hover:opacity-100
                 "
+                style={{
+                    background: `
+                        radial-gradient(
+                            circle,
+                            var(--accent-soft-heavy),
+                            transparent 70%
+                        )
+                    `,
+                }}
             />
 
+
+            {/* Highlight Accent Bar (only for highlighted card) */}
+
+            {highlight && (
+
+                <div
+                    aria-hidden="true"
+                    className="
+                        absolute
+                        inset-y-3
+                        start-0
+                        w-[3px]
+                        rounded-full
+                        bg-[var(--accent-500)]
+                        opacity-70
+                        transition-opacity
+                        duration-300
+                        group-hover:opacity-100
+                    "
+                />
+
+            )}
+
+
+            {/* Top Row */}
 
             <div
                 className="
@@ -623,7 +705,7 @@ function SummaryCard({
             >
 
                 <div
-                    className="
+                    className={`
                         flex
                         h-7
                         w-7
@@ -631,15 +713,29 @@ function SummaryCard({
                         items-center
                         justify-center
                         rounded-lg
-                        bg-[var(--surface)]
-                    "
+                        border
+                        transition-all
+                        duration-300
+                        group-hover:scale-105
+                        ${
+                            highlight
+                                ? 'border-[var(--accent-border)] bg-[var(--accent-soft)]'
+                                : 'border-[var(--border-subtle)] bg-[var(--surface)]'
+                        }
+                    `}
                 >
 
                     <Icon
                         size={14}
-                        className="
-                            text-[var(--text-muted)]
-                        "
+                        className={`
+                            transition-colors
+                            duration-300
+                            ${
+                                highlight
+                                    ? 'text-[var(--accent-500)]'
+                                    : 'text-[var(--text-muted)] group-hover:text-[var(--accent-500)]'
+                            }
+                        `}
                     />
 
                 </div>
@@ -661,6 +757,8 @@ function SummaryCard({
 
             </div>
 
+
+            {/* Content */}
 
             <div
                 className="

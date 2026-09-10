@@ -169,7 +169,7 @@ function CreditStats({
 
 
   // =======================================================
-  // Colors
+  // Colors (icon tones only — card tint follows accent)
   // =======================================================
 
   const colorClasses = {
@@ -182,12 +182,6 @@ function CreditStats({
 
       accent:
         'bg-amber-500',
-
-      value:
-        'text-amber-600 dark:text-amber-400',
-
-      glow:
-        'group-hover:shadow-amber-500/10',
     },
 
     orange: {
@@ -199,12 +193,6 @@ function CreditStats({
 
       accent:
         'bg-orange-500',
-
-      value:
-        'text-orange-600 dark:text-orange-400',
-
-      glow:
-        'group-hover:shadow-orange-500/10',
     },
 
     cyan: {
@@ -216,12 +204,6 @@ function CreditStats({
 
       accent:
         'bg-cyan-500',
-
-      value:
-        'text-cyan-600 dark:text-cyan-400',
-
-      glow:
-        'group-hover:shadow-cyan-500/10',
     },
 
     emerald: {
@@ -233,12 +215,6 @@ function CreditStats({
 
       accent:
         'bg-emerald-500',
-
-      value:
-        'text-emerald-600 dark:text-emerald-400',
-
-      glow:
-        'group-hover:shadow-emerald-500/10',
     },
   };
 
@@ -299,7 +275,7 @@ function CreditStats({
               h-5
               w-1
               rounded-full
-              bg-amber-500
+              bg-[var(--accent-500)]
             "
           />
 
@@ -309,7 +285,7 @@ function CreditStats({
               sm:text-lg
               font-semibold
               tracking-tight
-              text-[var(--text-primary)]
+              text-[var(--text)]
             "
           >
             {t(
@@ -367,7 +343,7 @@ function CreditStats({
                 key={
                   stat.title
                 }
-                className={`
+                className="
                   group
                   relative
                   min-w-0
@@ -375,24 +351,66 @@ function CreditStats({
                   rounded-2xl
                   border
                   border-[var(--border)]
-                  bg-[var(--surface)]
                   p-4
                   sm:p-5
-                  shadow-sm
+                  shadow-[var(--shadow-card)]
                   transition-all
                   duration-300
+                  ease-[var(--ease-out)]
                   hover:-translate-y-0.5
-                  hover:border-slate-300
-                  dark:hover:border-slate-700
-                  hover:shadow-lg
-                  ${colors.glow}
-                `}
+                  hover:border-[var(--glass-border-hover)]
+                  hover:shadow-[var(--shadow-card-hover)]
+                "
+                style={{
+                  background: `
+                    linear-gradient(
+                      135deg,
+                      var(--glass-active-tint),
+                      var(--glass-active-tint-soft) 70%,
+                      transparent 100%
+                    ),
+                    var(--surface)
+                  `,
+                }}
               >
 
-                {/* Accent */}
-
+                {/* =================================================
+                    Hover Tint Overlay
+                    Fades in on hover, follows accent color.
+                ================================================== */}
 
                 <div
+                  aria-hidden="true"
+                  className="
+                    pointer-events-none
+                    absolute
+                    inset-0
+                    rounded-2xl
+                    opacity-0
+                    transition-opacity
+                    duration-300
+                    ease-[var(--ease-out)]
+                    group-hover:opacity-100
+                  "
+                  style={{
+                    background: `
+                      linear-gradient(
+                        135deg,
+                        var(--glass-hover-tint),
+                        var(--glass-hover-tint-soft) 70%,
+                        transparent 100%
+                      )
+                    `,
+                  }}
+                />
+
+
+                {/* =================================================
+                    Accent Top Line (per-tone, for icon identity)
+                ================================================== */}
+
+                <div
+                  aria-hidden="true"
                   className={`
                     absolute
                     inset-x-0
@@ -407,7 +425,12 @@ function CreditStats({
                 />
 
 
+                {/* =================================================
+                    Decorative Glow
+                ================================================== */}
+
                 <div
+                  aria-hidden="true"
                   className="
                     pointer-events-none
                     absolute
@@ -427,7 +450,9 @@ function CreditStats({
                 />
 
 
-                {/* Top */}
+                {/* =================================================
+                    Top Row
+                ================================================== */}
 
                 <div
                   className="
@@ -502,7 +527,9 @@ function CreditStats({
                 </div>
 
 
-                {/* Content */}
+                {/* =================================================
+                    Content
+                ================================================== */}
 
                 <div
                   className="
@@ -600,7 +627,9 @@ function CreditStats({
                 </div>
 
 
-                {/* Bottom indicator */}
+                {/* =================================================
+                    Bottom indicator
+                ================================================== */}
 
                 <div
                   className="

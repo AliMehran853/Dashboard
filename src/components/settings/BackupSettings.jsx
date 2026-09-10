@@ -456,11 +456,6 @@ function BackupSettings() {
                 );
 
 
-            // -------------------------------------------------
-            // Only restore tables that belong to the
-            // current application schema.
-            // -------------------------------------------------
-
             const tablesToRestore = [];
 
 
@@ -511,18 +506,10 @@ function BackupSettings() {
             }
 
 
-            // -------------------------------------------------
-            // Restore atomically
-            // -------------------------------------------------
-
             await db.transaction(
                 'rw',
                 ...currentTables,
                 async () => {
-
-                    // ---------------------------------------------
-                    // Clear current database
-                    // ---------------------------------------------
 
                     for (
                         const table of currentTables
@@ -532,10 +519,6 @@ function BackupSettings() {
 
                     }
 
-
-                    // ---------------------------------------------
-                    // Restore rows
-                    // ---------------------------------------------
 
                     for (
                         const item of tablesToRestore
@@ -571,16 +554,8 @@ function BackupSettings() {
         savedData
     ) => {
 
-        // -------------------------------------------------
-        // Clear current localStorage
-        // -------------------------------------------------
-
         localStorage.clear();
 
-
-        // -------------------------------------------------
-        // Restore saved keys
-        // -------------------------------------------------
 
         Object.entries(
             savedData
@@ -630,27 +605,15 @@ function BackupSettings() {
                 setError('');
 
 
-                // -------------------------------------------------
-                // Read File
-                // -------------------------------------------------
-
                 const text =
                     await file.text();
 
-
-                // -------------------------------------------------
-                // Parse JSON
-                // -------------------------------------------------
 
                 const backup =
                     JSON.parse(
                         text
                     );
 
-
-                // -------------------------------------------------
-                // Validate
-                // -------------------------------------------------
 
                 if (
                     !validateBackup(
@@ -664,10 +627,6 @@ function BackupSettings() {
 
                 }
 
-
-                // -------------------------------------------------
-                // Confirm Destructive Restore
-                // -------------------------------------------------
 
                 const confirmed =
                     window.confirm(
@@ -684,27 +643,15 @@ function BackupSettings() {
                 }
 
 
-                // -------------------------------------------------
-                // Restore Database
-                // -------------------------------------------------
-
                 await restoreDatabase(
                     backup.database.tables
                 );
 
 
-                // -------------------------------------------------
-                // Restore LocalStorage
-                // -------------------------------------------------
-
                 restoreLocalStorage(
                     backup.localStorage
                 );
 
-
-                // -------------------------------------------------
-                // Success
-                // -------------------------------------------------
 
                 setMessage(
                     t(
@@ -712,10 +659,6 @@ function BackupSettings() {
                     )
                 );
 
-
-                // -------------------------------------------------
-                // Notify Application
-                // -------------------------------------------------
 
                 window.dispatchEvent(
                     new Event(
@@ -765,10 +708,6 @@ function BackupSettings() {
                     )
                 );
 
-
-                // -------------------------------------------------
-                // Reload
-                // -------------------------------------------------
 
                 setTimeout(
                     () => {
@@ -842,17 +781,6 @@ function BackupSettings() {
                     sm:py-5
                 "
             >
-
-                <div
-                    className="
-                        absolute
-                        inset-x-0
-                        top-0
-                        h-px
-                        bg-cyan-500/45
-                    "
-                />
-
 
                 <div
                     className="

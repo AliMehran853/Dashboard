@@ -1,4 +1,5 @@
 import {
+    useEffect,
     useMemo,
     useState,
 } from 'react';
@@ -13,11 +14,67 @@ import {
     CreditCard,
     Wallet,
     Save,
+    Loader2,
 } from 'lucide-react';
 
 import {
     useTranslation,
 } from 'react-i18next';
+
+import {
+    getProducts,
+} from '../../database/db';
+
+
+// =========================================================
+// Helpers
+// =========================================================
+
+const toEnglishNumbers = (value) => {
+
+    return String(value ?? '')
+        .replace(/[۰-۹]/g, (digit) =>
+            String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit))
+        )
+        .replace(/[٠-٩]/g, (digit) =>
+            String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit))
+        );
+
+};
+
+
+const toNumber = (value) => {
+
+    const normalized = toEnglishNumbers(value)
+        .replace(/,/g, '')
+        .replace(/٬/g, '')
+        .replace(/[^\d.-]/g, '');
+
+    const number = Number(normalized);
+
+    return Number.isFinite(number) ? number : 0;
+
+};
+
+
+// =========================================================
+// Shared Field Class (no padding — so pl/pr utilities work)
+// =========================================================
+
+const FIELD_CLASS = `
+    w-full h-11
+    rounded-xl
+    border border-[var(--input-border)]
+    bg-[var(--input-bg)]
+    text-sm
+    text-[var(--text)]
+    placeholder:text-[var(--text-soft)]
+    outline-none
+    transition-colors duration-200
+    focus:border-[var(--input-border-focus)]
+    focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
+    disabled:opacity-50
+`;
 
 
 // =========================================================
@@ -40,6 +97,22 @@ function CreditSaleForm({
 
 
     // =======================================================
+    // Products (loaded from DB)
+    // =======================================================
+
+    const [
+        products,
+        setProducts,
+    ] = useState([]);
+
+
+    const [
+        loadingProducts,
+        setLoadingProducts,
+    ] = useState(true);
+
+
+    // =======================================================
     // Form State
     // =======================================================
 
@@ -51,6 +124,8 @@ function CreditSaleForm({
         customerName: '',
 
         phone: '',
+
+        productId: '',
 
         product: '',
 
@@ -70,7 +145,113 @@ function CreditSaleForm({
 
 
     // =======================================================
-    // Handle Input Change
+    // Load Products
+    // =======================================================
+
+    useEffect(() => {
+
+        let mounted = true;
+
+
+        const loadProducts = async () => {
+
+            try {
+
+                setLoadingProducts(true);
+
+
+                const result =
+                    await getProducts();
+
+
+                if (!mounted) {
+                    return;
+                }
+
+
+                setProducts(
+                    Array.isArray(result)
+                        ? result
+                        : []
+                );
+
+            } catch (loadError) {
+
+                console.error(
+                    'Failed to load products for credit form:',
+                    loadError
+                );
+
+
+                if (mounted) {
+                    setProducts([]);
+                }
+
+            } finally {
+
+                if (mounted) {
+                    setLoadingProducts(false);
+                }
+
+            }
+
+        };
+
+
+        loadProducts();
+
+
+        const handleProductsUpdated = () => {
+            loadProducts();
+        };
+
+
+        window.addEventListener(
+            'products-updated',
+            handleProductsUpdated
+        );
+
+
+        return () => {
+
+            mounted = false;
+
+            window.removeEventListener(
+                'products-updated',
+                handleProductsUpdated
+            );
+
+        };
+
+    }, []);
+
+
+    // =======================================================
+    // Only Products With Stock > 0
+    // =======================================================
+
+    const availableProducts =
+        useMemo(() => {
+
+            return products.filter((product) => {
+
+                const stock =
+                    Number(
+                        toEnglishNumbers(
+                            product?.stock
+                        )
+                    ) || 0;
+
+
+                return stock > 0;
+
+            });
+
+        }, [products]);
+
+
+    // =======================================================
+    // Handle Input Change (text fields)
     // =======================================================
 
     const handleChange = (
@@ -103,6 +284,131 @@ function CreditSaleForm({
 
 
     // =======================================================
+    // Handle Product Select
+    // Auto-fills unit price from the selected product
+    // =======================================================
+
+    const handleProductChange = (
+        event
+    ) => {
+
+        const value =
+            event.target.value;
+
+
+        const product =
+            availableProducts.find(
+                (item) =>
+                    String(item.id) ===
+                    String(value)
+            );
+
+
+        setFormData(
+            (
+                previous
+            ) => ({
+
+                ...previous,
+
+                productId:
+                    value,
+
+                product:
+                    product?.name || '',
+
+                unitPrice:
+                    product?.sellPrice !==
+                        undefined &&
+                    product?.sellPrice !==
+                        null
+                        ? String(
+                            product.sellPrice
+                        )
+                        : previous.unitPrice,
+
+            })
+        );
+
+
+        setError('');
+
+    };
+
+
+    // =======================================================
+    // Handle Quantity (numeric only)
+    // =======================================================
+
+    const handleQuantityChange = (
+        event
+    ) => {
+
+        const normalized =
+            toEnglishNumbers(
+                event.target.value
+            ).replace(
+                /[^\d]/g,
+                ''
+            );
+
+
+        setFormData(
+            (
+                previous
+            ) => ({
+
+                ...previous,
+
+                quantity:
+                    normalized,
+
+            })
+        );
+
+
+        setError('');
+
+    };
+
+
+    // =======================================================
+    // Handle Unit Price (numeric only)
+    // =======================================================
+
+    const handleUnitPriceChange = (
+        event
+    ) => {
+
+        const normalized =
+            toEnglishNumbers(
+                event.target.value
+            ).replace(
+                /[^\d]/g,
+                ''
+            );
+
+
+        setFormData(
+            (
+                previous
+            ) => ({
+
+                ...previous,
+
+                unitPrice:
+                    normalized,
+
+            })
+        );
+
+
+        setError('');
+
+    };
+
+
+    // =======================================================
     // Calculate Total
     // =======================================================
 
@@ -111,15 +417,15 @@ function CreditSaleForm({
             () => {
 
                 const quantity =
-                    Number(
+                    toNumber(
                         formData.quantity
-                    ) || 0;
+                    );
 
 
                 const unitPrice =
-                    Number(
+                    toNumber(
                         formData.unitPrice
-                    ) || 0;
+                    );
 
 
                 return (
@@ -183,6 +489,7 @@ function CreditSaleForm({
 
 
         if (
+            !formData.productId ||
             !formData.product.trim()
         ) {
 
@@ -199,7 +506,7 @@ function CreditSaleForm({
 
         if (
             !formData.quantity ||
-            Number(
+            toNumber(
                 formData.quantity
             ) <= 0
         ) {
@@ -217,7 +524,7 @@ function CreditSaleForm({
 
         if (
             formData.unitPrice === '' ||
-            Number(
+            toNumber(
                 formData.unitPrice
             ) < 0
         ) {
@@ -243,16 +550,19 @@ function CreditSaleForm({
             phone:
                 formData.phone.trim(),
 
+            productId:
+                formData.productId,
+
             product:
                 formData.product.trim(),
 
             quantity:
-                Number(
+                toNumber(
                     formData.quantity
                 ),
 
             unitPrice:
-                Number(
+                toNumber(
                     formData.unitPrice
                 ),
 
@@ -279,7 +589,7 @@ function CreditSaleForm({
 
 
     // =======================================================
-    // Input Direction Helpers
+    // Direction Helpers
     // =======================================================
 
     const iconPosition =
@@ -347,10 +657,6 @@ function CreditSaleForm({
             role="presentation"
         >
 
-            {/* =================================================
-                Modal
-            ================================================= */}
-
             <div
                 className="
                     relative
@@ -395,9 +701,7 @@ function CreditSaleForm({
                 <div
                     className="
                         sticky
-
                         top-0
-
                         z-10
 
                         relative
@@ -629,10 +933,6 @@ function CreditSaleForm({
                         "
                     >
 
-                        {/* =================================================
-                            Error
-                        ================================================= */}
-
                         {error && (
 
                             <div
@@ -726,11 +1026,7 @@ function CreditSaleForm({
                                         )}
 
                                         className={`
-                                            ui-input
-
-                                            h-11
-                                            w-full
-
+                                            ${FIELD_CLASS}
                                             ${inputIconPadding}
                                         `}
                                     />
@@ -780,11 +1076,7 @@ function CreditSaleForm({
                                         dir="ltr"
 
                                         className={`
-                                            ui-input
-
-                                            h-11
-                                            w-full
-
+                                            ${FIELD_CLASS}
                                             ${inputIconPadding}
                                         `}
                                     />
@@ -830,7 +1122,7 @@ function CreditSaleForm({
                                 "
                             >
 
-                                {/* Product */}
+                                {/* Product Select */}
 
                                 <Field
                                     label={t(
@@ -846,32 +1138,85 @@ function CreditSaleForm({
                                     }
                                 >
 
-                                    <input
-                                        type="text"
+                                    {loadingProducts ? (
 
-                                        name="product"
+                                        <div
+                                            className="
+                                                flex
+                                                h-11
+                                                w-full
 
-                                        value={
-                                            formData.product
-                                        }
+                                                items-center
+                                                justify-center
 
-                                        onChange={
-                                            handleChange
-                                        }
+                                                rounded-xl
 
-                                        placeholder={t(
-                                            'credit.saleForm.sale.productPlaceholder'
-                                        )}
+                                                border
+                                                border-[var(--input-border)]
 
-                                        className={`
-                                            ui-input
+                                                bg-[var(--input-bg)]
 
-                                            h-11
-                                            w-full
+                                                text-[var(--text-muted)]
+                                            "
+                                        >
 
-                                            ${inputIconPadding}
-                                        `}
-                                    />
+                                            <Loader2
+                                                size={16}
+                                                className="
+                                                    animate-spin
+                                                "
+                                            />
+
+                                        </div>
+
+                                    ) : (
+
+                                        <select
+                                            name="productId"
+
+                                            value={
+                                                formData.productId
+                                            }
+
+                                            onChange={
+                                                handleProductChange
+                                            }
+
+                                            className={`
+                                                ${FIELD_CLASS}
+                                                ${inputIconPadding}
+                                                cursor-pointer
+                                            `}
+                                        >
+
+                                            <option value="">
+                                                {t(
+                                                    'credit.saleForm.sale.productPlaceholder'
+                                                )}
+                                            </option>
+
+
+                                            {availableProducts.map(
+                                                (product) => (
+
+                                                    <option
+                                                        key={
+                                                            product.id
+                                                        }
+
+                                                        value={
+                                                            product.id
+                                                        }
+                                                    >
+                                                        {product.name}
+                                                    </option>
+
+                                                )
+                                            )}
+
+                                        </select>
+
+                                    )}
 
                                 </Field>
 
@@ -906,7 +1251,9 @@ function CreditSaleForm({
                                     >
 
                                         <input
-                                            type="number"
+                                            type="text"
+
+                                            inputMode="numeric"
 
                                             name="quantity"
 
@@ -915,21 +1262,15 @@ function CreditSaleForm({
                                             }
 
                                             onChange={
-                                                handleChange
+                                                handleQuantityChange
                                             }
-
-                                            min="1"
 
                                             placeholder={t(
                                                 'credit.saleForm.sale.quantityPlaceholder'
                                             )}
 
                                             className={`
-                                                ui-input
-
-                                                h-11
-                                                w-full
-
+                                                ${FIELD_CLASS}
                                                 ${inputIconPadding}
                                             `}
                                         />
@@ -960,7 +1301,9 @@ function CreditSaleForm({
                                         >
 
                                             <input
-                                                type="number"
+                                                type="text"
+
+                                                inputMode="numeric"
 
                                                 name="unitPrice"
 
@@ -969,10 +1312,8 @@ function CreditSaleForm({
                                                 }
 
                                                 onChange={
-                                                    handleChange
+                                                    handleUnitPriceChange
                                                 }
-
-                                                min="0"
 
                                                 placeholder={t(
                                                     'credit.saleForm.sale.unitPricePlaceholder'
@@ -981,10 +1322,7 @@ function CreditSaleForm({
                                                 dir="ltr"
 
                                                 className={`
-                                                    ui-input
-
-                                                    h-11
-                                                    w-full
+                                                    ${FIELD_CLASS}
 
                                                     ${
                                                         isEnglish
@@ -1279,11 +1617,7 @@ function CreditSaleForm({
                                     }
 
                                     className={`
-                                        ui-input
-
-                                        h-11
-                                        w-full
-
+                                        ${FIELD_CLASS}
                                         ${inputIconPadding}
                                     `}
                                 />

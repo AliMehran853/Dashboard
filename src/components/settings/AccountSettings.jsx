@@ -476,10 +476,6 @@ function AccountSettings() {
 
     // =====================================================
     // Input Padding
-    //
-    // فاصله واقعی متن از آیکن
-    // با style مستقیم اعمال می‌شود تا ui-input
-    // نتواند آن را override کند.
     // =====================================================
 
     const inputPadding =
@@ -530,17 +526,6 @@ function AccountSettings() {
                     sm:py-5
                 "
             >
-
-                <div
-                    className="
-                        absolute
-                        inset-x-0
-                        top-0
-                        h-px
-                        bg-cyan-500/45
-                    "
-                />
-
 
                 <div
                     className="

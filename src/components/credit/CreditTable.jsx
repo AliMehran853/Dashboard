@@ -4,6 +4,7 @@ import {
   Phone,
   Wallet,
   Trash2,
+  Package,
 } from 'lucide-react';
 
 import {
@@ -151,6 +152,175 @@ const getCustomerName = (
     credit?.name ||
     '-'
   );
+
+};
+
+
+// =========================================================
+// Extract Product Names From A Credit Account
+// Supports: items / sales / products / creditSales arrays,
+// plus single `product`, `productName`, `lastProduct` fields.
+// =========================================================
+
+const getCreditProducts = (
+  credit
+) => {
+
+  if (
+    !credit ||
+    typeof credit !== 'object'
+  ) {
+
+    return [];
+
+  }
+
+
+  const names = [];
+
+  const seen = new Set();
+
+
+  const push = (value) => {
+
+    if (typeof value !== 'string') {
+      return;
+    }
+
+
+    const trimmed =
+      value.trim();
+
+
+    if (!trimmed) {
+      return;
+    }
+
+
+    const key =
+      trimmed.toLowerCase();
+
+
+    if (seen.has(key)) {
+      return;
+    }
+
+
+    seen.add(key);
+
+    names.push(trimmed);
+
+  };
+
+
+  // -------------------------------------------------------
+  // Arrays
+  // -------------------------------------------------------
+
+  const arraysToScan = [
+
+    credit.items,
+
+    credit.sales,
+
+    credit.creditSales,
+
+    credit.products,
+
+  ];
+
+
+  arraysToScan.forEach((arr) => {
+
+    if (!Array.isArray(arr)) {
+      return;
+    }
+
+
+    arr.forEach((item) => {
+
+      if (typeof item === 'string') {
+
+        push(item);
+
+        return;
+
+      }
+
+
+      if (
+        item &&
+        typeof item === 'object'
+      ) {
+
+        push(item.product);
+
+        push(item.productName);
+
+        push(item.name);
+
+      }
+
+    });
+
+  });
+
+
+  // -------------------------------------------------------
+  // Single Fields
+  // -------------------------------------------------------
+
+  push(credit.product);
+
+  push(credit.productName);
+
+  push(credit.lastProduct);
+
+
+  return names;
+
+};
+
+
+// =========================================================
+// Payments Count For A Credit Account
+// =========================================================
+
+const getPaymentsCount = (
+  credit
+) => {
+
+  if (
+    !credit ||
+    typeof credit !== 'object'
+  ) {
+
+    return 0;
+
+  }
+
+
+  const candidates = [
+
+    credit.payments,
+
+    credit.paymentHistory,
+
+    credit.transactions,
+
+  ];
+
+
+  for (const arr of candidates) {
+
+    if (Array.isArray(arr)) {
+      return arr.length;
+    }
+
+  }
+
+
+  return 0;
 
 };
 
@@ -323,9 +493,6 @@ function CreditTable({
         credit.remaining
       ) || 0;
 
-
-    // Only fully settled accounts
-    // can be deleted.
 
     if (remaining > 0) {
       return;
@@ -534,6 +701,170 @@ function CreditTable({
         )}
 
       </span>
+    );
+
+  };
+
+
+  // =======================================================
+  // Product Chips (shared)
+  // =======================================================
+
+  const renderProductChips = (
+    credit,
+    max = 2
+  ) => {
+
+    const products =
+      getCreditProducts(
+        credit
+      );
+
+
+    if (products.length === 0) {
+      return null;
+    }
+
+
+    const visible =
+      products.slice(
+        0,
+        max
+      );
+
+
+    const extra =
+      products.length - visible.length;
+
+
+    return (
+      <div
+        className="
+          mt-1.5
+          flex
+          min-w-0
+          flex-wrap
+          items-center
+          gap-1
+        "
+      >
+
+        {visible.map(
+          (name) => (
+
+            <span
+              key={name}
+              title={name}
+              className="
+                inline-flex
+                max-w-[9rem]
+                min-w-0
+                items-center
+                gap-1
+                rounded-md
+                border
+                border-[var(--border)]
+                bg-[var(--surface-muted)]
+                px-1.5
+                py-0.5
+                text-[9px]
+                leading-4
+                text-[var(--text-secondary)]
+              "
+            >
+
+              <Package
+                size={9}
+                className="
+                  shrink-0
+                  text-[var(--text-muted)]
+                "
+              />
+
+
+              <span
+                className="
+                  truncate
+                "
+              >
+                {name}
+              </span>
+
+            </span>
+
+          )
+        )}
+
+
+        {extra > 0 && (
+
+          <span
+            className="
+              inline-flex
+              items-center
+              rounded-md
+              border
+              border-[var(--border)]
+              bg-[var(--surface-muted)]
+              px-1.5
+              py-0.5
+              text-[9px]
+              leading-4
+              text-[var(--text-muted)]
+            "
+          >
+            +{extra}
+          </span>
+
+        )}
+
+      </div>
+    );
+
+  };
+
+
+  // =======================================================
+  // Payments Count Hint (shared)
+  // =======================================================
+
+  const renderPaymentsHint = (
+    credit
+  ) => {
+
+    const count =
+      getPaymentsCount(
+        credit
+      );
+
+
+    if (count <= 0) {
+      return null;
+    }
+
+
+    return (
+      <p
+        className="
+          mt-0.5
+          text-[9px]
+          text-[var(--text-muted)]
+        "
+      >
+        {formatNumber(
+          count
+        )}{' '}
+
+        {t(
+          'credit.table.paymentsCount',
+          {
+            defaultValue:
+              isEnglish
+                ? 'payments'
+                : 'پرداخت',
+          }
+        )}
+      </p>
     );
 
   };
@@ -864,7 +1195,7 @@ function CreditTable({
               <table
                 className="
                   w-full
-                  min-w-[920px]
+                  min-w-[960px]
                   border-collapse
                 "
               >
@@ -1086,19 +1417,20 @@ function CreditTable({
                           "
                         >
 
-                          {/* Customer */}
+                          {/* Customer + Products */}
 
                           <td
                             className="
                               px-5
                               py-3.5
+                              align-top
                             "
                           >
 
                             <div
                               className="
                                 flex
-                                items-center
+                                items-start
                                 gap-3
                               "
                             >
@@ -1178,6 +1510,12 @@ function CreditTable({
 
                                 </div>
 
+
+                                {renderProductChips(
+                                  credit,
+                                  2
+                                )}
+
                               </div>
 
                             </div>
@@ -1192,6 +1530,7 @@ function CreditTable({
                               whitespace-nowrap
                               px-4
                               py-3.5
+                              align-top
                             "
                           >
 
@@ -1229,13 +1568,14 @@ function CreditTable({
                           </td>
 
 
-                          {/* Paid */}
+                          {/* Paid + Payments Count */}
 
                           <td
                             className="
                               whitespace-nowrap
                               px-4
                               py-3.5
+                              align-top
                             "
                           >
 
@@ -1271,6 +1611,11 @@ function CreditTable({
                               )}
                             </span>
 
+
+                            {renderPaymentsHint(
+                              credit
+                            )}
+
                           </td>
 
 
@@ -1281,6 +1626,7 @@ function CreditTable({
                               whitespace-nowrap
                               px-4
                               py-3.5
+                              align-top
                             "
                           >
 
@@ -1329,6 +1675,7 @@ function CreditTable({
                               whitespace-nowrap
                               px-4
                               py-3.5
+                              align-top
                             "
                           >
 
@@ -1354,6 +1701,7 @@ function CreditTable({
                             className="
                               px-4
                               py-3.5
+                              align-top
                               text-center
                             "
                           >
@@ -1369,6 +1717,7 @@ function CreditTable({
                             className="
                               px-4
                               py-3.5
+                              align-top
                             "
                           >
 
@@ -1585,7 +1934,7 @@ function CreditTable({
                           className="
                             flex
                             min-w-0
-                            items-center
+                            items-start
                             gap-3
                           "
                         >
@@ -1648,6 +1997,12 @@ function CreditTable({
                                 '-'
                               }
                             </p>
+
+
+                            {renderProductChips(
+                              credit,
+                              3
+                            )}
 
                           </div>
 
@@ -1989,6 +2344,11 @@ function CreditTable({
                               credit.paid
                             )}
                           </p>
+
+
+                          {renderPaymentsHint(
+                            credit
+                          )}
 
                         </div>
 

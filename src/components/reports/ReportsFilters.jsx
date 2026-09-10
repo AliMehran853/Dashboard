@@ -9,6 +9,37 @@ import {
 
 
 // =========================================================
+// Shared Field Class (accent-aware)
+// =========================================================
+
+const FIELD_CLASS = `
+    w-full
+    h-10
+    min-w-0
+
+    rounded-xl
+
+    border
+    border-[var(--input-border)]
+
+    bg-[var(--input-bg)]
+
+    text-xs
+
+    text-[var(--text)]
+
+    placeholder:text-[var(--text-soft)]
+
+    outline-none
+
+    focus:border-[var(--input-border-focus)]
+    focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
+
+    transition
+`;
+
+
+// =========================================================
 // Reports Filters
 // =========================================================
 
@@ -52,21 +83,102 @@ function ReportsFilters({
             dir={i18n.dir()}
 
             className="
+                group
+                relative
+                overflow-hidden
+
                 rounded-2xl
 
                 border
-                border-slate-200
-                dark:border-slate-800
-
-                bg-white
-                dark:bg-slate-900/60
+                border-[var(--border)]
 
                 p-4
+
+                shadow-[var(--shadow-card)]
+
+                transition-all
+                duration-300
+                ease-[var(--ease-out)]
+
+                hover:border-[var(--glass-border-hover)]
+                hover:shadow-[var(--shadow-card-hover)]
             "
+
+            style={{
+                background: `
+                    linear-gradient(
+                        135deg,
+                        var(--glass-active-tint),
+                        var(--glass-active-tint-soft) 70%,
+                        transparent 100%
+                    ),
+                    var(--surface)
+                `,
+            }}
         >
+
+            {/* =================================================
+                Hover Tint Overlay
+                Fades in on hover, follows accent color.
+            ================================================== */}
+
+            <div
+                aria-hidden="true"
+
+                className="
+                    pointer-events-none
+                    absolute
+                    inset-0
+                    rounded-2xl
+
+                    opacity-0
+
+                    transition-opacity
+                    duration-300
+                    ease-[var(--ease-out)]
+
+                    group-hover:opacity-100
+                "
+
+                style={{
+                    background: `
+                        linear-gradient(
+                            135deg,
+                            var(--glass-hover-tint),
+                            var(--glass-hover-tint-soft) 70%,
+                            transparent 100%
+                        )
+                    `,
+                }}
+            />
+
+
+            {/* =================================================
+                Accent Top Line
+            ================================================== */}
+
+            <div
+                aria-hidden="true"
+
+                className="
+                    absolute
+                    top-0
+                    inset-x-0
+
+                    h-px
+
+                    bg-[var(--accent-500)]
+
+                    opacity-40
+                "
+            />
+
 
             <div
                 className="
+                    relative
+                    z-10
+
                     grid
                     grid-cols-1
 
@@ -92,13 +204,14 @@ function ReportsFilters({
                     <Search
                         size={16}
                         className={`
+                            pointer-events-none
+
                             absolute
 
                             top-1/2
                             -translate-y-1/2
 
-                            text-slate-400
-                            dark:text-slate-600
+                            text-[var(--text-soft)]
 
                             ${
                                 i18n.dir() === 'rtl'
@@ -127,41 +240,13 @@ function ReportsFilters({
                         dir={i18n.dir()}
 
                         className={`
-                            w-full
-                            h-10
-
-                            rounded-xl
-
-                            border
-                            border-slate-200
-                            dark:border-slate-800
-
-                            bg-slate-50
-                            dark:bg-slate-950/50
+                            ${FIELD_CLASS}
 
                             ${
                                 i18n.dir() === 'rtl'
                                     ? 'pr-9 pl-3'
                                     : 'pl-9 pr-3'
                             }
-
-                            text-xs
-
-                            text-slate-800
-                            dark:text-slate-200
-
-                            placeholder:text-slate-400
-                            dark:placeholder:text-slate-600
-
-                            outline-none
-
-                            focus:border-emerald-400
-                            dark:focus:border-emerald-500/40
-
-                            focus:ring-2
-                            focus:ring-emerald-500/10
-
-                            transition
                         `}
                     />
 
@@ -183,37 +268,13 @@ function ReportsFilters({
 
                     dir={i18n.dir()}
 
-                    className="
-                        w-full
-                        h-10
-                        min-w-0
-
-                        rounded-xl
-
-                        border
-                        border-slate-200
-                        dark:border-slate-800
-
-                        bg-slate-50
-                        dark:bg-slate-950/50
+                    className={`
+                        ${FIELD_CLASS}
 
                         px-3
 
-                        text-xs
-
-                        text-slate-700
-                        dark:text-slate-300
-
-                        outline-none
-
-                        focus:border-emerald-400
-                        dark:focus:border-emerald-500/40
-
-                        focus:ring-2
-                        focus:ring-emerald-500/10
-
-                        transition
-                    "
+                        cursor-pointer
+                    `}
                 >
 
                     <option value="all">
@@ -258,37 +319,13 @@ function ReportsFilters({
 
                     dir={i18n.dir()}
 
-                    className="
-                        w-full
-                        h-10
-                        min-w-0
-
-                        rounded-xl
-
-                        border
-                        border-slate-200
-                        dark:border-slate-800
-
-                        bg-slate-50
-                        dark:bg-slate-950/50
+                    className={`
+                        ${FIELD_CLASS}
 
                         px-3
 
-                        text-xs
-
-                        text-slate-700
-                        dark:text-slate-300
-
-                        outline-none
-
-                        focus:border-emerald-400
-                        dark:focus:border-emerald-500/40
-
-                        focus:ring-2
-                        focus:ring-emerald-500/10
-
-                        transition
-                    "
+                        cursor-pointer
+                    `}
                 >
 
                     <option value="all">
@@ -327,37 +364,13 @@ function ReportsFilters({
 
                     dir={i18n.dir()}
 
-                    className="
-                        w-full
-                        h-10
-                        min-w-0
-
-                        rounded-xl
-
-                        border
-                        border-slate-200
-                        dark:border-slate-800
-
-                        bg-slate-50
-                        dark:bg-slate-950/50
+                    className={`
+                        ${FIELD_CLASS}
 
                         px-3
 
-                        text-xs
-
-                        text-slate-700
-                        dark:text-slate-300
-
-                        outline-none
-
-                        focus:border-emerald-400
-                        dark:focus:border-emerald-500/40
-
-                        focus:ring-2
-                        focus:ring-emerald-500/10
-
-                        transition
-                    "
+                        cursor-pointer
+                    `}
                 >
 
                     <option value="all">
@@ -420,6 +433,8 @@ function ReportsFilters({
                     }
 
                     className="
+                        ui-button-secondary
+
                         w-full
                         sm:col-span-2
                         xl:col-span-1
@@ -427,31 +442,7 @@ function ReportsFilters({
                         h-10
                         px-4
 
-                        rounded-xl
-
-                        border
-                        border-slate-200
-                        dark:border-slate-800
-
-                        bg-white
-                        dark:bg-transparent
-
                         text-xs
-
-                        text-slate-500
-
-                        hover:text-slate-900
-                        dark:hover:text-white
-
-                        hover:bg-slate-100
-                        dark:hover:bg-slate-800
-
-                        transition
-
-                        flex
-                        items-center
-                        justify-center
-                        gap-2
                     "
                 >
 

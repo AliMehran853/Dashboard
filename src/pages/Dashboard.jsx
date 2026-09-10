@@ -752,7 +752,7 @@ function Dashboard() {
 
 
     // =====================================================
-    // Color Styles
+    // Color Styles (icon tones only — card tint follows accent)
     // =====================================================
 
     const colorStyles = {
@@ -768,9 +768,6 @@ function Dashboard() {
             accent:
                 'bg-emerald-500',
 
-            glow:
-                'group-hover:shadow-emerald-500/10',
-
         },
 
 
@@ -784,9 +781,6 @@ function Dashboard() {
 
             accent:
                 'bg-amber-500',
-
-            glow:
-                'group-hover:shadow-amber-500/10',
 
         },
 
@@ -802,9 +796,6 @@ function Dashboard() {
             accent:
                 'bg-violet-500',
 
-            glow:
-                'group-hover:shadow-violet-500/10',
-
         },
 
 
@@ -818,9 +809,6 @@ function Dashboard() {
 
             accent:
                 'bg-cyan-500',
-
-            glow:
-                'group-hover:shadow-cyan-500/10',
 
         },
 
@@ -884,8 +872,6 @@ function Dashboard() {
                     border
                     border-[var(--border-subtle)]
 
-                    bg-[var(--surface)]
-
                     p-4
                     sm:p-5
                     md:p-6
@@ -895,6 +881,18 @@ function Dashboard() {
                     transition-colors
                     duration-300
                 "
+
+                style={{
+                    background: `
+                        linear-gradient(
+                            135deg,
+                            var(--glass-active-tint),
+                            var(--glass-active-tint-soft) 70%,
+                            transparent 100%
+                        ),
+                        var(--surface)
+                    `,
+                }}
             >
 
                 {/* Accent glow */}
@@ -1113,7 +1111,7 @@ function Dashboard() {
                                     stat.id
                                 }
 
-                                className={`
+                                className="
                                     group
                                     relative
                                     min-w-0
@@ -1124,28 +1122,70 @@ function Dashboard() {
                                     border
                                     border-[var(--border)]
 
-                                    bg-[var(--surface)]
-
                                     p-4
                                     sm:p-5
 
-                                    shadow-sm
+                                    shadow-[var(--shadow-card)]
 
                                     transition-all
                                     duration-300
+                                    ease-[var(--ease-out)]
 
                                     hover:-translate-y-0.5
+                                    hover:border-[var(--glass-border-hover)]
+                                    hover:shadow-[var(--shadow-card-hover)]
+                                "
 
-                                    hover:border-slate-300
-                                    dark:hover:border-slate-700
-
-                                    hover:shadow-lg
-
-                                    ${styles.glow}
-                                `}
+                                style={{
+                                    background: `
+                                        linear-gradient(
+                                            135deg,
+                                            var(--glass-active-tint),
+                                            var(--glass-active-tint-soft) 70%,
+                                            transparent 100%
+                                        ),
+                                        var(--surface)
+                                    `,
+                                }}
                             >
 
-                                {/* Accent */}
+                                {/* =================================================
+                                    Hover Tint Overlay
+                                    Fades in on hover, follows accent color.
+                                ================================================== */}
+
+                                <div
+                                    className="
+                                        pointer-events-none
+                                        absolute
+                                        inset-0
+                                        rounded-2xl
+
+                                        opacity-0
+
+                                        transition-opacity
+                                        duration-300
+                                        ease-[var(--ease-out)]
+
+                                        group-hover:opacity-100
+                                    "
+
+                                    style={{
+                                        background: `
+                                            linear-gradient(
+                                                135deg,
+                                                var(--glass-hover-tint),
+                                                var(--glass-hover-tint-soft) 70%,
+                                                transparent 100%
+                                            )
+                                        `,
+                                    }}
+                                />
+
+
+                                {/* =================================================
+                                    Accent Top Line (per-tone, for icon identity)
+                                ================================================== */}
 
                                 <div
                                     className={`
@@ -1166,7 +1206,9 @@ function Dashboard() {
                                 />
 
 
-                                {/* Decorative Glow */}
+                                {/* =================================================
+                                    Decorative Glow
+                                ================================================== */}
 
                                 <div
                                     aria-hidden="true"
@@ -1199,7 +1241,9 @@ function Dashboard() {
                                 />
 
 
-                                {/* Top */}
+                                {/* =================================================
+                                    Top Row
+                                ================================================== */}
 
                                 <div
                                     className="
@@ -1278,7 +1322,9 @@ function Dashboard() {
                                 </div>
 
 
-                                {/* Content */}
+                                {/* =================================================
+                                    Content
+                                ================================================== */}
 
                                 <div
                                     className="
@@ -1429,7 +1475,9 @@ function Dashboard() {
                                 </div>
 
 
-                                {/* Bottom indicator */}
+                                {/* =================================================
+                                    Bottom indicator
+                                ================================================== */}
 
                                 <div
                                     className="

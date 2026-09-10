@@ -55,6 +55,65 @@ const formatNumber = (value) => {
 };
 
 // =========================================================
+// Shared Field Classes (accent-aware)
+// =========================================================
+
+const FIELD_CLASS = `
+  w-full h-11
+  rounded-xl
+  border border-[var(--input-border)]
+  bg-[var(--input-bg)]
+  text-sm
+  text-[var(--text)]
+  placeholder:text-[var(--text-soft)]
+  outline-none
+  transition-colors duration-200
+  focus:border-[var(--input-border-focus)]
+  focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
+  disabled:opacity-50
+`;
+
+const TEXTAREA_CLASS = `
+  w-full
+  rounded-xl
+  border border-[var(--input-border)]
+  bg-[var(--input-bg)]
+  p-4
+  text-sm
+  text-[var(--text)]
+  placeholder:text-[var(--text-soft)]
+  outline-none
+  resize-none
+  transition-colors duration-200
+  focus:border-[var(--input-border-focus)]
+  focus:shadow-[0_0_0_3px_var(--accent-soft-strong)]
+  disabled:opacity-50
+`;
+
+// =========================================================
+// Modal Panel Style (same look as .ui-modal, but WITHOUT
+// overflow:hidden so the form can scroll internally)
+// =========================================================
+
+const MODAL_PANEL_STYLE = {
+  background: `
+    linear-gradient(
+      135deg,
+      var(--glass-active-tint),
+      var(--glass-active-tint-soft) 70%,
+      transparent 100%
+    ),
+    var(--glass-bg-strong)
+  `,
+  backdropFilter:
+    'blur(var(--glass-blur-strong)) saturate(220%) brightness(1.12)',
+  WebkitBackdropFilter:
+    'blur(var(--glass-blur-strong)) saturate(220%) brightness(1.12)',
+  boxShadow:
+    'var(--shadow-xl), var(--glass-inner-shadow)',
+};
+
+// =========================================================
 // Sale Form
 // =========================================================
 
@@ -477,39 +536,63 @@ function SaleForm({ onClose, onSuccess }) {
         fixed inset-0 z-50
         flex items-center justify-center
         p-2 sm:p-4
-        bg-slate-200/80 dark:bg-slate-950/80
-        backdrop-blur-sm
+        backdrop-blur-md
       "
+      style={{
+        background: `
+          radial-gradient(
+            circle at 50% 50%,
+            rgba(0, 0, 0, 0.55),
+            rgba(0, 0, 0, 0.72)
+          )
+        `,
+      }}
     >
+      {/* =================================================
+          Modal Panel
+          Flex column, overflow-hidden to clip rounded corners.
+          Header is a fixed child, form is the scrollable child.
+      ================================================== */}
+
       <div
         className="
           relative
+          flex flex-col
           w-full
           max-w-2xl
           max-h-[calc(100vh-1rem)]
           sm:max-h-[90vh]
-          overflow-y-auto
+          overflow-hidden
           rounded-2xl
-          border border-slate-200
-          dark:border-slate-800
-          bg-white dark:bg-slate-900
-          shadow-2xl
-          shadow-slate-900/10
-          dark:shadow-black/50
+          border border-[var(--glass-border)]
         "
+        style={MODAL_PANEL_STYLE}
       >
+
+        {/* =================================================
+            Header (fixed, never scrolls)
+        ================================================== */}
+
         <div
           className="
-            sticky top-0 z-10
+            flex-shrink-0
             flex items-center justify-between
             gap-3
             px-4 sm:px-6
             py-4 sm:py-5
-            border-b border-slate-200
-            dark:border-slate-800
-            bg-white/95 dark:bg-slate-900/95
-            backdrop-blur
+            border-b border-[var(--border-subtle)]
           "
+          style={{
+            background: `
+              linear-gradient(
+                135deg,
+                var(--glass-active-tint),
+                var(--glass-active-tint-soft) 70%,
+                transparent 100%
+              ),
+              rgba(0, 0, 0, 0)
+            `,
+          }}
         >
           <div className="flex min-w-0 items-center gap-3">
             <div
@@ -518,15 +601,14 @@ function SaleForm({ onClose, onSuccess }) {
                 sm:h-11 sm:w-11
                 items-center justify-center
                 rounded-xl
-                bg-emerald-500/10
-                border border-emerald-500/10
+                border border-[var(--accent-border)]
+                bg-[var(--accent-soft)]
               "
             >
               <Package
                 size={19}
                 className="
-                  text-emerald-600
-                  dark:text-emerald-400
+                  text-[var(--accent-500)]
                 "
               />
             </div>
@@ -536,8 +618,7 @@ function SaleForm({ onClose, onSuccess }) {
                 className="
                   text-base sm:text-lg
                   font-bold
-                  text-slate-900
-                  dark:text-white
+                  text-[var(--text)]
                 "
               >
                 {t('sales.form.title')}
@@ -547,8 +628,7 @@ function SaleForm({ onClose, onSuccess }) {
                 className="
                   mt-1
                   text-[11px] sm:text-xs
-                  text-slate-500
-                  dark:text-slate-500
+                  text-[var(--text-muted)]
                 "
               >
                 {t('sales.form.subtitle')}
@@ -562,37 +642,39 @@ function SaleForm({ onClose, onSuccess }) {
             disabled={saving}
             aria-label={t('common.closeMenu')}
             className="
-              flex h-9 w-9 shrink-0
-              items-center justify-center
+              ui-icon-button
+              h-9 w-9
               rounded-lg
-              text-slate-500
-              hover:text-slate-900
-              dark:hover:text-white
-              hover:bg-slate-100
-              dark:hover:bg-slate-800
-              disabled:opacity-50
-              transition
             "
           >
             <X size={19} />
           </button>
         </div>
 
+        {/* =================================================
+            Form (scrollable body)
+        ================================================== */}
+
         <form
           onSubmit={handleSubmit}
-          className="space-y-5 sm:space-y-6 p-4 sm:p-6"
+          className="
+            flex-1
+            min-h-0
+            overflow-y-auto
+            main-scrollbar
+            space-y-5 sm:space-y-6
+            p-4 sm:p-6
+          "
         >
           {error && (
             <div
               className="
                 rounded-xl
-                border border-red-200
-                dark:border-red-500/20
-                bg-red-50
-                dark:bg-red-500/5
+                border border-red-500/25
+                bg-red-500/10
                 px-4 py-3
                 text-sm
-                text-red-600
+                text-red-500
                 dark:text-red-400
               "
             >
@@ -605,16 +687,14 @@ function SaleForm({ onClose, onSuccess }) {
               <Package
                 size={16}
                 className="
-                  text-emerald-600
-                  dark:text-emerald-400
+                  text-[var(--accent-500)]
                 "
               />
 
               <h3
                 className="
                   text-sm font-semibold
-                  text-slate-900
-                  dark:text-white
+                  text-[var(--text)]
                 "
               >
                 {t('sales.form.productSection.title')}
@@ -627,8 +707,7 @@ function SaleForm({ onClose, onSuccess }) {
                   size={22}
                   className="
                     animate-spin
-                    text-emerald-600
-                    dark:text-emerald-400
+                    text-[var(--accent-500)]
                   "
                 />
               </div>
@@ -645,8 +724,7 @@ function SaleForm({ onClose, onSuccess }) {
                     className="
                       mb-2 block
                       text-xs
-                      text-slate-500
-                      dark:text-slate-400
+                      text-[var(--text-muted)]
                     "
                   >
                     {t('sales.form.fields.product')}
@@ -661,8 +739,7 @@ function SaleForm({ onClose, onSuccess }) {
                         ${isEnglish ? 'left-3' : 'right-3'}
                         top-1/2
                         -translate-y-1/2
-                        text-slate-400
-                        dark:text-slate-600
+                        text-[var(--text-soft)]
                       `}
                     />
 
@@ -675,24 +752,12 @@ function SaleForm({ onClose, onSuccess }) {
                       }
                       disabled={saving}
                       className={`
-                        w-full h-11
-                        rounded-xl
-                        border
-                        border-slate-200
-                        dark:border-slate-800
-                        bg-slate-50
-                        dark:bg-slate-950/60
+                        ${FIELD_CLASS}
                         ${
                           isEnglish
                             ? 'pl-10 pr-4'
                             : 'pr-10 pl-4'
                         }
-                        text-sm
-                        text-slate-800
-                        dark:text-slate-300
-                        outline-none
-                        focus:border-emerald-500/50
-                        disabled:opacity-50
                       `}
                     >
                       <option value="">
@@ -718,8 +783,7 @@ function SaleForm({ onClose, onSuccess }) {
                     <label
                       className="
                         text-xs
-                        text-slate-500
-                        dark:text-slate-400
+                        text-[var(--text-muted)]
                       "
                     >
                       {t('sales.form.fields.category')}
@@ -738,10 +802,8 @@ function SaleForm({ onClose, onSuccess }) {
                         flex shrink-0
                         items-center gap-1
                         text-[11px]
-                        text-emerald-600
-                        dark:text-emerald-400
-                        hover:text-emerald-500
-                        dark:hover:text-emerald-300
+                        text-[var(--accent-500)]
+                        hover:text-[var(--accent-400)]
                         disabled:opacity-50
                         transition
                       "
@@ -760,8 +822,7 @@ function SaleForm({ onClose, onSuccess }) {
                         ${isEnglish ? 'left-3' : 'right-3'}
                         top-1/2
                         -translate-y-1/2
-                        text-slate-400
-                        dark:text-slate-600
+                        text-[var(--text-soft)]
                       `}
                     />
 
@@ -774,24 +835,12 @@ function SaleForm({ onClose, onSuccess }) {
                       }
                       disabled={saving}
                       className={`
-                        w-full h-11
-                        rounded-xl
-                        border
-                        border-slate-200
-                        dark:border-slate-800
-                        bg-slate-50
-                        dark:bg-slate-950/60
+                        ${FIELD_CLASS}
                         ${
                           isEnglish
                             ? 'pl-10 pr-4'
                             : 'pr-10 pl-4'
                         }
-                        text-sm
-                        text-slate-800
-                        dark:text-slate-300
-                        outline-none
-                        focus:border-emerald-500/50
-                        disabled:opacity-50
                       `}
                     >
                       <option value="">
@@ -816,8 +865,8 @@ function SaleForm({ onClose, onSuccess }) {
                       className="
                         mt-3
                         rounded-xl
-                        border border-emerald-500/20
-                        bg-emerald-500/5
+                        border border-[var(--accent-border)]
+                        bg-[var(--accent-soft)]
                         p-3
                       "
                     >
@@ -845,19 +894,14 @@ function SaleForm({ onClose, onSuccess }) {
                             min-w-0 flex-1
                             h-10
                             rounded-lg
-                            border
-                            border-slate-200
-                            dark:border-slate-800
-                            bg-white
-                            dark:bg-slate-950/60
+                            border border-[var(--input-border)]
+                            bg-[var(--input-bg-focus)]
                             px-3
                             text-sm
-                            text-slate-900
-                            dark:text-white
-                            placeholder:text-slate-400
-                            dark:placeholder:text-slate-600
+                            text-[var(--text)]
+                            placeholder:text-[var(--text-soft)]
                             outline-none
-                            focus:border-emerald-500/50
+                            focus:border-[var(--input-border-focus)]
                           "
                         />
 
@@ -866,18 +910,10 @@ function SaleForm({ onClose, onSuccess }) {
                           onClick={handleAddCategory}
                           disabled={addingCategory}
                           className="
+                            ui-button-primary
                             h-10
                             px-4
-                            rounded-lg
-                            bg-emerald-500
-                            hover:bg-emerald-400
-                            disabled:opacity-50
-                            text-slate-950
-                            text-sm font-semibold
-                            flex items-center
-                            justify-center
-                            gap-2
-                            transition
+                            text-sm
                           "
                         >
                           {addingCategory ? (
@@ -916,8 +952,7 @@ function SaleForm({ onClose, onSuccess }) {
                     className="
                       mb-2 block
                       text-xs
-                      text-slate-500
-                      dark:text-slate-400
+                      text-[var(--text-muted)]
                     "
                   >
                     {t('sales.form.fields.quantity')}
@@ -932,8 +967,7 @@ function SaleForm({ onClose, onSuccess }) {
                         ${isEnglish ? 'left-3' : 'right-3'}
                         top-1/2
                         -translate-y-1/2
-                        text-slate-400
-                        dark:text-slate-600
+                        text-[var(--text-soft)]
                       `}
                     />
 
@@ -948,23 +982,12 @@ function SaleForm({ onClose, onSuccess }) {
                       }
                       disabled={saving}
                       className={`
-                        w-full h-11
-                        rounded-xl
-                        border
-                        border-slate-200
-                        dark:border-slate-800
-                        bg-slate-50
-                        dark:bg-slate-950/60
+                        ${FIELD_CLASS}
                         ${
                           isEnglish
                             ? 'pl-10 pr-4'
                             : 'pr-10 pl-4'
                         }
-                        text-sm
-                        text-slate-900
-                        dark:text-white
-                        outline-none
-                        focus:border-emerald-500/50
                       `}
                     />
                   </div>
@@ -975,8 +998,7 @@ function SaleForm({ onClose, onSuccess }) {
                     className="
                       mb-2 block
                       text-xs
-                      text-slate-500
-                      dark:text-slate-400
+                      text-[var(--text-muted)]
                     "
                   >
                     {t(
@@ -993,8 +1015,7 @@ function SaleForm({ onClose, onSuccess }) {
                         ${isEnglish ? 'left-3' : 'right-3'}
                         top-1/2
                         -translate-y-1/2
-                        text-slate-400
-                        dark:text-slate-600
+                        text-[var(--text-soft)]
                       `}
                     />
 
@@ -1009,23 +1030,12 @@ function SaleForm({ onClose, onSuccess }) {
                       }
                       disabled={saving}
                       className={`
-                        w-full h-11
-                        rounded-xl
-                        border
-                        border-slate-200
-                        dark:border-slate-800
-                        bg-slate-50
-                        dark:bg-slate-950/60
+                        ${FIELD_CLASS}
                         ${
                           isEnglish
                             ? 'pl-10 pr-14'
                             : 'pr-10 pl-14'
                         }
-                        text-sm
-                        text-slate-900
-                        dark:text-white
-                        outline-none
-                        focus:border-emerald-500/50
                       `}
                     />
 
@@ -1037,8 +1047,7 @@ function SaleForm({ onClose, onSuccess }) {
                         top-1/2
                         -translate-y-1/2
                         text-xs
-                        text-slate-400
-                        dark:text-slate-600
+                        text-[var(--text-soft)]
                       `}
                     >
                       {t('common.currency')}
@@ -1049,16 +1058,48 @@ function SaleForm({ onClose, onSuccess }) {
             )}
           </section>
 
+          {/* =================================================
+              Total
+          ================================================= */}
+
           <section
             className="
+              relative
+              overflow-hidden
               rounded-2xl
-              border border-emerald-500/10
-              bg-emerald-500/5
+              border border-[var(--accent-border)]
               p-4 sm:p-5
             "
+            style={{
+              background: `
+                linear-gradient(
+                  135deg,
+                  var(--accent-soft-strong),
+                  var(--accent-soft) 70%,
+                  transparent 100%
+                ),
+                var(--surface)
+              `,
+            }}
           >
             <div
+              aria-hidden="true"
               className="
+                pointer-events-none
+                absolute
+                -right-8
+                -top-8
+                h-24
+                w-24
+                rounded-full
+                bg-[var(--accent-soft-heavy)]
+                blur-2xl
+              "
+            />
+
+            <div
+              className="
+                relative
                 flex
                 flex-col
                 min-[420px]:flex-row
@@ -1068,20 +1109,29 @@ function SaleForm({ onClose, onSuccess }) {
               "
             >
               <div className="flex items-center gap-3">
-                <Calculator
-                  size={20}
+                <div
                   className="
-                    text-emerald-600
-                    dark:text-emerald-400
+                    flex h-10 w-10
+                    shrink-0
+                    items-center justify-center
+                    rounded-xl
+                    border border-[var(--accent-border)]
+                    bg-[var(--accent-soft)]
                   "
-                />
+                >
+                  <Calculator
+                    size={18}
+                    className="
+                      text-[var(--accent-500)]
+                    "
+                  />
+                </div>
 
                 <div>
                   <p
                     className="
                       text-xs
-                      text-slate-600
-                      dark:text-slate-500
+                      text-[var(--text-secondary)]
                     "
                   >
                     {t(
@@ -1093,8 +1143,7 @@ function SaleForm({ onClose, onSuccess }) {
                     className="
                       mt-1
                       text-[11px]
-                      text-slate-500
-                      dark:text-slate-600
+                      text-[var(--text-muted)]
                     "
                   >
                     {t(
@@ -1114,8 +1163,7 @@ function SaleForm({ onClose, onSuccess }) {
                   className="
                     text-2xl
                     font-bold
-                    text-emerald-600
-                    dark:text-emerald-400
+                    text-[var(--accent-500)]
                   "
                   dir="ltr"
                 >
@@ -1125,8 +1173,7 @@ function SaleForm({ onClose, onSuccess }) {
                 <span
                   className="
                     text-xs
-                    text-slate-500
-                    dark:text-slate-500
+                    text-[var(--text-muted)]
                   "
                 >
                   {t('common.currency')}
@@ -1135,21 +1182,23 @@ function SaleForm({ onClose, onSuccess }) {
             </div>
           </section>
 
+          {/* =================================================
+              Payment
+          ================================================= */}
+
           <section>
             <div className="mb-4 flex items-center gap-2">
               <Banknote
                 size={16}
                 className="
-                  text-cyan-600
-                  dark:text-cyan-400
+                  text-[var(--accent-500)]
                 "
               />
 
               <h3
                 className="
                   text-sm font-semibold
-                  text-slate-900
-                  dark:text-white
+                  text-[var(--text)]
                 "
               >
                 {t('sales.form.payment.title')}
@@ -1179,22 +1228,22 @@ function SaleForm({ onClose, onSuccess }) {
                 <div
                   className="
                     rounded-xl
-                    border border-slate-200
-                    dark:border-slate-800
-                    bg-slate-50
-                    dark:bg-slate-950/40
+                    border border-[var(--input-border)]
+                    bg-[var(--input-bg)]
                     p-4
                     transition
-                    peer-checked:border-cyan-500/40
-                    peer-checked:bg-cyan-500/5
+                    peer-checked:border-[var(--accent-border-hover)]
                   "
+                  style={{
+                    transition:
+                      'border-color 220ms var(--ease-out), background 220ms var(--ease-out)',
+                  }}
                 >
                   <div className="flex items-center gap-3">
                     <Banknote
                       size={20}
                       className="
-                        text-cyan-600
-                        dark:text-cyan-400
+                        text-[var(--accent-500)]
                       "
                     />
 
@@ -1202,8 +1251,7 @@ function SaleForm({ onClose, onSuccess }) {
                       <p
                         className="
                           text-sm font-medium
-                          text-slate-900
-                          dark:text-white
+                          text-[var(--text)]
                         "
                       >
                         {t(
@@ -1215,7 +1263,7 @@ function SaleForm({ onClose, onSuccess }) {
                         className="
                           mt-1
                           text-[11px]
-                          text-slate-500
+                          text-[var(--text-muted)]
                         "
                       >
                         {t(
@@ -1242,22 +1290,22 @@ function SaleForm({ onClose, onSuccess }) {
                 <div
                   className="
                     rounded-xl
-                    border border-slate-200
-                    dark:border-slate-800
-                    bg-slate-50
-                    dark:bg-slate-950/40
+                    border border-[var(--input-border)]
+                    bg-[var(--input-bg)]
                     p-4
                     transition
-                    peer-checked:border-amber-500/40
-                    peer-checked:bg-amber-500/5
+                    peer-checked:border-[var(--accent-border-hover)]
                   "
+                  style={{
+                    transition:
+                      'border-color 220ms var(--ease-out), background 220ms var(--ease-out)',
+                  }}
                 >
                   <div className="flex items-center gap-3">
                     <CreditCard
                       size={20}
                       className="
-                        text-amber-600
-                        dark:text-amber-400
+                        text-[var(--accent-500)]
                       "
                     />
 
@@ -1265,8 +1313,7 @@ function SaleForm({ onClose, onSuccess }) {
                       <p
                         className="
                           text-sm font-medium
-                          text-slate-900
-                          dark:text-white
+                          text-[var(--text)]
                         "
                       >
                         {t(
@@ -1278,7 +1325,7 @@ function SaleForm({ onClose, onSuccess }) {
                         className="
                           mt-1
                           text-[11px]
-                          text-slate-500
+                          text-[var(--text-muted)]
                         "
                       >
                         {t(
@@ -1292,21 +1339,23 @@ function SaleForm({ onClose, onSuccess }) {
             </div>
           </section>
 
+          {/* =================================================
+              Customer
+          ================================================= */}
+
           <section>
             <div className="mb-4 flex items-center gap-2">
               <User
                 size={16}
                 className="
-                  text-amber-600
-                  dark:text-amber-400
+                  text-[var(--accent-500)]
                 "
               />
 
               <h3
                 className="
                   text-sm font-semibold
-                  text-slate-900
-                  dark:text-white
+                  text-[var(--text)]
                 "
               >
                 {t(
@@ -1341,23 +1390,10 @@ function SaleForm({ onClose, onSuccess }) {
                       )
                 }
                 disabled={saving}
-                className="
-                  w-full h-11
-                  rounded-xl
-                  border border-slate-200
-                  dark:border-slate-800
-                  bg-slate-50
-                  dark:bg-slate-950/60
+                className={`
+                  ${FIELD_CLASS}
                   px-4
-                  text-sm
-                  text-slate-900
-                  dark:text-white
-                  placeholder:text-slate-400
-                  dark:placeholder:text-slate-600
-                  outline-none
-                  focus:border-emerald-500/50
-                  disabled:opacity-50
-                "
+                `}
               />
 
               <div className="relative">
@@ -1369,8 +1405,7 @@ function SaleForm({ onClose, onSuccess }) {
                     ${isEnglish ? 'left-3' : 'right-3'}
                     top-1/2
                     -translate-y-1/2
-                    text-slate-400
-                    dark:text-slate-600
+                    text-[var(--text-soft)]
                   `}
                 />
 
@@ -1390,46 +1425,35 @@ function SaleForm({ onClose, onSuccess }) {
                   )}
                   disabled={saving}
                   className={`
-                    w-full h-11
-                    rounded-xl
-                    border border-slate-200
-                    dark:border-slate-800
-                    bg-slate-50
-                    dark:bg-slate-950/60
+                    ${FIELD_CLASS}
                     ${
                       isEnglish
                         ? 'pl-10 pr-4'
                         : 'pr-10 pl-4'
                     }
-                    text-sm
-                    text-slate-900
-                    dark:text-white
-                    placeholder:text-slate-400
-                    dark:placeholder:text-slate-600
-                    outline-none
-                    focus:border-emerald-500/50
-                    disabled:opacity-50
                   `}
                 />
               </div>
             </div>
           </section>
 
+          {/* =================================================
+              Note
+          ================================================= */}
+
           <section>
             <div className="mb-4 flex items-center gap-2">
               <FileText
                 size={16}
                 className="
-                  text-slate-500
-                  dark:text-slate-400
+                  text-[var(--accent-500)]
                 "
               />
 
               <h3
                 className="
                   text-sm font-semibold
-                  text-slate-900
-                  dark:text-white
+                  text-[var(--text)]
                 "
               >
                 {t(
@@ -1448,26 +1472,13 @@ function SaleForm({ onClose, onSuccess }) {
                 'sales.form.note.placeholder'
               )}
               disabled={saving}
-              className="
-                w-full
-                rounded-xl
-                border border-slate-200
-                dark:border-slate-800
-                bg-slate-50
-                dark:bg-slate-950/60
-                p-4
-                text-sm
-                text-slate-900
-                dark:text-white
-                placeholder:text-slate-400
-                dark:placeholder:text-slate-600
-                outline-none
-                resize-none
-                focus:border-emerald-500/50
-                disabled:opacity-50
-              "
+              className={TEXTAREA_CLASS}
             />
           </section>
+
+          {/* =================================================
+              Actions
+          ================================================= */}
 
           <div
             className="
@@ -1484,21 +1495,11 @@ function SaleForm({ onClose, onSuccess }) {
               onClick={onClose}
               disabled={saving}
               className="
+                ui-button-secondary
                 h-11
                 w-full sm:w-auto
                 px-5
-                rounded-xl
-                border border-slate-200
-                dark:border-slate-800
                 text-sm
-                text-slate-600
-                dark:text-slate-400
-                hover:text-slate-900
-                dark:hover:text-white
-                hover:bg-slate-100
-                dark:hover:bg-slate-800
-                disabled:opacity-50
-                transition
               "
             >
               {t(
@@ -1514,21 +1515,11 @@ function SaleForm({ onClose, onSuccess }) {
                 !productId
               }
               className="
+                ui-button-primary
                 h-11
                 w-full sm:w-auto
                 px-6
-                rounded-xl
-                bg-emerald-500
-                hover:bg-emerald-400
-                disabled:opacity-50
-                disabled:cursor-not-allowed
-                text-slate-950
                 text-sm
-                font-semibold
-                transition
-                flex items-center
-                justify-center
-                gap-2
               "
             >
               {saving && (

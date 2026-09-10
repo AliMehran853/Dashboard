@@ -1,136 +1,267 @@
 import {
     useEffect,
-    useMemo,
+    useLayoutEffect,
+    useRef,
     useState,
 } from 'react';
 
+import { createPortal } from 'react-dom';
+
 import {
-    Plus,
-    Package,
-    Trash2,
-    AlertTriangle,
-    X,
+    BarChart3,
+    Download,
+    Loader2,
+    FileSpreadsheet,
+    FileText,
 } from 'lucide-react';
 
 import {
     useTranslation,
 } from 'react-i18next';
 
-import ProductForm
-    from '../components/products/ProductForm';
+import ReportsStats
+    from '../components/reports/ReportsStats';
 
-import ProductStats
-    from '../components/products/ProductStats';
+import ReportsFilters
+    from '../components/reports/ReportsFilters';
 
-import ProductFilters
-    from '../components/products/ProductFilters';
+import SalesTrendChart
+    from '../components/reports/SalesTrendChart';
 
-import ProductTable
-    from '../components/products/ProductTable';
+import PaymentDistributionChart
+    from '../components/reports/PaymentDistributionChart';
 
-import ProductDetails
-    from '../components/products/ProductDetails';
+import CategorySalesChart
+    from '../components/reports/CategorySalesChart';
+
+import ReportsSummary
+    from '../components/reports/ReportsSummary';
 
 import {
-    addProduct,
-    getProducts,
-    getCategories,
-    deleteProduct,
-    updateProduct,
-} from '../database/db';
+    getSalesReport,
+    getReportCategories,
+} from '../services/reportService';
+
+import {
+    exportReportToExcel,
+} from '../utils/export/excel';
+
+import {
+    exportReportToPDF,
+} from '../utils/export/pdf';
 
 
 // =========================================================
-// Products
+// Default Report Data
 // =========================================================
 
-function Products() {
+const createDefaultReportData = () => ({
+
+    statistics: {
+
+        totalSales:
+            0,
+
+        totalTransactions:
+            0,
+
+        cashSales:
+            0,
+
+        creditSales:
+            0,
+
+        totalRevenue:
+            0,
+
+    },
+
+
+    salesTrend: [],
+
+
+    paymentDistribution: [],
+
+
+    categorySales: [],
+
+
+    summary: {
+
+        bestCategory:
+            '-',
+
+        bestCategorySales:
+            0,
+
+        averageSale:
+            0,
+
+        totalItems:
+            0,
+
+    },
+
+
+    rawSales: [],
+
+});
+
+
+// =========================================================
+// Normalize Report Data
+// =========================================================
+
+const normalizeReportData = (
+    result
+) => {
+
+    const fallback =
+        createDefaultReportData();
+
+
+    if (
+        !result ||
+        typeof result !== 'object'
+    ) {
+
+        return fallback;
+
+    }
+
+
+    return {
+
+        statistics: {
+
+            ...fallback.statistics,
+
+            ...(result.statistics || {}),
+
+        },
+
+
+        salesTrend:
+
+            Array.isArray(
+                result.salesTrend
+            )
+                ? result.salesTrend
+                : [],
+
+
+        paymentDistribution:
+
+            Array.isArray(
+                result.paymentDistribution
+            )
+                ? result.paymentDistribution
+                : [],
+
+
+        categorySales:
+
+            Array.isArray(
+                result.categorySales
+            )
+                ? result.categorySales
+                : [],
+
+
+        summary: {
+
+            ...fallback.summary,
+
+            ...(result.summary || {}),
+
+        },
+
+
+        rawSales:
+
+            Array.isArray(
+                result.rawSales
+            )
+                ? result.rawSales
+                : [],
+
+    };
+
+};
+
+
+// =========================================================
+// Reports
+// =========================================================
+
+function Reports() {
 
     const {
         t,
+        i18n,
     } = useTranslation();
 
 
     // =====================================================
-    // Data
+    // Language
+    // =====================================================
+
+    const language =
+        i18n.language || 'fa';
+
+
+    const isEnglish =
+        String(
+            language
+        )
+            .toLowerCase()
+            .startsWith('en');
+
+
+    const direction =
+        isEnglish
+            ? 'ltr'
+            : 'rtl';
+
+
+    // =====================================================
+    // Export State
     // =====================================================
 
     const [
-        products,
-        setProducts,
-    ] = useState([]);
+        exportOpen,
+        setExportOpen,
+    ] = useState(false);
 
 
     const [
-        categories,
-        setCategories,
-    ] = useState([]);
-
-
-    // =====================================================
-    // UI State
-    // =====================================================
-
-    const [
-        loading,
-        setLoading,
-    ] = useState(true);
+        exporting,
+        setExporting,
+    ] = useState(false);
 
 
     const [
-        error,
-        setError,
+        exportError,
+        setExportError,
     ] = useState('');
 
 
-    const [
-        refreshKey,
-        setRefreshKey,
-    ] = useState(0);
-
-
     // =====================================================
-    // Form / Details
+    // Export Refs + Position
     // =====================================================
 
-    const [
-        showForm,
-        setShowForm,
-    ] = useState(false);
+    const exportButtonRef =
+        useRef(null);
+
+
+    const exportMenuRef =
+        useRef(null);
 
 
     const [
-        showDetails,
-        setShowDetails,
-    ] = useState(false);
-
-
-    const [
-        selectedProduct,
-        setSelectedProduct,
-    ] = useState(null);
-
-
-    const [
-        editingProduct,
-        setEditingProduct,
-    ] = useState(null);
-
-
-    // =====================================================
-    // Delete
-    // =====================================================
-
-    const [
-        productToDelete,
-        setProductToDelete,
-    ] = useState(null);
-
-
-    const [
-        deleting,
-        setDeleting,
-    ] = useState(false);
+        menuStyle,
+        setMenuStyle,
+    ] = useState({});
 
 
     // =====================================================
@@ -144,279 +275,511 @@ function Products() {
 
 
     const [
+        period,
+        setPeriod,
+    ] = useState('week');
+
+
+    const [
+        paymentType,
+        setPaymentType,
+    ] = useState('all');
+
+
+    const [
         category,
         setCategory,
     ] = useState('all');
 
 
+    // =====================================================
+    // Categories
+    // =====================================================
+
     const [
-        stockStatus,
-        setStockStatus,
-    ] = useState('all');
+        categories,
+        setCategories,
+    ] = useState([]);
 
 
     // =====================================================
-    // Load Products
+    // Report Data
     // =====================================================
 
-    const loadProducts = async () => {
-
-        try {
-
-            setLoading(true);
-            setError('');
-
-
-            const data =
-                await getProducts();
+    const [
+        reportData,
+        setReportData,
+    ] = useState(
+        createDefaultReportData()
+    );
 
 
-            setProducts(
-                Array.isArray(data)
-                    ? data
-                    : []
-            );
+    // =====================================================
+    // Loading
+    // =====================================================
 
-        } catch (loadError) {
-
-            console.error(
-                'Failed to load products:',
-                loadError
-            );
+    const [
+        loading,
+        setLoading,
+    ] = useState(true);
 
 
-            setError(
-                t(
-                    'products.error.load'
-                )
-            );
+    // =====================================================
+    // Error
+    // =====================================================
 
-        } finally {
-
-            setLoading(false);
-
-        }
-
-    };
+    const [
+        error,
+        setError,
+    ] = useState('');
 
 
     // =====================================================
     // Load Categories
     // =====================================================
 
-    const loadCategories = async () => {
-
-        try {
-
-            const data =
-                await getCategories();
-
-
-            setCategories(
-                Array.isArray(data)
-                    ? data
-                    : []
-            );
-
-        } catch (loadError) {
-
-            console.error(
-                'Failed to load categories:',
-                loadError
-            );
-
-
-            setCategories([]);
-
-        }
-
-    };
-
-
-    // =====================================================
-    // Initial Load
-    // =====================================================
-
     useEffect(() => {
 
-        loadProducts();
+        let cancelled =
+            false;
+
+
+        const loadCategories =
+            async () => {
+
+                try {
+
+                    const result =
+                        await getReportCategories();
+
+
+                    if (
+                        cancelled
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    setCategories(
+                        Array.isArray(
+                            result
+                        )
+                            ? result
+                            : []
+                    );
+
+                } catch (
+                    loadError
+                ) {
+
+                    console.error(
+                        'Failed to load report categories:',
+                        loadError
+                    );
+
+
+                    if (
+                        !cancelled
+                    ) {
+
+                        setCategories([]);
+
+                    }
+
+                }
+
+            };
+
+
         loadCategories();
+
+
+        return () => {
+
+            cancelled =
+                true;
+
+        };
 
     }, []);
 
 
     // =====================================================
-    // Refresh
+    // Load Report
     // =====================================================
 
-    const refreshData = async () => {
+    useEffect(() => {
 
-        await Promise.all([
-            loadProducts(),
-            loadCategories(),
-        ]);
+        let cancelled =
+            false;
 
 
-        setRefreshKey(
-            (current) =>
-                current + 1
-        );
+        const loadReport =
+            async () => {
 
-    };
+                try {
 
-
-    // =====================================================
-    // Add Product
-    // =====================================================
-
-    const handleOpenAdd = () => {
-
-        setError('');
-        setEditingProduct(null);
-        setSelectedProduct(null);
-        setShowDetails(false);
-        setShowForm(true);
-
-    };
-
-
-    // =====================================================
-    // Edit Product
-    // =====================================================
-
-    const handleEdit = (product) => {
-
-        if (!product) {
-            return;
-        }
-
-
-        setError('');
-        setSelectedProduct(null);
-        setShowDetails(false);
-        setEditingProduct(product);
-        setShowForm(true);
-
-    };
-
-
-    // =====================================================
-    // Close Product Form
-    // =====================================================
-
-    const handleCloseForm = () => {
-
-        setShowForm(false);
-        setEditingProduct(null);
-
-    };
-
-
-    // =====================================================
-    // Submit Product
-    // =====================================================
-
-    const handleSubmitProduct =
-        async (product) => {
-
-            try {
-
-                setError('');
-
-
-                if (editingProduct) {
-
-                    await updateProduct(
-                        editingProduct.id,
-                        product
+                    setLoading(
+                        true
                     );
 
-                } else {
+                    setError('');
 
-                    await addProduct(
-                        product
+
+                    const result =
+                        await getSalesReport({
+
+                            period,
+
+                            paymentType,
+
+                            category,
+
+                            search,
+
+                        });
+
+
+                    if (
+                        cancelled
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    setReportData(
+                        normalizeReportData(
+                            result
+                        )
                     );
+
+                } catch (
+                    loadError
+                ) {
+
+                    console.error(
+                        'Failed to load report:',
+                        loadError
+                    );
+
+
+                    if (
+                        !cancelled
+                    ) {
+
+                        setReportData(
+                            createDefaultReportData()
+                        );
+
+
+                        setError(
+                            t(
+                                'reports.errors.load'
+                            )
+                        );
+
+                    }
+
+                } finally {
+
+                    if (
+                        !cancelled
+                    ) {
+
+                        setLoading(
+                            false
+                        );
+
+                    }
 
                 }
 
-
-                await refreshData();
-
-
-                setShowForm(false);
-                setEditingProduct(null);
-
-            } catch (saveError) {
-
-                console.error(
-                    'Failed to save product:',
-                    saveError
-                );
+            };
 
 
-                setError(
-                    editingProduct
-                        ? t(
-                            'products.error.update'
-                        )
-                        : t(
-                            'products.error.add'
-                        )
-                );
+        loadReport();
 
 
-                throw saveError;
+        return () => {
+
+            cancelled =
+                true;
+
+        };
+
+    }, [
+        period,
+        paymentType,
+        category,
+        search,
+        t,
+    ]);
+
+
+    // =====================================================
+    // Menu Position Calculator
+    //
+    // Uses the button's bounding rect to place a fixed-
+    // position menu in the viewport. Escapes every ancestor
+    // with `overflow: hidden` because we render via Portal.
+    // =====================================================
+
+    const computeMenuPosition =
+        () => {
+
+            if (
+                !exportButtonRef.current
+            ) {
+
+                return {};
 
             }
+
+
+            const rect =
+                exportButtonRef.current
+                    .getBoundingClientRect();
+
+
+            const margin =
+                8;
+
+
+            const style = {
+
+                position:
+                    'fixed',
+
+                top:
+                    rect.bottom + margin,
+
+                zIndex:
+                    9999,
+
+            };
+
+
+            if (isEnglish) {
+
+                // LTR: align dropdown's right edge with button's right edge
+
+                style.right =
+                    Math.max(
+                        margin,
+                        window.innerWidth -
+                            rect.right
+                    );
+
+                style.left =
+                    'auto';
+
+            } else {
+
+                // RTL: align dropdown's left edge with button's left edge
+
+                style.left =
+                    Math.max(
+                        margin,
+                        rect.left
+                    );
+
+                style.right =
+                    'auto';
+
+            }
+
+
+            return style;
 
         };
 
 
     // =====================================================
-    // Request Delete
+    // Recompute Menu Position On Open / Resize / Scroll
     // =====================================================
 
-    const handleDelete = (product) => {
+    useLayoutEffect(() => {
 
-        if (!product) {
-            return;
+        if (!exportOpen) {
+
+            return undefined;
+
         }
 
 
-        setError('');
-        setShowDetails(false);
-        setSelectedProduct(null);
-        setProductToDelete(product);
+        setMenuStyle(
+            computeMenuPosition()
+        );
 
-    };
+
+        const handleReposition = () => {
+
+            setMenuStyle(
+                computeMenuPosition()
+            );
+
+        };
+
+
+        window.addEventListener(
+            'resize',
+            handleReposition
+        );
+
+
+        window.addEventListener(
+            'scroll',
+            handleReposition,
+            true
+        );
+
+
+        return () => {
+
+            window.removeEventListener(
+                'resize',
+                handleReposition
+            );
+
+
+            window.removeEventListener(
+                'scroll',
+                handleReposition,
+                true
+            );
+
+        };
+
+    }, [
+        exportOpen,
+        isEnglish,
+    ]);
 
 
     // =====================================================
-    // Cancel Delete
+    // Close On Outside Click
     // =====================================================
 
-    const handleCancelDelete = () => {
+    useEffect(() => {
 
-        if (deleting) {
-            return;
+        if (!exportOpen) {
+
+            return undefined;
+
         }
 
 
-        setProductToDelete(null);
+        const handleClickOutside = (
+            event
+        ) => {
 
-    };
+            if (
+                exportMenuRef.current &&
+                exportMenuRef.current.contains(
+                    event.target
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                exportButtonRef.current &&
+                exportButtonRef.current.contains(
+                    event.target
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            setExportOpen(
+                false
+            );
+
+        };
+
+
+        document.addEventListener(
+            'mousedown',
+            handleClickOutside
+        );
+
+
+        return () => {
+
+            document.removeEventListener(
+                'mousedown',
+                handleClickOutside
+            );
+
+        };
+
+    }, [
+        exportOpen,
+    ]);
 
 
     // =====================================================
-    // Confirm Delete
+    // Clear Filters
     // =====================================================
 
-    const handleConfirmDelete =
+    const handleClearFilters =
+        () => {
+
+            setSearch('');
+
+            setPeriod(
+                'week'
+            );
+
+            setPaymentType(
+                'all'
+            );
+
+            setCategory(
+                'all'
+            );
+
+        };
+
+
+    // =====================================================
+    // Open Export
+    // =====================================================
+
+    const handleExportClick =
+        () => {
+
+            setExportError('');
+
+            setExportOpen(
+                (
+                    current
+                ) =>
+                    !current
+            );
+
+        };
+
+
+    // =====================================================
+    // Export Excel
+    // =====================================================
+
+    const handleExportExcel =
         async () => {
 
             if (
-                !productToDelete ||
-                deleting
+                exporting
             ) {
 
                 return;
@@ -426,37 +789,62 @@ function Products() {
 
             try {
 
-                setDeleting(true);
-                setError('');
-
-
-                await deleteProduct(
-                    productToDelete.id
+                setExporting(
+                    true
                 );
 
+                setExportError('');
 
-                setProductToDelete(null);
+
+                exportReportToExcel({
+
+                    reportData,
+
+                    period,
+
+                    paymentType,
+
+                    category,
+
+                    search,
+
+                    language:
+                        i18n.language,
+
+                });
 
 
-                await refreshData();
+                setExportOpen(
+                    false
+                );
 
-            } catch (deleteError) {
+            } catch (
+                exportException
+            ) {
 
                 console.error(
-                    'Failed to delete product:',
-                    deleteError
+                    'Excel export failed:',
+                    exportException
                 );
 
 
-                setError(
+                setExportError(
                     t(
-                        'products.error.delete'
+                        'reports.errors.export',
+                        {
+                            defaultValue:
+                                isEnglish
+                                    ? 'Excel export failed.'
+                                    : 'خروجی اکسل ایجاد نشد.',
+                        }
                     )
                 );
 
             } finally {
 
-                setDeleting(false);
+                setExporting(
+                    false
+                );
 
             }
 
@@ -464,170 +852,396 @@ function Products() {
 
 
     // =====================================================
-    // View Details
+    // Export PDF
     // =====================================================
 
-    const handleViewDetails = (
-        product
-    ) => {
+    const handleExportPDF =
+        async () => {
 
-        if (!product) {
-            return;
-        }
+            if (
+                exporting
+            ) {
 
+                return;
 
-        setSelectedProduct(product);
-        setShowDetails(true);
-
-    };
+            }
 
 
-    // =====================================================
-    // Close Details
-    // =====================================================
+            try {
 
-    const handleCloseDetails = () => {
-
-        setShowDetails(false);
-        setSelectedProduct(null);
-
-    };
-
-
-    // =====================================================
-    // Clear Filters
-    // =====================================================
-
-    const handleClearFilters = () => {
-
-        setSearch('');
-        setCategory('all');
-        setStockStatus('all');
-
-    };
-
-
-    // =====================================================
-    // Filter Products
-    // =====================================================
-
-    const filteredProducts =
-        useMemo(
-            () => {
-
-                const query =
-                    search
-                        .trim()
-                        .toLowerCase();
-
-
-                return products.filter(
-                    (product) => {
-
-                        if (query) {
-
-                            const name =
-                                String(
-                                    product.name || ''
-                                ).toLowerCase();
-
-
-                            const productCategory =
-                                String(
-                                    product.category || ''
-                                ).toLowerCase();
-
-
-                            const description =
-                                String(
-                                    product.description || ''
-                                ).toLowerCase();
-
-
-                            const matchesSearch =
-                                name.includes(query) ||
-                                productCategory.includes(query) ||
-                                description.includes(query);
-
-
-                            if (!matchesSearch) {
-                                return false;
-                            }
-
-                        }
-
-
-                        if (
-                            category !== 'all' &&
-                            product.category !== category
-                        ) {
-
-                            return false;
-
-                        }
-
-
-                        const stock =
-                            Number(
-                                product.stock
-                            ) || 0;
-
-
-                        const minStock =
-                            Number(
-                                product.minStock
-                            ) || 0;
-
-
-                        if (
-                            stockStatus === 'available' &&
-                            (
-                                stock === 0 ||
-                                stock <= minStock
-                            )
-                        ) {
-
-                            return false;
-
-                        }
-
-
-                        if (
-                            stockStatus === 'low' &&
-                            (
-                                stock === 0 ||
-                                stock > minStock
-                            )
-                        ) {
-
-                            return false;
-
-                        }
-
-
-                        if (
-                            stockStatus === 'out' &&
-                            stock !== 0
-                        ) {
-
-                            return false;
-
-                        }
-
-
-                        return true;
-
-                    }
+                setExporting(
+                    true
                 );
 
-            },
-            [
-                products,
-                search,
-                category,
-                stockStatus,
-            ]
-        );
+                setExportError('');
+
+
+                await exportReportToPDF({
+
+                    reportData,
+
+                    period,
+
+                    paymentType,
+
+                    category,
+
+                    search,
+
+                    language:
+                        i18n.language,
+
+                });
+
+
+                setExportOpen(
+                    false
+                );
+
+            } catch (
+                exportException
+            ) {
+
+                console.error(
+                    'PDF export failed:',
+                    exportException
+                );
+
+
+                setExportError(
+                    t(
+                        'reports.errors.export',
+                        {
+                            defaultValue:
+                                isEnglish
+                                    ? 'PDF export failed.'
+                                    : 'خروجی PDF ایجاد نشد.',
+                        }
+                    )
+                );
+
+            } finally {
+
+                setExporting(
+                    false
+                );
+
+            }
+
+        };
+
+
+    // =====================================================
+    // Render Export Menu (Portal)
+    // =====================================================
+
+    const renderExportMenu =
+        () => {
+
+            if (!exportOpen) {
+
+                return null;
+
+            }
+
+
+            return createPortal(
+
+                <div
+                    ref={exportMenuRef}
+                    style={menuStyle}
+                    className={`
+                        w-64
+                        max-w-[calc(100vw-1rem)]
+                        sm:w-72
+
+                        overflow-hidden
+
+                        rounded-2xl
+
+                        border
+                        border-[var(--glass-border)]
+
+                        p-1.5
+
+                        shadow-2xl
+                        shadow-black/25
+
+                        backdrop-blur-xl
+                        backdrop-saturate-150
+                    `}
+                    data-export-menu="true"
+                >
+
+                    {/* Glass Background Layer */}
+
+                    <div
+                        aria-hidden="true"
+                        className="
+                            pointer-events-none
+                            absolute
+                            inset-0
+                        "
+                        style={{
+                            background: `
+                                linear-gradient(
+                                    135deg,
+                                    var(--glass-active-tint),
+                                    var(--glass-active-tint-soft) 70%,
+                                    transparent 100%
+                                ),
+                                var(--glass-bg-strong)
+                            `,
+                            backdropFilter:
+                                'blur(var(--glass-blur-strong)) saturate(220%) brightness(1.12)',
+                            WebkitBackdropFilter:
+                                'blur(var(--glass-blur-strong)) saturate(220%) brightness(1.12)',
+                        }}
+                    />
+
+
+                    <div
+                        className="
+                            relative
+                            z-10
+                        "
+                    >
+
+                        {/* Menu Header */}
+
+                        <div
+                            className="
+                                border-b
+                                border-[var(--border-subtle)]
+                                px-3
+                                py-3
+                            "
+                        >
+
+                            <p
+                                className="
+                                    text-sm
+                                    font-semibold
+                                    text-[var(--text)]
+                                "
+                            >
+                                {
+                                    t(
+                                        'reports.actions.export'
+                                    )
+                                }
+                            </p>
+
+
+                            <p
+                                className="
+                                    mt-1
+                                    text-[10px]
+                                    leading-5
+                                    text-[var(--text-muted)]
+                                "
+                            >
+                                {
+                                    isEnglish
+                                        ? 'Choose a format for the current report.'
+                                        : 'فرمت مناسب برای گزارش فعلی را انتخاب کنید.'
+                                }
+                            </p>
+
+                        </div>
+
+
+                        {/* Menu Items */}
+
+                        <div
+                            className="
+                                space-y-1
+                                p-1
+                            "
+                        >
+
+                            {/* Excel */}
+
+                            <button
+                                type="button"
+                                onClick={handleExportExcel}
+                                disabled={exporting}
+                                className="
+                                    flex
+                                    w-full
+                                    items-center
+                                    gap-3
+                                    rounded-xl
+                                    p-3
+                                    text-start
+                                    transition-all
+                                    duration-200
+                                    hover:bg-[var(--accent-soft)]
+                                    disabled:cursor-not-allowed
+                                    disabled:opacity-50
+                                "
+                            >
+
+                                <div
+                                    className="
+                                        flex
+                                        h-10
+                                        w-10
+                                        shrink-0
+                                        items-center
+                                        justify-center
+                                        rounded-xl
+                                        border
+                                        border-emerald-500/20
+                                        bg-emerald-500/10
+                                    "
+                                >
+
+                                    <FileSpreadsheet
+                                        size={18}
+                                        className="
+                                            text-emerald-500
+                                            dark:text-emerald-400
+                                        "
+                                    />
+
+                                </div>
+
+
+                                <div
+                                    className="
+                                        min-w-0
+                                        flex-1
+                                    "
+                                >
+
+                                    <p
+                                        className="
+                                            text-sm
+                                            font-semibold
+                                            text-[var(--text)]
+                                        "
+                                    >
+                                        Excel
+                                    </p>
+
+
+                                    <p
+                                        className="
+                                            mt-0.5
+                                            truncate
+                                            text-[10px]
+                                            text-[var(--text-muted)]
+                                        "
+                                    >
+                                        {
+                                            isEnglish
+                                                ? 'Editable report with detailed sales'
+                                                : 'گزارش قابل ویرایش با جزئیات فروش'
+                                        }
+                                    </p>
+
+                                </div>
+
+                            </button>
+
+
+                            {/* PDF */}
+
+                            <button
+                                type="button"
+                                onClick={handleExportPDF}
+                                disabled={exporting}
+                                className="
+                                    flex
+                                    w-full
+                                    items-center
+                                    gap-3
+                                    rounded-xl
+                                    p-3
+                                    text-start
+                                    transition-all
+                                    duration-200
+                                    hover:bg-[var(--accent-soft)]
+                                    disabled:cursor-not-allowed
+                                    disabled:opacity-50
+                                "
+                            >
+
+                                <div
+                                    className="
+                                        flex
+                                        h-10
+                                        w-10
+                                        shrink-0
+                                        items-center
+                                        justify-center
+                                        rounded-xl
+                                        border
+                                        border-rose-500/20
+                                        bg-rose-500/10
+                                    "
+                                >
+
+                                    <FileText
+                                        size={18}
+                                        className="
+                                            text-rose-500
+                                            dark:text-rose-400
+                                        "
+                                    />
+
+                                </div>
+
+
+                                <div
+                                    className="
+                                        min-w-0
+                                        flex-1
+                                    "
+                                >
+
+                                    <p
+                                        className="
+                                            text-sm
+                                            font-semibold
+                                            text-[var(--text)]
+                                        "
+                                    >
+                                        PDF
+                                    </p>
+
+
+                                    <p
+                                        className="
+                                            mt-0.5
+                                            truncate
+                                            text-[10px]
+                                            text-[var(--text-muted)]
+                                        "
+                                    >
+                                        {
+                                            isEnglish
+                                                ? 'Printable management report'
+                                                : 'گزارش مدیریتی مناسب چاپ'
+                                        }
+                                    </p>
+
+                                </div>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>,
+
+                document.body
+
+            );
+
+        };
 
 
     // =====================================================
@@ -637,10 +1251,14 @@ function Products() {
     return (
 
         <div
+            dir={
+                direction
+            }
+
             className="
                 min-h-full
                 space-y-5
-                pb-2
+                pb-6
                 text-[var(--text-secondary)]
             "
         >
@@ -652,14 +1270,11 @@ function Products() {
             <section
                 className="
                     relative
-                    overflow-hidden
 
                     rounded-2xl
 
                     border
                     border-[var(--border-subtle)]
-
-                    bg-[var(--surface)]
 
                     p-4
 
@@ -671,9 +1286,20 @@ function Products() {
                     sm:p-5
                     md:p-6
                 "
+                style={{
+                    background: `
+                        linear-gradient(
+                            135deg,
+                            var(--glass-active-tint),
+                            var(--glass-active-tint-soft) 70%,
+                            transparent 100%
+                        ),
+                        var(--surface)
+                    `,
+                }}
             >
 
-                {/* Accent glow */}
+                {/* Glow Wrapper — clips glows to rounded corners only */}
 
                 <div
                     aria-hidden="true"
@@ -681,45 +1307,52 @@ function Products() {
                         pointer-events-none
 
                         absolute
-                        -start-16
-                        -top-20
+                        inset-0
 
-                        h-48
-                        w-48
-
-                        rounded-full
-
-                        bg-emerald-500/[0.06]
-
-                        blur-3xl
-
-                        dark:bg-emerald-400/[0.055]
+                        overflow-hidden
+                        rounded-2xl
                     "
-                />
+                >
+
+                    <div
+                        className="
+                            absolute
+                            -start-20
+                            -top-20
+
+                            h-52
+                            w-52
+
+                            rounded-full
+
+                            bg-[var(--accent-soft-heavy)]
+
+                            blur-3xl
+                        "
+                    />
 
 
-                <div
-                    aria-hidden="true"
-                    className="
-                        pointer-events-none
+                    <div
+                        className="
+                            absolute
+                            -end-16
+                            -bottom-24
 
-                        absolute
-                        -end-16
-                        -bottom-24
+                            h-44
+                            w-44
 
-                        h-44
-                        w-44
+                            rounded-full
 
-                        rounded-full
+                            bg-[var(--accent-soft)]
 
-                        bg-cyan-500/[0.025]
+                            blur-3xl
+                        "
+                    />
 
-                        blur-3xl
+                </div>
 
-                        dark:bg-cyan-400/[0.035]
-                    "
-                />
 
+                {/* Header Content */}
 
                 <div
                     className="
@@ -734,6 +1367,8 @@ function Products() {
                         sm:justify-between
                     "
                 >
+
+                    {/* Title */}
 
                     <div
                         className="
@@ -756,18 +1391,17 @@ function Products() {
                                 rounded-xl
 
                                 border
-                                border-emerald-500/10
+                                border-[var(--accent-border)]
 
-                                bg-emerald-500/10
+                                bg-[var(--accent-soft)]
+
+                                text-[var(--accent-500)]
                             "
                         >
 
-                            <Package
+                            <BarChart3
                                 size={20}
-                                className="
-                                    text-emerald-500
-                                    dark:text-emerald-400
-                                "
+                                strokeWidth={1.9}
                             />
 
                         </div>
@@ -793,8 +1427,8 @@ function Products() {
                                         w-2
                                         shrink-0
                                         rounded-full
-                                        bg-emerald-500
-                                        shadow-[0_0_12px_rgba(16,185,129,0.35)]
+                                        bg-[var(--accent-500)]
+                                        shadow-[0_0_12px_var(--accent-glow)]
                                     "
                                 />
 
@@ -804,8 +1438,7 @@ function Products() {
                                         font-medium
                                         uppercase
                                         tracking-[0.12em]
-                                        text-emerald-600
-                                        dark:text-emerald-400
+                                        text-[var(--accent-600)]
                                     "
                                 >
                                     Taqwa
@@ -832,7 +1465,7 @@ function Products() {
                             >
                                 {
                                     t(
-                                        'products.pageTitle'
+                                        'reports.page.title'
                                     )
                                 }
                             </h1>
@@ -854,7 +1487,7 @@ function Products() {
                             >
                                 {
                                     t(
-                                        'products.pageDescription'
+                                        'reports.page.description'
                                     )
                                 }
                             </p>
@@ -864,31 +1497,85 @@ function Products() {
                     </div>
 
 
-                    <button
-                        type="button"
-                        onClick={handleOpenAdd}
-                        className="
-                            ui-button-primary
+                    {/* =================================================
+                        Export Button
+                        (Dropdown rendered via Portal)
+                    ================================================== */}
 
+                    <div
+                        ref={exportButtonRef}
+                        className="
+                            relative
                             w-full
                             sm:w-auto
-
-                            !bg-emerald-500
-                            hover:!bg-emerald-400
                         "
                     >
 
-                        <Plus
-                            size={17}
-                        />
+                        <button
+                            type="button"
+                            onClick={handleExportClick}
+                            disabled={
+                                loading ||
+                                exporting
+                            }
+                            aria-haspopup="menu"
+                            aria-expanded={exportOpen}
+                            className="
+                                ui-button-secondary
 
-                        {
-                            t(
-                                'products.addProduct'
-                            )
-                        }
+                                group
 
-                    </button>
+                                w-full
+                                sm:w-auto
+
+                                px-4
+
+                                text-xs
+                                font-medium
+                            "
+                        >
+
+                            {
+                                exporting
+                                    ? (
+                                        <Loader2
+                                            size={15}
+                                            className="
+                                                animate-spin
+                                            "
+                                        />
+                                    )
+                                    : (
+                                        <Download
+                                            size={15}
+                                        />
+                                    )
+                            }
+
+
+                            {
+                                exporting
+                                    ? (
+                                        t(
+                                            'reports.actions.exporting',
+                                            {
+                                                defaultValue:
+                                                    isEnglish
+                                                        ? 'Preparing...'
+                                                        : 'در حال آماده‌سازی...',
+                                            }
+                                        )
+                                    )
+                                    : (
+                                        t(
+                                            'reports.actions.export'
+                                        )
+                                    )
+                            }
+
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -896,65 +1583,70 @@ function Products() {
 
 
             {/* =================================================
-                Error
+                Export Menu (Portal renders into body)
             ================================================== */}
 
-            {error && (
-
-                <div
-                    role="alert"
-                    className="
-                        rounded-2xl
-
-                        border
-                        border-red-500/20
-
-                        bg-red-500/[0.06]
-
-                        px-4
-                        py-3
-
-                        text-xs
-                        leading-5
-
-                        text-[var(--danger)]
-
-                        sm:text-sm
-                    "
-                >
-                    {error}
-                </div>
-
-            )}
+            {renderExportMenu()}
 
 
             {/* =================================================
-                Statistics
+                Export Error
             ================================================== */}
 
-            <ProductStats
-                refreshKey={
-                    refreshKey
-                }
-            />
+            {
+                exportError && (
+
+                    <div
+                        role="alert"
+                        className="
+                            rounded-2xl
+
+                            border
+                            border-red-500/20
+
+                            bg-red-500/[0.06]
+
+                            px-4
+                            py-3
+
+                            text-xs
+                            leading-5
+
+                            text-red-500
+                            dark:text-red-400
+
+                            sm:text-sm
+                        "
+                    >
+                        {
+                            exportError
+                        }
+                    </div>
+
+                )
+            }
 
 
             {/* =================================================
                 Filters
             ================================================== */}
 
-            <ProductFilters
+            <ReportsFilters
 
                 search={
                     search
                 }
 
-                category={
-                    category
+                period={
+                    period
                 }
 
-                stockStatus={
-                    stockStatus
+                paymentType={
+                    paymentType
+                }
+
+                category={
+                    category
                 }
 
                 categories={
@@ -965,12 +1657,16 @@ function Products() {
                     setSearch
                 }
 
-                onCategoryChange={
-                    setCategory
+                onPeriodChange={
+                    setPeriod
                 }
 
-                onStockStatusChange={
-                    setStockStatus
+                onPaymentTypeChange={
+                    setPaymentType
+                }
+
+                onCategoryChange={
+                    setCategory
                 }
 
                 onClearFilters={
@@ -981,522 +1677,161 @@ function Products() {
 
 
             {/* =================================================
-                Table
+                Error
             ================================================== */}
 
-            <ProductTable
-
-                products={
-                    filteredProducts
-                }
-
-                loading={
-                    loading
-                }
-
-                onViewDetails={
-                    handleViewDetails
-                }
-
-                onEdit={
-                    handleEdit
-                }
-
-                onDelete={
-                    handleDelete
-                }
-
-            />
-
-
-            {/* =================================================
-                Product Form
-            ================================================== */}
-
-            {showForm && (
-
-                <ProductForm
-
-                    product={
-                        editingProduct
-                    }
-
-                    onClose={
-                        handleCloseForm
-                    }
-
-                    onSubmit={
-                        handleSubmitProduct
-                    }
-
-                />
-
-            )}
-
-
-            {/* =================================================
-                Product Details
-            ================================================== */}
-
-            {showDetails &&
-                selectedProduct && (
-
-                    <ProductDetails
-
-                        product={
-                            selectedProduct
-                        }
-
-                        onClose={
-                            handleCloseDetails
-                        }
-
-                        onEdit={
-                            handleEdit
-                        }
-
-                        onDelete={
-                            handleDelete
-                        }
-
-                    />
-
-                )}
-
-
-            {/* =================================================
-                Delete Modal
-            ================================================== */}
-
-            {productToDelete && (
-
-                <div
-                    className="
-                        fixed
-                        inset-0
-                        z-[60]
-
-                        flex
-                        items-center
-                        justify-center
-
-                        bg-slate-950/[0.45]
-
-                        p-3
-
-                        backdrop-blur-[20px]
-
-                        dark:bg-black/[0.58]
-
-                        sm:p-4
-                    "
-                >
+            {
+                error && (
 
                     <div
+                        role="alert"
                         className="
-                            w-full
-                            max-w-md
-
-                            max-h-[calc(100vh-1.5rem)]
-
-                            overflow-y-auto
-
                             rounded-2xl
 
                             border
-                            border-[var(--border)]
+                            border-red-500/20
 
-                            bg-[var(--surface)]
+                            bg-red-500/[0.06]
 
-                            shadow-2xl
+                            px-4
+                            py-3
 
-                            sm:max-h-[calc(100vh-2rem)]
+                            text-xs
+                            leading-5
+
+                            text-red-500
+                            dark:text-red-400
+
+                            sm:text-sm
                         "
                     >
-
-                        {/* Header */}
-
-                        <div
-                            className="
-                                flex
-                                items-center
-                                justify-between
-                                gap-3
-
-                                border-b
-                                border-[var(--border)]
-
-                                px-4
-                                py-4
-
-                                sm:px-5
-                            "
-                        >
-
-                            <div
-                                className="
-                                    flex
-                                    min-w-0
-                                    items-center
-                                    gap-3
-                                "
-                            >
-
-                                <div
-                                    className="
-                                        flex
-                                        h-10
-                                        w-10
-                                        shrink-0
-                                        items-center
-                                        justify-center
-
-                                        rounded-xl
-
-                                        border
-                                        border-rose-500/10
-
-                                        bg-rose-500/10
-                                    "
-                                >
-
-                                    <Trash2
-                                        size={18}
-                                        className="
-                                            text-rose-500
-                                        "
-                                    />
-
-                                </div>
-
-
-                                <div
-                                    className="
-                                        min-w-0
-                                    "
-                                >
-
-                                    <h2
-                                        className="
-                                            truncate
-                                            text-sm
-                                            font-semibold
-                                            text-[var(--text-primary)]
-                                        "
-                                    >
-                                        {
-                                            t(
-                                                'products.deleteModal.title'
-                                            )
-                                        }
-                                    </h2>
-
-
-                                    <p
-                                        className="
-                                            mt-1
-                                            text-[10px]
-                                            text-[var(--text-muted)]
-                                        "
-                                    >
-                                        {
-                                            t(
-                                                'products.deleteModal.subtitle'
-                                            )
-                                        }
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-
-                            <button
-                                type="button"
-                                onClick={
-                                    handleCancelDelete
-                                }
-                                disabled={
-                                    deleting
-                                }
-                                className="
-                                    ui-icon-button
-                                    shrink-0
-                                "
-                            >
-
-                                <X
-                                    size={17}
-                                />
-
-                            </button>
-
-                        </div>
-
-
-                        {/* Content */}
-
-                        <div
-                            className="
-                                p-4
-                                sm:p-5
-                            "
-                        >
-
-                            <div
-                                className="
-                                    rounded-xl
-
-                                    border
-                                    border-rose-500/15
-
-                                    bg-rose-500/5
-
-                                    p-4
-                                "
-                            >
-
-                                <div
-                                    className="
-                                        flex
-                                        items-start
-                                        gap-3
-                                    "
-                                >
-
-                                    <AlertTriangle
-                                        size={17}
-                                        className="
-                                            mt-0.5
-                                            shrink-0
-                                            text-rose-500
-                                            dark:text-rose-400
-                                        "
-                                    />
-
-
-                                    <div
-                                        className="
-                                            min-w-0
-                                        "
-                                    >
-
-                                        <p
-                                            className="
-                                                text-xs
-                                                font-semibold
-                                                text-[var(--text-primary)]
-                                            "
-                                        >
-                                            {
-                                                t(
-                                                    'products.deleteModal.question'
-                                                )
-                                            }
-                                        </p>
-
-
-                                        <p
-                                            className="
-                                                mt-2
-                                                text-[11px]
-                                                leading-6
-                                                text-[var(--text-muted)]
-                                            "
-                                        >
-
-                                            {
-                                                t(
-                                                    'products.deleteModal.messageBefore'
-                                                )
-                                            }
-
-
-                                            <span
-                                                className="
-                                                    mx-1
-                                                    font-semibold
-                                                    text-rose-500
-                                                    dark:text-rose-400
-                                                "
-                                            >
-                                                «
-                                                {
-                                                    productToDelete.name
-                                                }
-                                                »
-                                            </span>
-
-
-                                            {
-                                                t(
-                                                    'products.deleteModal.messageAfter'
-                                                )
-                                            }
-
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <p
-                                className="
-                                    mt-4
-                                    text-[10px]
-                                    leading-5
-                                    text-[var(--text-muted)]
-                                "
-                            >
-                                {
-                                    t(
-                                        'products.deleteModal.warning'
-                                    )
-                                }
-                            </p>
-
-                        </div>
-
-
-                        {/* Footer */}
-
-                        <div
-                            className="
-                                flex
-                                flex-col-reverse
-                                gap-3
-
-                                border-t
-                                border-[var(--border)]
-
-                                bg-[var(--surface-muted)]
-
-                                px-4
-                                py-4
-
-                                sm:flex-row
-                                sm:px-5
-                            "
-                        >
-
-                            <button
-                                type="button"
-                                onClick={
-                                    handleCancelDelete
-                                }
-                                disabled={
-                                    deleting
-                                }
-                                className="
-                                    ui-button-secondary
-                                    flex-1
-                                "
-                            >
-                                {
-                                    t(
-                                        'products.deleteModal.cancel'
-                                    )
-                                }
-                            </button>
-
-
-                            <button
-                                type="button"
-                                onClick={
-                                    handleConfirmDelete
-                                }
-                                disabled={
-                                    deleting
-                                }
-                                className="
-                                    flex
-                                    h-11
-                                    flex-1
-                                    items-center
-                                    justify-center
-                                    gap-2
-
-                                    rounded-xl
-
-                                    bg-rose-500
-
-                                    px-4
-
-                                    text-xs
-                                    font-semibold
-                                    text-white
-
-                                    shadow-lg
-                                    shadow-rose-500/10
-
-                                    transition-all
-                                    duration-200
-
-                                    hover:bg-rose-400
-
-                                    active:scale-[0.98]
-
-                                    disabled:cursor-not-allowed
-                                    disabled:opacity-50
-                                "
-                            >
-
-                                {deleting ? (
-
-                                    <>
-
-                                        <span
-                                            className="
-                                                h-4
-                                                w-4
-                                                rounded-full
-
-                                                border-2
-                                                border-white/30
-                                                border-t-white
-
-                                                animate-spin
-                                            "
-                                        />
-
-                                        {
-                                            t(
-                                                'products.deleteModal.deleting'
-                                            )
-                                        }
-
-                                    </>
-
-                                ) : (
-
-                                    <>
-
-                                        <Trash2
-                                            size={15}
-                                        />
-
-                                        {
-                                            t(
-                                                'products.deleteModal.delete'
-                                            )
-                                        }
-
-                                    </>
-
-                                )}
-
-                            </button>
-
-                        </div>
-
+                        {
+                            error
+                        }
                     </div>
 
-                </div>
+                )
+            }
 
-            )}
+
+            {/* =================================================
+                Loading / Report
+            ================================================== */}
+
+            {
+                loading
+
+                    ? (
+
+                        <div
+                            className="
+                                flex
+                                min-h-[400px]
+                                flex-col
+                                items-center
+                                justify-center
+                                gap-3
+                                text-[var(--text-muted)]
+                            "
+                        >
+
+                            <div
+                                className="
+                                    flex
+                                    h-14
+                                    w-14
+                                    items-center
+                                    justify-center
+
+                                    rounded-2xl
+
+                                    border
+                                    border-[var(--accent-border)]
+
+                                    bg-[var(--accent-soft)]
+                                "
+                            >
+
+                                <Loader2
+                                    size={26}
+                                    className="
+                                        animate-spin
+                                        text-[var(--accent-500)]
+                                    "
+                                />
+
+                            </div>
+
+
+                            <span
+                                className="
+                                    text-sm
+                                "
+                            >
+                                {
+                                    t(
+                                        'reports.loading'
+                                    )
+                                }
+                            </span>
+
+                        </div>
+
+                    )
+
+                    : (
+
+                        <>
+
+                            <ReportsStats
+                                statistics={
+                                    reportData.statistics
+                                }
+                            />
+
+
+                            <div
+                                className="
+                                    grid
+                                    grid-cols-1
+                                    gap-5
+                                    xl:grid-cols-2
+                                "
+                            >
+
+                                <SalesTrendChart
+                                    data={
+                                        reportData.salesTrend
+                                    }
+                                />
+
+
+                                <PaymentDistributionChart
+                                    data={
+                                        reportData.paymentDistribution
+                                    }
+                                />
+
+                            </div>
+
+
+                            <CategorySalesChart
+                                data={
+                                    reportData.categorySales
+                                }
+                            />
+
+
+                            <ReportsSummary
+                                summary={
+                                    reportData.summary
+                                }
+                            />
+
+                        </>
+
+                    )
+            }
 
         </div>
 
@@ -1505,4 +1840,4 @@ function Products() {
 }
 
 
-export default Products;
+export default Reports;

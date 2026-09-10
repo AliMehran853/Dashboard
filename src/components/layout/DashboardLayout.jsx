@@ -17,10 +17,7 @@ import Header
     from './Header';
 
 
-// =========================================================
-// Dashboard Layout
-// =========================================================
-
+// ==========================================
 function DashboardLayout() {
 
     const {
@@ -90,7 +87,7 @@ function DashboardLayout() {
         >
 
             {/* =================================================
-                Soft Background Layer
+                Rich Background Layer
             ================================================== */}
 
             <div
@@ -106,7 +103,142 @@ function DashboardLayout() {
                 "
             >
 
-                {/* Accent Glow */}
+                {/* Base solid black */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        hidden
+                        dark:block
+
+                        bg-black
+                    "
+                />
+
+
+                {/* =================================================
+                    Light — Extra darkening base
+                    Slightly darker than --page-bg so the vignette
+                    can pull the corners toward a deeper warm tone.
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        dark:hidden
+                    "
+                    style={{
+                        background: `
+                            linear-gradient(
+                                145deg,
+                                #ece4d6 0%,
+                                #e6ddcc 55%,
+                                #ddd2bc 100%
+                            )
+                        `,
+                    }}
+                />
+
+
+                {/* =================================================
+                    Grid — Light
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        dark:hidden
+                    "
+                    style={{
+                        backgroundImage: `
+                            linear-gradient(
+                                to right,
+                                rgba(var(--accent-rgb), 0.055) 1px,
+                                transparent 1px
+                            ),
+                            linear-gradient(
+                                to bottom,
+                                rgba(var(--accent-rgb), 0.055) 1px,
+                                transparent 1px
+                            )
+                        `,
+                        backgroundSize:
+                            '24px 24px',
+                    }}
+                />
+
+
+                {/* =================================================
+                    Grid — Dark (main)
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        hidden
+                        dark:block
+                    "
+                    style={{
+                        backgroundImage: `
+                            linear-gradient(
+                                to right,
+                                rgba(var(--accent-rgb), 0.06) 1px,
+                                transparent 1px
+                            ),
+                            linear-gradient(
+                                to bottom,
+                                rgba(var(--accent-rgb), 0.06) 1px,
+                                transparent 1px
+                            )
+                        `,
+                        backgroundSize:
+                            '24px 24px',
+                    }}
+                />
+
+
+                {/* =================================================
+                    Grid — Dark (fine overlay)
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        hidden
+                        dark:block
+                    "
+                    style={{
+                        backgroundImage: `
+                            linear-gradient(
+                                to right,
+                                rgba(var(--accent-rgb), 0.024) 1px,
+                                transparent 1px
+                            ),
+                            linear-gradient(
+                                to bottom,
+                                rgba(var(--accent-rgb), 0.024) 1px,
+                                transparent 1px
+                            )
+                        `,
+                        backgroundSize:
+                            '6px 6px',
+                    }}
+                />
+
+
+                {/* =================================================
+                    Accent Orb — Top Left
+                ================================================== */}
 
                 <div
                     className="
@@ -115,39 +247,346 @@ function DashboardLayout() {
                         -top-40
                         -start-40
 
-                        h-80
-                        w-80
+                        h-[30rem]
+                        w-[30rem]
 
                         rounded-full
 
-                        bg-[var(--accent-soft)]
+                        blur-[140px]
 
-                        blur-[100px]
-
-                        opacity-60
+                        opacity-30
+                        dark:opacity-45
                     "
+                    style={{
+                        background: `
+                            rgba(var(--accent-rgb), 0.40)
+                        `,
+                    }}
                 />
 
 
-                {/* Secondary Glow */}
+                {/* =================================================
+                    Accent Orb — Top Right
+                ================================================== */}
 
                 <div
                     className="
                         absolute
 
-                        -bottom-48
+                        -top-48
                         -end-40
 
-                        h-96
-                        w-96
+                        h-[34rem]
+                        w-[34rem]
 
                         rounded-full
 
-                        bg-indigo-500/[0.035]
+                        blur-[160px]
 
-                        blur-[110px]
+                        opacity-18
+                        dark:opacity-30
+                    "
+                    style={{
+                        background: `
+                            rgba(var(--accent-rgb), 0.35)
+                        `,
+                    }}
+                />
 
-                        dark:bg-indigo-400/[0.045]
+
+                {/* =================================================
+                    Accent Orb — Bottom Left
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+
+                        -bottom-44
+                        -start-36
+
+                        h-[30rem]
+                        w-[30rem]
+
+                        rounded-full
+
+                        blur-[150px]
+
+                        opacity-15
+                        dark:opacity-25
+                    "
+                    style={{
+                        background: `
+                            rgba(var(--accent-rgb), 0.32)
+                        `,
+                    }}
+                />
+
+
+                {/* =================================================
+                    Accent Orb — Bottom Right
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+
+                        -bottom-52
+                        -end-44
+
+                        h-[34rem]
+                        w-[34rem]
+
+                        rounded-full
+
+                        blur-[160px]
+
+                        opacity-22
+                        dark:opacity-38
+                    "
+                    style={{
+                        background: `
+                            rgba(var(--accent-rgb), 0.40)
+                        `,
+                    }}
+                />
+
+
+                {/* =================================================
+                    Accent Halo — Center base glow (very subtle)
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+
+                        top-1/2
+                        left-1/2
+
+                        -translate-x-1/2
+                        -translate-y-1/2
+
+                        h-[40rem]
+                        w-[40rem]
+
+                        rounded-full
+
+                        blur-[200px]
+
+                        opacity-10
+                        dark:opacity-18
+                    "
+                    style={{
+                        background: `
+                            rgba(var(--accent-rgb), 0.28)
+                        `,
+                    }}
+                />
+
+
+                {/* =================================================
+                    Accent Aura — Corner washes (light only)
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        opacity-80
+                        dark:hidden
+                    "
+                    style={{
+                        background: `
+                            radial-gradient(
+                                circle at 0% 0%,
+                                rgba(var(--accent-rgb), 0.10),
+                                transparent 38%
+                            ),
+                            radial-gradient(
+                                circle at 100% 100%,
+                                rgba(var(--accent-rgb), 0.14),
+                                transparent 42%
+                            )
+                        `,
+                    }}
+                />
+
+
+                {/* =================================================
+                    Light Vignette — Dark corners
+                    Radial gradient that keeps the center bright
+                    and pulls every corner toward a warm dark tone.
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        dark:hidden
+                    "
+                    style={{
+                        background: `
+                            radial-gradient(
+                                ellipse 70% 70% at 50% 50%,
+                                transparent 0%,
+                                rgba(60, 40, 20, 0.10) 35%,
+                                rgba(45, 30, 12, 0.22) 65%,
+                                rgba(30, 20, 8, 0.40) 88%,
+                                rgba(20, 12, 4, 0.55) 100%
+                            )
+                        `,
+                    }}
+                />
+
+
+                {/* =================================================
+                    Light — Edge darkening (top / bottom)
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        dark:hidden
+                    "
+                    style={{
+                        background: `
+                            linear-gradient(
+                                180deg,
+                                rgba(45, 30, 12, 0.18) 0%,
+                                transparent 22%,
+                                transparent 78%,
+                                rgba(45, 30, 12, 0.18) 100%
+                            )
+                        `,
+                    }}
+                />
+
+
+                {/* =================================================
+                    Light — Edge darkening (left / right)
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        dark:hidden
+                    "
+                    style={{
+                        background: `
+                            linear-gradient(
+                                90deg,
+                                rgba(45, 30, 12, 0.16) 0%,
+                                transparent 20%,
+                                transparent 80%,
+                                rgba(45, 30, 12, 0.16) 100%
+                            )
+                        `,
+                    }}
+                />
+
+
+                {/* =================================================
+                    Heavy Vignette — Dark
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        hidden
+                        dark:block
+                    "
+                    style={{
+                        background: `
+                            radial-gradient(
+                                ellipse 70% 70% at 50% 50%,
+                                transparent 0%,
+                                rgba(0, 0, 0, 0.40) 30%,
+                                rgba(0, 0, 0, 0.78) 60%,
+                                rgba(0, 0, 0, 0.96) 85%,
+                                #000000 100%
+                            )
+                        `,
+                    }}
+                />
+
+
+                {/* =================================================
+                    Top & Bottom Depth Fade — Dark
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        hidden
+                        dark:block
+                    "
+                    style={{
+                        background: `
+                            linear-gradient(
+                                180deg,
+                                rgba(0, 0, 0, 0.75) 0%,
+                                rgba(0, 0, 0, 0.25) 8%,
+                                transparent 22%,
+                                transparent 78%,
+                                rgba(0, 0, 0, 0.25) 92%,
+                                rgba(0, 0, 0, 0.75) 100%
+                            )
+                        `,
+                    }}
+                />
+
+
+                {/* =================================================
+                    Side Edge Darkening — Dark
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        hidden
+                        dark:block
+                    "
+                    style={{
+                        background: `
+                            linear-gradient(
+                                90deg,
+                                rgba(0, 0, 0, 0.65) 0%,
+                                rgba(0, 0, 0, 0.20) 8%,
+                                transparent 20%,
+                                transparent 80%,
+                                rgba(0, 0, 0, 0.20) 92%,
+                                rgba(0, 0, 0, 0.65) 100%
+                            )
+                        `,
+                    }}
+                />
+
+
+                {/* =================================================
+                    Final darkening pass — Dark
+                ================================================== */}
+
+                <div
+                    className="
+                        absolute
+                        inset-0
+
+                        hidden
+                        dark:block
+
+                        bg-black/35
                     "
                 />
 

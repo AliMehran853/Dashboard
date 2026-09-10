@@ -401,17 +401,6 @@ function AppearanceSettings() {
 
                 <div
                     className="
-                        absolute
-                        inset-x-0
-                        top-0
-                        h-px
-                        bg-violet-500/45
-                    "
-                />
-
-
-                <div
-                    className="
                         flex
                         h-10
                         w-10

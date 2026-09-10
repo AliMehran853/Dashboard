@@ -196,15 +196,11 @@ function ShoppingListStats({
             icon:
                 ShoppingCart,
 
-            accent:
-                'emerald',
-
             iconClass:
                 'text-emerald-500 dark:text-emerald-400',
 
             iconBg:
                 'border-emerald-500/10 bg-emerald-500/10',
-
         },
 
 
@@ -229,15 +225,11 @@ function ShoppingListStats({
             icon:
                 Clock3,
 
-            accent:
-                'amber',
-
             iconClass:
                 'text-amber-500 dark:text-amber-400',
 
             iconBg:
                 'border-amber-500/10 bg-amber-500/10',
-
         },
 
 
@@ -262,15 +254,11 @@ function ShoppingListStats({
             icon:
                 CheckCircle2,
 
-            accent:
-                'sky',
-
             iconClass:
                 'text-sky-500 dark:text-sky-400',
 
             iconBg:
                 'border-sky-500/10 bg-sky-500/10',
-
         },
 
     ];
@@ -319,47 +307,67 @@ function ShoppingListStats({
                                     rounded-2xl
                                     border
                                     border-[var(--border)]
-                                    bg-[var(--surface)]
                                     p-4
-                                    shadow-sm
+                                    sm:p-5
+                                    shadow-[var(--shadow-card)]
                                     transition-all
                                     duration-300
+                                    ease-[var(--ease-out)]
                                     hover:-translate-y-0.5
-                                    hover:shadow-lg
-                                    dark:hover:shadow-black/20
-                                    sm:p-5
+                                    hover:border-[var(--glass-border-hover)]
+                                    hover:shadow-[var(--shadow-card-hover)]
                                 "
+                                style={{
+                                    background: `
+                                        linear-gradient(
+                                            135deg,
+                                            var(--glass-active-tint),
+                                            var(--glass-active-tint-soft) 70%,
+                                            transparent 100%
+                                        ),
+                                        var(--surface)
+                                    `,
+                                }}
                             >
 
-                                {/* Accent */}
+                                {/* =================================================
+                                    Hover Tint Overlay
+                                    Fades in on hover, follows accent color.
+                                ================================================== */}
 
                                 <div
-                                    className={`
+                                    aria-hidden="true"
+                                    className="
+                                        pointer-events-none
                                         absolute
-                                        inset-x-0
-                                        top-0
-                                        h-px
-                                        opacity-50
+                                        inset-0
+                                        rounded-2xl
+                                        opacity-0
                                         transition-opacity
                                         duration-300
+                                        ease-[var(--ease-out)]
                                         group-hover:opacity-100
-                                        ${
-                                            stat.accent ===
-                                                'emerald'
-                                                ? 'bg-emerald-500'
-                                                : stat.accent ===
-                                                    'amber'
-                                                    ? 'bg-amber-500'
-                                                    : 'bg-sky-500'
-                                        }
-                                    `}
+                                    "
+                                    style={{
+                                        background: `
+                                            linear-gradient(
+                                                135deg,
+                                                var(--glass-hover-tint),
+                                                var(--glass-hover-tint-soft) 70%,
+                                                transparent 100%
+                                            )
+                                        `,
+                                    }}
                                 />
 
 
-                                {/* Glow */}
+                                {/* =================================================
+                                    Hover Background Glow (accent-driven)
+                                ================================================== */}
 
                                 <div
-                                    className={`
+                                    aria-hidden="true"
+                                    className="
                                         pointer-events-none
                                         absolute
                                         -end-10
@@ -372,16 +380,36 @@ function ShoppingListStats({
                                         transition-opacity
                                         duration-500
                                         group-hover:opacity-100
-                                        ${
-                                            stat.accent ===
-                                                'emerald'
-                                                ? 'bg-emerald-500/10'
-                                                : stat.accent ===
-                                                    'amber'
-                                                    ? 'bg-amber-500/10'
-                                                    : 'bg-sky-500/10'
-                                        }
-                                    `}
+                                    "
+                                    style={{
+                                        background: `
+                                            radial-gradient(
+                                                circle,
+                                                var(--accent-soft-heavy),
+                                                transparent 70%
+                                            )
+                                        `,
+                                    }}
+                                />
+
+
+                                {/* =================================================
+                                    Accent Top Line (accent-driven)
+                                ================================================== */}
+
+                                <div
+                                    aria-hidden="true"
+                                    className="
+                                        absolute
+                                        inset-x-0
+                                        top-0
+                                        h-px
+                                        bg-[var(--accent-500)]
+                                        opacity-40
+                                        transition-opacity
+                                        duration-300
+                                        group-hover:opacity-80
+                                    "
                                 />
 
 
@@ -444,6 +472,8 @@ function ShoppingListStats({
                                     </div>
 
 
+                                    {/* Icon (per-tone, for identity) */}
+
                                     <div
                                         className={`
                                             flex
@@ -475,6 +505,10 @@ function ShoppingListStats({
                                 </div>
 
 
+                                {/* =================================================
+                                    Bottom Indicator (accent-driven)
+                                ================================================== */}
+
                                 <div
                                     className="
                                         relative
@@ -488,23 +522,17 @@ function ShoppingListStats({
                                 >
 
                                     <div
-                                        className={`
+                                        className="
                                             h-full
                                             w-8
                                             rounded-full
+                                            bg-[var(--accent-500)]
+                                            opacity-60
                                             transition-all
                                             duration-500
                                             group-hover:w-14
-                                            ${
-                                                stat.accent ===
-                                                    'emerald'
-                                                    ? 'bg-emerald-500'
-                                                    : stat.accent ===
-                                                        'amber'
-                                                        ? 'bg-amber-500'
-                                                        : 'bg-sky-500'
-                                            }
-                                        `}
+                                            group-hover:opacity-100
+                                        "
                                     />
 
                                 </div>
