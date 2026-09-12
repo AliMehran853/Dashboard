@@ -9,6 +9,31 @@
 
 
 /* =========================================================
+   GLOBAL BORDER RADIUS OVERRIDE
+========================================================= */
+
+.rounded-sm,
+.rounded,
+.rounded-md,
+.rounded-lg,
+.rounded-xl,
+.rounded-2xl,
+.rounded-3xl,
+[class*="rounded-t-"],
+[class*="rounded-b-"],
+[class*="rounded-s-"],
+[class*="rounded-e-"],
+[class*="rounded-l-"],
+[class*="rounded-r-"],
+[class*="rounded-tl-"],
+[class*="rounded-tr-"],
+[class*="rounded-bl-"],
+[class*="rounded-br-"] {
+    border-radius: 0.625rem !important;
+}
+
+
+/* =========================================================
    FONT — PERSIAN / VAZIRMATN
 ========================================================= */
 
@@ -134,14 +159,12 @@
 
 /* =========================================================
    DESIGN TOKENS
-   Default = Emerald  |  Theme = Obsidian Glass
-   Tint intensity reduced for a softer / more subtle look.
 ========================================================= */
 
 :root {
 
     /* =====================================================
-       Accent
+       Accent — default emerald
     ===================================================== */
 
     --accent-50: #ecfdf5;
@@ -184,123 +207,163 @@
 
 
     /* =====================================================
-       Aurora Orbs
-    ===================================================== */
-
-    --orb-1:
-        rgba(16, 185, 129, 0.55);
-    --orb-2:
-        rgba(139, 92, 246, 0.48);
-    --orb-3:
-        rgba(244, 63, 94, 0.42);
-    --orb-4:
-        rgba(6, 182, 212, 0.48);
-
-
-    /* =====================================================
-       Page — Light (Warm Pearl)
+       Page — Light (PURE WHITE canvas)
     ===================================================== */
 
     --page-bg:
-        #f5f1ea;
+        #ffffff;
 
     --page-bg-soft:
-        #fbf8f4;
+        #ffffff;
 
     --page-bg-end:
-        #ece6dc;
+        #ffffff;
 
 
     /* =====================================================
-       Surface — Light
+       Surface — Light (SOLID GRAY cards on white)
     ===================================================== */
 
     --surface:
-        rgba(255, 255, 255, 0.55);
+        #ececec;
 
     --surface-hover:
-        rgba(255, 255, 255, 0.72);
+        #e3e3e3;
 
     --surface-solid:
-        #ffffff;
+        #ececec;
 
     --surface-soft:
-        #f8f4ee;
+        #e2e2e2;
 
     --surface-muted:
-        #efe9e0;
+        #d6d6d6;
 
     --surface-elevated:
-        rgba(255, 255, 255, 0.72);
+        #ececec;
 
     --surface-strong:
-        rgba(255, 255, 255, 0.88);
+        #e6e6e6;
 
 
     /* =====================================================
-       Glass — Light
+       Surface Gradient — Light = NONE
+    ===================================================== */
+
+    --surface-gradient:
+        none;
+
+
+    /* =====================================================
+       Glass — Light (solid, no gradient)
     ===================================================== */
 
     --glass-bg:
-        rgba(255, 253, 250, 0.62);
+        #ececec;
 
     --glass-bg-hover:
-        rgba(255, 253, 250, 0.78);
+        #e3e3e3;
 
     --glass-bg-strong:
-        rgba(255, 253, 250, 0.85);
+        #e8e8e8;
+
+    --glass-gradient:
+        none;
 
     --glass-border:
-        rgba(var(--accent-rgb), 0.20);
+        rgba(var(--accent-rgb), 0.38);
 
     --glass-border-hover:
-        rgba(var(--accent-rgb), 0.36);
+        rgba(var(--accent-rgb), 0.60);
 
     --glass-border-soft:
-        rgba(var(--accent-rgb), 0.12);
+        rgba(var(--accent-rgb), 0.20);
 
     --glass-highlight:
-        rgba(255, 255, 255, 1);
+        rgba(255, 255, 255, 0.85);
 
     --glass-inner-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 1),
-        inset 0 -1px 0 rgba(120, 113, 108, 0.10);
+        inset 0 -1px 0 rgba(0, 0, 0, 0.06);
 
-    /* Radial wash tints — light */
     --glass-active-tint:
-        rgba(var(--accent-rgb), 0.052);
+        rgba(255, 255, 255, 0);
 
     --glass-active-tint-soft:
-        rgba(var(--accent-rgb), 0.022);
+        rgba(255, 255, 255, 0);
 
     --glass-hover-tint:
-        rgba(var(--accent-rgb), 0.108);
+        rgba(0, 0, 0, 0.05);
 
     --glass-hover-tint-soft:
-        rgba(var(--accent-rgb), 0.048);
+        rgba(0, 0, 0, 0.02);
 
     --glass-blur:
-        40px;
+        30px;
 
     --glass-blur-strong:
-        60px;
+        46px;
 
 
     /* =====================================================
-       Border — Light
+       NAV — Light theme → solid, matched with cards (#ececec)
+    ===================================================== */
+
+    --nav-bg:
+        #ececec;
+
+    --nav-bg-hover:
+        #e3e3e3;
+
+    --nav-gradient:
+        none;
+
+    --nav-border:
+        rgba(0, 0, 0, 0.06);
+
+    --nav-highlight:
+        rgba(255, 255, 255, 0.85);
+
+    --nav-surface:
+        rgba(0, 0, 0, 0.04);
+
+    --nav-surface-hover:
+        rgba(0, 0, 0, 0.08);
+
+    --nav-surface-muted:
+        rgba(0, 0, 0, 0.025);
+
+    --nav-text:
+        #0a0a0a;
+
+    --nav-text-secondary:
+        #262626;
+
+    --nav-text-muted:
+        #525252;
+
+    --nav-text-soft:
+        #737373;
+
+    --nav-text-faint:
+        #a3a3a3;
+
+
+    /* =====================================================
+       Border — Light (accent-derived)
     ===================================================== */
 
     --border-subtle:
-        rgba(var(--accent-rgb), 0.10);
+        rgba(var(--accent-rgb), 0.20);
 
     --border:
-        rgba(var(--accent-rgb), 0.18);
+        rgba(var(--accent-rgb), 0.38);
 
     --border-hover:
-        rgba(var(--accent-rgb), 0.30);
+        rgba(var(--accent-rgb), 0.55);
 
     --border-strong:
-        rgba(var(--accent-rgb), 0.44);
+        rgba(var(--accent-rgb), 0.70);
 
 
     /* =====================================================
@@ -311,16 +374,16 @@
         #0a0908;
 
     --text-secondary:
-        #292524;
+        #1f1f1f;
 
     --text-muted:
-        #57534e;
+        #525252;
 
     --text-soft:
-        #a8a29e;
+        #737373;
 
     --text-faint:
-        #d6d3d1;
+        #a3a3a3;
 
 
     /* =====================================================
@@ -328,39 +391,39 @@
     ===================================================== */
 
     --shadow-xs:
-        0 1px 2px rgba(28, 25, 23, 0.05);
+        0 1px 2px rgba(0, 0, 0, 0.06);
 
     --shadow-sm:
-        0 4px 14px rgba(28, 25, 23, 0.07),
-        0 1px 2px rgba(28, 25, 23, 0.04);
+        0 1px 3px rgba(0, 0, 0, 0.08),
+        0 1px 2px rgba(0, 0, 0, 0.05);
 
     --shadow-card:
-        0 14px 38px rgba(28, 25, 23, 0.12),
-        0 3px 8px rgba(28, 25, 23, 0.06);
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        0 1px 2px rgba(0, 0, 0, 0.05);
 
     --shadow-card-hover:
-        0 22px 52px rgba(28, 25, 23, 0.16),
-        0 5px 12px rgba(28, 25, 23, 0.08);
+        0 4px 14px rgba(0, 0, 0, 0.10),
+        0 2px 4px rgba(0, 0, 0, 0.06);
 
     --shadow-md:
-        0 18px 44px rgba(28, 25, 23, 0.13),
-        0 4px 10px rgba(28, 25, 23, 0.06);
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        0 1px 2px rgba(0, 0, 0, 0.05);
 
     --shadow-lg:
-        0 28px 62px rgba(28, 25, 23, 0.17),
-        0 6px 16px rgba(28, 25, 23, 0.08);
+        0 4px 14px rgba(0, 0, 0, 0.10),
+        0 2px 4px rgba(0, 0, 0, 0.06);
 
     --shadow-xl:
-        0 38px 88px rgba(28, 25, 23, 0.22),
-        0 10px 26px rgba(28, 25, 23, 0.10);
+        0 6px 20px rgba(0, 0, 0, 0.12),
+        0 2px 6px rgba(0, 0, 0, 0.08);
 
     --shadow-accent:
         0 0 0 1px var(--accent-border),
-        0 14px 38px var(--accent-glow);
+        0 4px 16px var(--accent-glow);
 
     --shadow-accent-strong:
         0 0 0 1px var(--accent-border-hover),
-        0 18px 52px var(--accent-glow-strong);
+        0 6px 20px var(--accent-glow-strong);
 
 
     /* =====================================================
@@ -368,16 +431,16 @@
     ===================================================== */
 
     --input-bg:
-        rgba(255, 253, 250, 0.72);
+        #ffffff;
 
     --input-bg-focus:
-        rgba(255, 253, 250, 0.95);
+        #ffffff;
 
     --input-border:
-        rgba(var(--accent-rgb), 0.22);
+        rgba(var(--accent-rgb), 0.32);
 
     --input-border-hover:
-        rgba(var(--accent-rgb), 0.38);
+        rgba(var(--accent-rgb), 0.50);
 
     --input-border-focus:
         var(--accent-border-hover);
@@ -397,13 +460,13 @@
         var(--accent-700);
 
     --button-secondary-bg:
-        rgba(255, 253, 250, 0.68);
+        #ffffff;
 
     --button-secondary-hover:
-        rgba(255, 253, 250, 0.92);
+        #f5f5f5;
 
     --button-secondary-border:
-        rgba(var(--accent-rgb), 0.20);
+        rgba(var(--accent-rgb), 0.30);
 
 
     /* =====================================================
@@ -411,13 +474,13 @@
     ===================================================== */
 
     --success: #10b981;
-    --success-soft: rgba(16, 185, 129, 0.10);
+    --success-soft: rgba(16, 185, 129, 0.12);
     --warning: #f59e0b;
-    --warning-soft: rgba(245, 158, 11, 0.10);
+    --warning-soft: rgba(245, 158, 11, 0.12);
     --danger: #ef4444;
-    --danger-soft: rgba(239, 68, 68, 0.10);
+    --danger-soft: rgba(239, 68, 68, 0.12);
     --info: #3b82f6;
-    --info-soft: rgba(59, 130, 246, 0.10);
+    --info-soft: rgba(59, 130, 246, 0.12);
 
 
     /* =====================================================
@@ -425,11 +488,11 @@
     ===================================================== */
 
     --radius-sm: 0.625rem;
-    --radius-md: 0.875rem;
-    --radius-lg: 1rem;
-    --radius-xl: 1.25rem;
-    --radius-2xl: 1.5rem;
-    --radius-3xl: 1.75rem;
+    --radius-md: 0.625rem;
+    --radius-lg: 0.625rem;
+    --radius-xl: 0.625rem;
+    --radius-2xl: 0.625rem;
+    --radius-3xl: 0.625rem;
 
 
     /* =====================================================
@@ -473,7 +536,7 @@
 
 
 /* =========================================================
-   ACCENT — EMERALD
+   ACCENT — EMERALD (default)
 ========================================================= */
 
 :root[data-accent="emerald"] {
@@ -498,7 +561,6 @@
     --accent-border-strong: rgba(16, 185, 129, 0.75);
     --accent-glow: rgba(16, 185, 129, 0.22);
     --accent-glow-strong: rgba(16, 185, 129, 0.38);
-    --orb-1: rgba(16, 185, 129, 0.55);
 }
 
 
@@ -528,7 +590,6 @@
     --accent-border-strong: rgba(59, 130, 246, 0.75);
     --accent-glow: rgba(59, 130, 246, 0.22);
     --accent-glow-strong: rgba(59, 130, 246, 0.38);
-    --orb-1: rgba(59, 130, 246, 0.58);
 }
 
 
@@ -558,7 +619,6 @@
     --accent-border-strong: rgba(139, 92, 246, 0.75);
     --accent-glow: rgba(139, 92, 246, 0.22);
     --accent-glow-strong: rgba(139, 92, 246, 0.38);
-    --orb-1: rgba(139, 92, 246, 0.58);
 }
 
 
@@ -588,7 +648,6 @@
     --accent-border-strong: rgba(245, 158, 11, 0.75);
     --accent-glow: rgba(245, 158, 11, 0.22);
     --accent-glow-strong: rgba(245, 158, 11, 0.38);
-    --orb-1: rgba(245, 158, 11, 0.55);
 }
 
 
@@ -618,7 +677,6 @@
     --accent-border-strong: rgba(239, 68, 68, 0.75);
     --accent-glow: rgba(239, 68, 68, 0.24);
     --accent-glow-strong: rgba(239, 68, 68, 0.42);
-    --orb-1: rgba(239, 68, 68, 0.58);
 }
 
 
@@ -648,66 +706,229 @@
     --accent-border-strong: rgba(244, 63, 94, 0.75);
     --accent-glow: rgba(244, 63, 94, 0.22);
     --accent-glow-strong: rgba(244, 63, 94, 0.38);
-    --orb-1: rgba(244, 63, 94, 0.55);
 }
 
 
 /* =========================================================
-   DARK MODE — TRUE OBSIDIAN BLACK
-   Tint intensity softened for a subtler glass look.
+   ACCENT — CYAN ⭐ (جدید)
+========================================================= */
+
+:root[data-accent="cyan"] {
+    --accent-50: #ecfeff;
+    --accent-100: #cffafe;
+    --accent-200: #a5f3fc;
+    --accent-300: #67e8f9;
+    --accent-400: #22d3ee;
+    --accent-500: #06b6d4;
+    --accent-600: #0891b2;
+    --accent-700: #0e7490;
+    --accent-800: #155e75;
+    --accent-900: #164e63;
+
+    --accent-rgb: 6, 182, 212;
+
+    --accent-soft: rgba(6, 182, 212, 0.09);
+    --accent-soft-strong: rgba(6, 182, 212, 0.16);
+    --accent-soft-heavy: rgba(6, 182, 212, 0.24);
+    --accent-border: rgba(6, 182, 212, 0.32);
+    --accent-border-hover: rgba(6, 182, 212, 0.55);
+    --accent-border-strong: rgba(6, 182, 212, 0.75);
+    --accent-glow: rgba(6, 182, 212, 0.22);
+    --accent-glow-strong: rgba(6, 182, 212, 0.38);
+}
+
+
+/* =========================================================
+   ACCENT — TEAL
+========================================================= */
+
+:root[data-accent="teal"] {
+    --accent-50: #f0fdfa;
+    --accent-100: #ccfbf1;
+    --accent-200: #99f6e4;
+    --accent-300: #5eead4;
+    --accent-400: #2dd4bf;
+    --accent-500: #14b8a6;
+    --accent-600: #0d9488;
+    --accent-700: #0f766e;
+    --accent-800: #115e59;
+    --accent-900: #134e4a;
+
+    --accent-rgb: 20, 184, 166;
+
+    --accent-soft: rgba(20, 184, 166, 0.09);
+    --accent-soft-strong: rgba(20, 184, 166, 0.16);
+    --accent-soft-heavy: rgba(20, 184, 166, 0.24);
+    --accent-border: rgba(20, 184, 166, 0.32);
+    --accent-border-hover: rgba(20, 184, 166, 0.55);
+    --accent-border-strong: rgba(20, 184, 166, 0.75);
+    --accent-glow: rgba(20, 184, 166, 0.22);
+    --accent-glow-strong: rgba(20, 184, 166, 0.38);
+}
+
+
+/* =========================================================
+   ACCENT — ORANGE
+========================================================= */
+
+:root[data-accent="orange"] {
+    --accent-50: #fff7ed;
+    --accent-100: #ffedd5;
+    --accent-200: #fed7aa;
+    --accent-300: #fdba74;
+    --accent-400: #fb923c;
+    --accent-500: #f97316;
+    --accent-600: #ea580c;
+    --accent-700: #c2410c;
+    --accent-800: #9a3412;
+    --accent-900: #7c2d12;
+
+    --accent-rgb: 249, 115, 22;
+
+    --accent-soft: rgba(249, 115, 22, 0.09);
+    --accent-soft-strong: rgba(249, 115, 22, 0.16);
+    --accent-soft-heavy: rgba(249, 115, 22, 0.24);
+    --accent-border: rgba(249, 115, 22, 0.32);
+    --accent-border-hover: rgba(249, 115, 22, 0.55);
+    --accent-border-strong: rgba(249, 115, 22, 0.75);
+    --accent-glow: rgba(249, 115, 22, 0.22);
+    --accent-glow-strong: rgba(249, 115, 22, 0.38);
+}
+
+
+/* =========================================================
+   ACCENT — PINK
+========================================================= */
+
+:root[data-accent="pink"] {
+    --accent-50: #fdf2f8;
+    --accent-100: #fce7f3;
+    --accent-200: #fbcfe8;
+    --accent-300: #f9a8d4;
+    --accent-400: #f472b6;
+    --accent-500: #ec4899;
+    --accent-600: #db2777;
+    --accent-700: #be185d;
+    --accent-800: #9d174d;
+    --accent-900: #831843;
+
+    --accent-rgb: 236, 72, 153;
+
+    --accent-soft: rgba(236, 72, 153, 0.09);
+    --accent-soft-strong: rgba(236, 72, 153, 0.16);
+    --accent-soft-heavy: rgba(236, 72, 153, 0.24);
+    --accent-border: rgba(236, 72, 153, 0.32);
+    --accent-border-hover: rgba(236, 72, 153, 0.55);
+    --accent-border-strong: rgba(236, 72, 153, 0.75);
+    --accent-glow: rgba(236, 72, 153, 0.22);
+    --accent-glow-strong: rgba(236, 72, 153, 0.38);
+}
+
+
+/* =========================================================
+   ACCENT — INDIGO
+========================================================= */
+
+:root[data-accent="indigo"] {
+    --accent-50: #eef2ff;
+    --accent-100: #e0e7ff;
+    --accent-200: #c7d2fe;
+    --accent-300: #a5b4fc;
+    --accent-400: #818cf8;
+    --accent-500: #6366f1;
+    --accent-600: #4f46e5;
+    --accent-700: #4338ca;
+    --accent-800: #3730a3;
+    --accent-900: #312e81;
+
+    --accent-rgb: 99, 102, 241;
+
+    --accent-soft: rgba(99, 102, 241, 0.09);
+    --accent-soft-strong: rgba(99, 102, 241, 0.16);
+    --accent-soft-heavy: rgba(99, 102, 241, 0.24);
+    --accent-border: rgba(99, 102, 241, 0.32);
+    --accent-border-hover: rgba(99, 102, 241, 0.55);
+    --accent-border-strong: rgba(99, 102, 241, 0.75);
+    --accent-glow: rgba(99, 102, 241, 0.22);
+    --accent-glow-strong: rgba(99, 102, 241, 0.38);
+}
+
+
+/* =========================================================
+   DARK MODE
 ========================================================= */
 
 .dark {
 
     --page-bg:
-        #000000;
+        #0f0f0f;
 
     --page-bg-soft:
-        #030303;
+        #0f0f0f;
 
     --page-bg-end:
-        #070707;
+        #0f0f0f;
 
 
     /* =====================================================
-       Surfaces — Warm Charcoal
+       Surfaces — Solid base + radial gradient overlay
     ===================================================== */
 
     --surface:
-        rgba(255, 255, 255, 0.035);
+        #1c1c1c;
 
     --surface-hover:
-        rgba(255, 255, 255, 0.065);
+        #222222;
 
     --surface-solid:
-        #0a0908;
+        #1c1c1c;
 
     --surface-soft:
-        #100e0d;
+        #1a1a1a;
 
     --surface-muted:
-        #17150f;
+        #222222;
 
     --surface-elevated:
-        rgba(24, 21, 18, 0.62);
+        #1c1c1c;
 
     --surface-strong:
-        rgba(18, 16, 14, 0.78);
+        #1c1c1c;
+
+
+    /* =====================================================
+       Surface Gradient — Dark
+    ===================================================== */
+
+    --surface-gradient:
+        radial-gradient(
+            130% 130% at 0% 0%,
+            rgba(255, 255, 255, 0.055) 0%,
+            rgba(255, 255, 255, 0.018) 38%,
+            rgba(255, 255, 255, 0) 72%
+        );
 
 
     /* =====================================================
        Glass — Dark
-       Tints reduced: base 0.125 → 0.085, hover 0.230 → 0.150
     ===================================================== */
 
     --glass-bg:
-        rgba(46, 42, 38, 0.42);
+        #1c1c1c;
 
     --glass-bg-hover:
-        rgba(58, 53, 48, 0.56);
+        #222222;
 
     --glass-bg-strong:
-        rgba(38, 34, 31, 0.74);
+        #1c1c1c;
+
+    --glass-gradient:
+        radial-gradient(
+            130% 130% at 0% 0%,
+            rgba(255, 255, 255, 0.055) 0%,
+            rgba(255, 255, 255, 0.018) 38%,
+            rgba(255, 255, 255, 0) 72%
+        );
 
     --glass-border:
         rgba(var(--accent-rgb), 0.26);
@@ -722,10 +943,9 @@
         rgba(255, 255, 255, 0.18);
 
     --glass-inner-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.18),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.80);
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.60);
 
-    /* Radial wash tints — dark */
     --glass-active-tint:
         rgba(var(--accent-rgb), 0.085);
 
@@ -743,6 +963,55 @@
 
     --glass-blur-strong:
         84px;
+
+
+    /* =====================================================
+       NAV — Dark
+    ===================================================== */
+
+    --nav-bg:
+        #1c1c1c;
+
+    --nav-bg-hover:
+        #222222;
+
+    --nav-gradient:
+        radial-gradient(
+            130% 130% at 0% 0%,
+            rgba(255, 255, 255, 0.055) 0%,
+            rgba(255, 255, 255, 0.018) 38%,
+            rgba(255, 255, 255, 0) 72%
+        );
+
+    --nav-border:
+        rgba(255, 255, 255, 0.08);
+
+    --nav-highlight:
+        rgba(255, 255, 255, 0.05);
+
+    --nav-surface:
+        rgba(255, 255, 255, 0.06);
+
+    --nav-surface-hover:
+        rgba(255, 255, 255, 0.11);
+
+    --nav-surface-muted:
+        rgba(255, 255, 255, 0.035);
+
+    --nav-text:
+        #ffffff;
+
+    --nav-text-secondary:
+        #e5e5e5;
+
+    --nav-text-muted:
+        #a3a3a3;
+
+    --nav-text-soft:
+        #737373;
+
+    --nav-text-faint:
+        #404040;
 
 
     /* =====================================================
@@ -779,56 +1048,56 @@
         #45423e;
 
 
-    /* Shadows */
+    /* Shadows — compact */
     --shadow-xs:
-        0 1px 2px rgba(0, 0, 0, 0.60);
+        0 1px 2px rgba(0, 0, 0, 0.5);
 
     --shadow-sm:
-        0 5px 20px rgba(0, 0, 0, 0.55),
-        0 1px 3px rgba(0, 0, 0, 0.40);
+        0 2px 6px rgba(0, 0, 0, 0.5),
+        0 1px 2px rgba(0, 0, 0, 0.4);
 
     --shadow-card:
-        0 20px 54px rgba(0, 0, 0, 0.72),
-        0 4px 12px rgba(0, 0, 0, 0.52),
+        0 4px 12px rgba(0, 0, 0, 0.55),
+        0 1px 3px rgba(0, 0, 0, 0.4),
         0 0 0 0.5px rgba(var(--accent-rgb), 0.06);
 
     --shadow-card-hover:
-        0 30px 70px rgba(0, 0, 0, 0.82),
-        0 8px 20px rgba(0, 0, 0, 0.58),
-        0 0 60px -20px rgba(var(--accent-rgb), 0.28);
+        0 6px 18px rgba(0, 0, 0, 0.6),
+        0 2px 6px rgba(0, 0, 0, 0.45),
+        0 0 30px -14px rgba(var(--accent-rgb), 0.28);
 
     --shadow-md:
-        0 24px 60px rgba(0, 0, 0, 0.70),
-        0 6px 16px rgba(0, 0, 0, 0.50),
+        0 4px 12px rgba(0, 0, 0, 0.55),
+        0 1px 3px rgba(0, 0, 0, 0.4),
         0 0 0 0.5px rgba(var(--accent-rgb), 0.05);
 
     --shadow-lg:
-        0 34px 78px rgba(0, 0, 0, 0.76),
-        0 10px 24px rgba(0, 0, 0, 0.55),
+        0 6px 18px rgba(0, 0, 0, 0.6),
+        0 2px 5px rgba(0, 0, 0, 0.45),
         0 0 0 0.5px rgba(var(--accent-rgb), 0.07);
 
     --shadow-xl:
-        0 46px 100px rgba(0, 0, 0, 0.86),
-        0 16px 36px rgba(0, 0, 0, 0.60),
+        0 10px 28px rgba(0, 0, 0, 0.65),
+        0 3px 8px rgba(0, 0, 0, 0.5),
         0 0 0 0.5px rgba(var(--accent-rgb), 0.09);
 
     --shadow-accent:
         0 0 0 1px var(--accent-border),
-        0 16px 42px var(--accent-glow),
-        0 0 60px -10px var(--accent-glow-strong);
+        0 6px 20px var(--accent-glow),
+        0 0 40px -14px var(--accent-glow-strong);
 
     --shadow-accent-strong:
         0 0 0 1px var(--accent-border-hover),
-        0 20px 55px var(--accent-glow-strong),
-        0 0 80px -10px var(--accent-glow-strong);
+        0 8px 26px var(--accent-glow-strong),
+        0 0 50px -12px var(--accent-glow-strong);
 
 
     /* Inputs */
     --input-bg:
-        rgba(46, 42, 38, 0.46);
+        #222222;
 
     --input-bg-focus:
-        rgba(46, 42, 38, 0.62);
+        #262626;
 
     --input-border:
         rgba(var(--accent-rgb), 0.21);
@@ -842,10 +1111,10 @@
 
     /* Secondary buttons */
     --button-secondary-bg:
-        rgba(46, 42, 38, 0.48);
+        #222222;
 
     --button-secondary-hover:
-        rgba(58, 53, 48, 0.62);
+        #262626;
 
     --button-secondary-border:
         rgba(var(--accent-rgb), 0.19);
@@ -860,12 +1129,6 @@
     --surface-muted: var(--surface-muted);
     --surface-solid: var(--surface-solid);
     --surface-solid-soft: var(--surface-soft);
-
-
-    /* Vivid orbs for dark mode */
-    --orb-2: rgba(139, 92, 246, 0.55);
-    --orb-3: rgba(244, 63, 94, 0.42);
-    --orb-4: rgba(6, 182, 212, 0.55);
 }
 
 
@@ -882,50 +1145,26 @@ body,
 
 
 html {
-    color-scheme: dark;
+    color-scheme: light;
     scroll-behavior: smooth;
 }
 
 
-html:not(.dark) {
-    color-scheme: light;
+html.dark {
+    color-scheme: dark;
 }
 
+
+/* =========================================================
+   BODY
+========================================================= */
 
 body {
 
     min-width: 320px;
     margin: 0;
 
-    background:
-        radial-gradient(
-            1000px 700px at -5% -10%,
-            var(--orb-1),
-            transparent 55%
-        ),
-        radial-gradient(
-            900px 700px at 105% -5%,
-            var(--orb-2),
-            transparent 55%
-        ),
-        radial-gradient(
-            800px 700px at 50% 115%,
-            var(--orb-4),
-            transparent 60%
-        ),
-        radial-gradient(
-            700px 600px at -10% 100%,
-            var(--orb-3),
-            transparent 60%
-        ),
-        linear-gradient(
-            145deg,
-            var(--page-bg) 0%,
-            var(--page-bg-soft) 50%,
-            var(--page-bg-end) 100%
-        );
-
-    background-attachment: fixed;
+    background: var(--page-bg);
 
     color: var(--text);
 
@@ -946,44 +1185,6 @@ body {
     transition:
         background-color var(--duration-base) var(--ease-out),
         color var(--duration-base) var(--ease-out);
-}
-
-
-/* =========================================================
-   DARK BODY
-========================================================= */
-
-.dark body {
-
-    background:
-        radial-gradient(
-            1100px 800px at -5% -10%,
-            var(--orb-1),
-            transparent 50%
-        ),
-        radial-gradient(
-            1000px 800px at 105% -5%,
-            var(--orb-2),
-            transparent 52%
-        ),
-        radial-gradient(
-            900px 800px at 50% 120%,
-            var(--orb-4),
-            transparent 55%
-        ),
-        radial-gradient(
-            800px 700px at -10% 105%,
-            var(--orb-3),
-            transparent 55%
-        ),
-        radial-gradient(
-            circle at 50% 50%,
-            rgba(255, 255, 255, 0.02),
-            transparent 60%
-        ),
-        #000000;
-
-    background-attachment: fixed;
 }
 
 
@@ -1121,7 +1322,7 @@ button {
 
 .main-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+    scrollbar-color: rgba(0, 0, 0, 0.20) transparent;
 }
 
 
@@ -1137,7 +1338,7 @@ button {
 
 
 .main-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.18);
     border: 2px solid transparent;
     border-radius: 999px;
     background-clip: padding-box;
@@ -1153,12 +1354,12 @@ button {
 
 
 .dark .main-scrollbar {
-    scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
 }
 
 
 .dark .main-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.14);
 }
 
 
@@ -1169,8 +1370,6 @@ button {
 
 /* =========================================================
    GLOBAL BLUR LAYER
-   Any element with a rounded card shape AND an inline
-   gradient background gets frosted blur automatically.
 ========================================================= */
 
 [class*="rounded-xl"][style*="gradient"],
@@ -1178,23 +1377,22 @@ button {
 [class*="rounded-3xl"][style*="gradient"] {
     backdrop-filter:
         blur(var(--glass-blur))
-        saturate(210%)
-        brightness(1.08);
+        saturate(200%)
+        brightness(1.02);
 
     -webkit-backdrop-filter:
         blur(var(--glass-blur))
-        saturate(210%)
-        brightness(1.08);
+        saturate(200%)
+        brightness(1.02);
 }
 
-
-/* Exclude already-classed glass surfaces */
 
 .glass[style*="gradient"],
 .glass-panel[style*="gradient"],
 .glass-card[style*="gradient"],
 .glass-strong[style*="gradient"],
 .glass-interactive[style*="gradient"],
+.glass-nav[style*="gradient"],
 .ui-card[style*="gradient"],
 .ui-modal[style*="gradient"] {
     backdrop-filter: revert-layer;
@@ -1211,16 +1409,7 @@ button {
     position: relative;
 
     background:
-        radial-gradient(
-            ellipse 130% 110% at 0% 0%,
-            var(--glass-active-tint) 0%,
-            transparent 60%
-        ),
-        radial-gradient(
-            ellipse 110% 100% at 100% 100%,
-            var(--glass-active-tint-soft) 0%,
-            transparent 55%
-        ),
+        var(--glass-gradient),
         var(--glass-bg);
 
     border: 1px solid var(--glass-border);
@@ -1231,38 +1420,15 @@ button {
 
     backdrop-filter:
         blur(var(--glass-blur))
-        saturate(200%)
-        brightness(1.08);
+        saturate(180%)
+        brightness(1.02);
 
     -webkit-backdrop-filter:
         blur(var(--glass-blur))
-        saturate(200%)
-        brightness(1.08);
+        saturate(180%)
+        brightness(1.02);
 
     isolation: isolate;
-}
-
-
-.glass::before {
-
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    border-radius: inherit;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--glass-highlight),
-            transparent 42%
-        ),
-        radial-gradient(
-            120% 80% at 100% 0%,
-            var(--accent-soft),
-            transparent 60%
-        );
 }
 
 
@@ -1275,16 +1441,7 @@ button {
     position: relative;
 
     background:
-        radial-gradient(
-            ellipse 130% 110% at 0% 0%,
-            var(--glass-active-tint) 0%,
-            transparent 60%
-        ),
-        radial-gradient(
-            ellipse 110% 100% at 100% 100%,
-            var(--glass-active-tint-soft) 0%,
-            transparent 55%
-        ),
+        var(--glass-gradient),
         var(--glass-bg);
 
     border: 1px solid var(--glass-border);
@@ -1295,38 +1452,15 @@ button {
 
     backdrop-filter:
         blur(var(--glass-blur))
-        saturate(210%)
-        brightness(1.10);
+        saturate(180%)
+        brightness(1.02);
 
     -webkit-backdrop-filter:
         blur(var(--glass-blur))
-        saturate(210%)
-        brightness(1.10);
+        saturate(180%)
+        brightness(1.02);
 
     isolation: isolate;
-}
-
-
-.glass-panel::before {
-
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    border-radius: inherit;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--glass-highlight),
-            transparent 46%
-        ),
-        radial-gradient(
-            130% 90% at 100% 0%,
-            var(--accent-soft),
-            transparent 62%
-        );
 }
 
 
@@ -1339,16 +1473,7 @@ button {
     position: relative;
 
     background:
-        radial-gradient(
-            ellipse 140% 120% at 0% 0%,
-            var(--glass-active-tint) 0%,
-            transparent 60%
-        ),
-        radial-gradient(
-            ellipse 120% 110% at 100% 100%,
-            var(--glass-active-tint-soft) 0%,
-            transparent 55%
-        ),
+        var(--glass-gradient),
         var(--glass-bg);
 
     border: 1px solid var(--glass-border);
@@ -1361,13 +1486,13 @@ button {
 
     backdrop-filter:
         blur(var(--glass-blur))
-        saturate(210%)
-        brightness(1.10);
+        saturate(180%)
+        brightness(1.02);
 
     -webkit-backdrop-filter:
         blur(var(--glass-blur))
-        saturate(210%)
-        brightness(1.10);
+        saturate(180%)
+        brightness(1.02);
 
     transition:
         transform var(--duration-base) var(--ease-out),
@@ -1379,73 +1504,10 @@ button {
 }
 
 
-.glass-card::before {
-
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    border-radius: inherit;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--glass-highlight),
-            transparent 46%
-        ),
-        radial-gradient(
-            140% 90% at 100% 0%,
-            var(--accent-soft),
-            transparent 62%
-        );
-}
-
-
-.glass-card::after {
-
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.80) 0%,
-            rgba(255, 255, 255, 0) 12%
-        );
-
-    opacity: 0.95;
-    mix-blend-mode: soft-light;
-}
-
-.dark .glass-card::after {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 0.22) 0%,
-            rgba(var(--accent-rgb), 0.06) 8%,
-            rgba(255, 255, 255, 0) 16%
-        );
-    opacity: 0.90;
-}
-
-
 .glass-card:hover {
 
     background:
-        radial-gradient(
-            ellipse 150% 130% at 0% 0%,
-            var(--glass-hover-tint) 0%,
-            transparent 62%
-        ),
-        radial-gradient(
-            ellipse 130% 120% at 100% 100%,
-            var(--glass-hover-tint-soft) 0%,
-            transparent 58%
-        ),
+        var(--glass-gradient),
         var(--glass-bg-hover);
 
     border-color: var(--glass-border-hover);
@@ -1465,33 +1527,74 @@ button {
 .glass-strong {
 
     background:
-        radial-gradient(
-            ellipse 130% 110% at 0% 0%,
-            var(--glass-active-tint) 0%,
-            transparent 60%
-        ),
-        radial-gradient(
-            ellipse 110% 100% at 100% 100%,
-            var(--glass-active-tint-soft) 0%,
-            transparent 55%
-        ),
-        var(--glass-bg-strong);
+        var(--nav-gradient),
+        var(--nav-bg);
 
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--nav-border);
 
     box-shadow:
         var(--shadow-lg),
-        var(--glass-inner-shadow);
+        inset 0 1px 0 var(--nav-highlight);
 
     backdrop-filter:
         blur(var(--glass-blur-strong))
-        saturate(220%)
-        brightness(1.12);
+        saturate(200%)
+        brightness(1.04);
 
     -webkit-backdrop-filter:
         blur(var(--glass-blur-strong))
-        saturate(220%)
-        brightness(1.12);
+        saturate(200%)
+        brightness(1.04);
+}
+
+
+/* =========================================================
+   GLASS NAV — Header & Sidebar
+========================================================= */
+
+.glass-nav {
+
+    --text: var(--nav-text);
+    --text-secondary: var(--nav-text-secondary);
+    --text-muted: var(--nav-text-muted);
+    --text-soft: var(--nav-text-soft);
+    --text-faint: var(--nav-text-faint);
+
+    --border: var(--nav-border);
+    --border-subtle: var(--nav-border);
+    --border-hover: var(--nav-border);
+    --border-strong: var(--nav-border);
+
+    --glass-border: var(--nav-border);
+    --glass-highlight: var(--nav-highlight);
+
+    --surface: var(--nav-surface);
+    --surface-hover: var(--nav-surface-hover);
+    --surface-muted: var(--nav-surface-muted);
+    --surface-solid: var(--nav-bg);
+
+    --button-secondary-bg: var(--nav-surface);
+    --button-secondary-hover: var(--nav-surface-hover);
+    --button-secondary-border: var(--nav-border);
+
+    --input-bg: var(--nav-surface);
+    --input-bg-focus: var(--nav-surface-hover);
+    --input-border: var(--nav-border);
+
+    position: relative;
+
+    background:
+        var(--nav-gradient),
+        var(--nav-bg);
+
+    border: 1px solid var(--nav-border);
+
+    color: var(--nav-text);
+
+    box-shadow:
+        inset 0 1px 0 var(--nav-highlight);
+
+    isolation: isolate;
 }
 
 
@@ -1504,16 +1607,7 @@ button {
     position: relative;
 
     background:
-        radial-gradient(
-            ellipse 130% 110% at 0% 0%,
-            var(--glass-active-tint) 0%,
-            transparent 60%
-        ),
-        radial-gradient(
-            ellipse 110% 100% at 100% 100%,
-            var(--glass-active-tint-soft) 0%,
-            transparent 55%
-        ),
+        var(--glass-gradient),
         var(--glass-bg);
 
     border: 1px solid var(--glass-border);
@@ -1526,13 +1620,13 @@ button {
 
     backdrop-filter:
         blur(var(--glass-blur))
-        saturate(210%)
-        brightness(1.10);
+        saturate(180%)
+        brightness(1.02);
 
     -webkit-backdrop-filter:
         blur(var(--glass-blur))
-        saturate(210%)
-        brightness(1.10);
+        saturate(180%)
+        brightness(1.02);
 
     transition:
         transform var(--duration-base) var(--ease-out),
@@ -1545,16 +1639,7 @@ button {
 .glass-interactive:hover {
 
     background:
-        radial-gradient(
-            ellipse 140% 120% at 0% 0%,
-            var(--glass-hover-tint) 0%,
-            transparent 62%
-        ),
-        radial-gradient(
-            ellipse 120% 110% at 100% 100%,
-            var(--glass-hover-tint-soft) 0%,
-            transparent 58%
-        ),
+        var(--glass-gradient),
         var(--glass-bg-hover);
 
     border-color: var(--glass-border-hover);
@@ -1574,16 +1659,7 @@ button {
 .ui-card {
 
     background:
-        radial-gradient(
-            ellipse 140% 120% at 0% 0%,
-            var(--glass-active-tint) 0%,
-            transparent 60%
-        ),
-        radial-gradient(
-            ellipse 120% 110% at 100% 100%,
-            var(--glass-active-tint-soft) 0%,
-            transparent 55%
-        ),
+        var(--surface-gradient),
         var(--surface);
 
     border: 1px solid var(--border);
@@ -1591,16 +1667,6 @@ button {
     border-radius: var(--radius-2xl);
 
     box-shadow: var(--shadow-card);
-
-    backdrop-filter:
-        blur(var(--glass-blur))
-        saturate(200%)
-        brightness(1.06);
-
-    -webkit-backdrop-filter:
-        blur(var(--glass-blur))
-        saturate(200%)
-        brightness(1.06);
 
     transition:
         background-color var(--duration-base) var(--ease-out),
@@ -1613,16 +1679,7 @@ button {
 .ui-card:hover {
 
     background:
-        radial-gradient(
-            ellipse 150% 130% at 0% 0%,
-            var(--glass-hover-tint) 0%,
-            transparent 62%
-        ),
-        radial-gradient(
-            ellipse 130% 120% at 100% 100%,
-            var(--glass-hover-tint-soft) 0%,
-            transparent 58%
-        ),
+        var(--surface-gradient),
         var(--surface-hover);
 
     border-color: var(--border-hover);
@@ -1645,13 +1702,6 @@ button {
 
 
 .interactive-card:hover {
-
-    background:
-        radial-gradient(
-            ellipse 140% 120% at 0% 0%,
-            var(--glass-hover-tint) 0%,
-            transparent 65%
-        );
 
     border-color: var(--accent-border-hover);
 
@@ -1681,7 +1731,7 @@ button {
     border-color: var(--accent-border-hover);
     box-shadow:
         0 0 0 1px var(--accent-border),
-        0 8px 24px var(--accent-glow);
+        0 4px 14px var(--accent-glow);
 }
 
 
@@ -1727,7 +1777,7 @@ button {
     color: #ffffff;
 
     box-shadow:
-        0 8px 22px var(--accent-glow),
+        0 4px 12px var(--accent-glow),
         inset 0 1px 0 rgba(255, 255, 255, 0.32);
 
     font-weight: 500;
@@ -1753,8 +1803,8 @@ button {
     border-color: var(--accent-border-strong);
 
     box-shadow:
-        0 12px 32px var(--accent-glow-strong),
-        0 0 50px -10px var(--accent-glow-strong),
+        0 6px 18px var(--accent-glow-strong),
+        0 0 30px -10px var(--accent-glow-strong),
         inset 0 1px 0 rgba(255, 255, 255, 0.36);
 
     transform: translateY(-1px);
@@ -1766,7 +1816,7 @@ button {
     transform: translateY(0);
 
     box-shadow:
-        0 5px 14px var(--accent-glow),
+        0 3px 8px var(--accent-glow),
         inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
@@ -1794,9 +1844,6 @@ button {
     color: var(--text-secondary);
 
     box-shadow: var(--shadow-xs);
-
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
 
     cursor: pointer;
 
@@ -1870,6 +1917,16 @@ button {
 }
 
 
+.glass-nav .ui-button-ghost:hover {
+    color: var(--accent-500);
+}
+
+
+.dark .glass-nav .ui-button-ghost:hover {
+    color: var(--accent-400);
+}
+
+
 /* =========================================================
    ICON BUTTON
 ========================================================= */
@@ -1894,9 +1951,6 @@ button {
 
     box-shadow: var(--shadow-xs);
 
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-
     cursor: pointer;
 
     transition:
@@ -1919,6 +1973,16 @@ button {
     box-shadow: var(--shadow-accent);
 
     transform: translateY(-1px);
+}
+
+
+.glass-nav .ui-icon-button:hover {
+    color: var(--accent-500);
+}
+
+
+.dark .glass-nav .ui-icon-button:hover {
+    color: var(--accent-400);
 }
 
 
@@ -1962,7 +2026,7 @@ button {
 
     color: #b91c1c;
 
-    box-shadow: 0 8px 26px rgba(239, 68, 68, 0.18);
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.18);
 }
 
 
@@ -1993,9 +2057,6 @@ button {
     color: var(--text);
 
     box-shadow: var(--shadow-xs);
-
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
 
     transition:
         background-color var(--duration-fast) var(--ease-out),
@@ -2044,9 +2105,6 @@ button {
     background: var(--input-bg);
     color: var(--text);
 
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-
     cursor: pointer;
 
     transition:
@@ -2088,9 +2146,6 @@ button {
 
     background: var(--input-bg);
     color: var(--text);
-
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
 
     transition:
         background-color var(--duration-fast) var(--ease-out),
@@ -2240,16 +2295,7 @@ button {
     overflow: hidden;
 
     background:
-        radial-gradient(
-            ellipse 130% 110% at 0% 0%,
-            var(--glass-active-tint) 0%,
-            transparent 60%
-        ),
-        radial-gradient(
-            ellipse 110% 100% at 100% 100%,
-            var(--glass-active-tint-soft) 0%,
-            transparent 55%
-        ),
+        var(--glass-gradient),
         var(--glass-bg-strong);
 
     border: 1px solid var(--glass-border);
@@ -2261,13 +2307,13 @@ button {
 
     backdrop-filter:
         blur(var(--glass-blur-strong))
-        saturate(220%)
-        brightness(1.12);
+        saturate(200%)
+        brightness(1.04);
 
     -webkit-backdrop-filter:
         blur(var(--glass-blur-strong))
-        saturate(220%)
-        brightness(1.12);
+        saturate(200%)
+        brightness(1.04);
 }
 
 
@@ -2275,7 +2321,7 @@ button {
 
     border-bottom: 1px solid var(--border-subtle);
 
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(0, 0, 0, 0.02);
 }
 
 
@@ -2288,7 +2334,7 @@ button {
 
     border-top: 1px solid var(--border-subtle);
 
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.02);
 }
 
 
@@ -2330,7 +2376,7 @@ button {
 
 
 .ui-table tbody tr:hover {
-    background: var(--accent-soft);
+    background: var(--glass-hover-tint);
 }
 
 
@@ -2396,6 +2442,16 @@ button {
 }
 
 
+.glass-nav .ui-nav-item:hover {
+    color: var(--accent-500);
+}
+
+
+.dark .glass-nav .ui-nav-item:hover {
+    color: var(--accent-400);
+}
+
+
 .ui-nav-item.active {
 
     background:
@@ -2411,12 +2467,22 @@ button {
 
     box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-        0 6px 22px var(--accent-glow);
+        0 3px 12px var(--accent-glow);
 }
 
 
 .dark .ui-nav-item.active {
     color: var(--accent-300);
+}
+
+
+.glass-nav .ui-nav-item.active {
+    color: var(--accent-500);
+}
+
+
+.dark .glass-nav .ui-nav-item.active {
+    color: var(--accent-400);
 }
 
 
@@ -2435,9 +2501,6 @@ button {
     border-radius: 0.625rem;
 
     box-shadow: var(--shadow-lg);
-
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
 }
 
 
@@ -2449,18 +2512,7 @@ button {
 
     min-height: 100%;
 
-    background:
-        radial-gradient(
-            circle at 0% 0%,
-            var(--accent-soft),
-            transparent 30%
-        ),
-        radial-gradient(
-            circle at 100% 0%,
-            rgba(139, 92, 246, 0.06),
-            transparent 26%
-        ),
-        var(--page-bg);
+    background: var(--page-bg);
 }
 
 
@@ -2474,17 +2526,23 @@ button {
 
 
 .surface-primary {
-    background: var(--surface);
+    background:
+        var(--surface-gradient),
+        var(--surface);
 }
 
 
 .surface-secondary {
-    background: var(--surface-soft);
+    background:
+        var(--surface-gradient),
+        var(--surface-soft);
 }
 
 
 .surface-elevated {
-    background: var(--surface-elevated);
+    background:
+        var(--surface-gradient),
+        var(--surface-elevated);
 }
 
 
@@ -2639,12 +2697,12 @@ button {
     background-image:
         linear-gradient(
             to right,
-            rgba(0, 0, 0, 0.035) 1px,
+            rgba(0, 0, 0, 0.03) 1px,
             transparent 1px
         ),
         linear-gradient(
             to bottom,
-            rgba(0, 0, 0, 0.035) 1px,
+            rgba(0, 0, 0, 0.03) 1px,
             transparent 1px
         );
 
@@ -2678,7 +2736,7 @@ button {
     overflow-y: hidden;
 
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+    scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
 }
 
 
@@ -2693,13 +2751,23 @@ button {
 
 
 .ui-scroll-x::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.18);
     border-radius: 999px;
 }
 
 
 .ui-scroll-x::-webkit-scrollbar-thumb:hover {
     background: var(--accent-500);
+}
+
+
+.dark .ui-scroll-x {
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+
+
+.dark .ui-scroll-x::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
 }
 
 
@@ -2731,8 +2799,8 @@ button {
 @media (max-width: 1024px) {
 
     :root {
-        --glass-blur: 32px;
-        --glass-blur-strong: 48px;
+        --glass-blur: 24px;
+        --glass-blur-strong: 38px;
     }
 
     .dark {
@@ -2754,17 +2822,13 @@ button {
 @media (max-width: 768px) {
 
     :root {
-        --glass-blur: 26px;
-        --glass-blur-strong: 38px;
+        --glass-blur: 20px;
+        --glass-blur-strong: 30px;
     }
 
     .dark {
         --glass-blur: 36px;
         --glass-blur-strong: 52px;
-    }
-
-    .glass-card {
-        border-radius: var(--radius-xl);
     }
 
     .ui-button-primary,
@@ -2782,8 +2846,8 @@ button {
 @media (max-width: 480px) {
 
     :root {
-        --glass-blur: 20px;
-        --glass-blur-strong: 30px;
+        --glass-blur: 16px;
+        --glass-blur-strong: 24px;
     }
 
     .dark {
@@ -2846,5 +2910,278 @@ button {
         transform:
             translateY(0)
             scale(1);
+    }
+}
+
+
+/* =========================================================
+   NOTIFICATION PANEL — Mobile Blur Backdrop
+========================================================= */
+
+.notification-backdrop {
+
+    background:
+        rgba(0, 0, 0, 0.32);
+
+    backdrop-filter:
+        blur(14px)
+        saturate(140%);
+
+    -webkit-backdrop-filter:
+        blur(14px)
+        saturate(140%);
+
+    animation:
+        notificationBackdropIn
+        220ms
+        var(--ease-out)
+        both;
+}
+
+
+.dark .notification-backdrop {
+
+    background:
+        rgba(0, 0, 0, 0.55);
+
+    backdrop-filter:
+        blur(18px)
+        saturate(120%);
+
+    -webkit-backdrop-filter:
+        blur(18px)
+        saturate(120%);
+}
+
+
+@keyframes notificationBackdropIn {
+
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+    }
+
+    to {
+        opacity: 1;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+}
+
+
+/* =========================================================
+   NOTIFICATION PANEL — Slide In
+========================================================= */
+
+.notification-panel {
+
+    animation:
+        notificationPanelIn
+        280ms
+        var(--ease-smooth)
+        both;
+
+    will-change:
+        transform,
+        opacity;
+}
+
+
+@keyframes notificationPanelIn {
+
+    from {
+        opacity: 0;
+        transform:
+            translateY(-10px)
+            scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+
+/* =========================================================
+   NOTIFICATION PANEL — Mobile full-width override
+========================================================= */
+
+@media (max-width: 640px) {
+
+    .notification-panel {
+
+        animation:
+            notificationPanelInMobile
+            320ms
+            var(--ease-smooth)
+            both;
+
+        border-left: none;
+        border-right: none;
+        border-top: 1px solid var(--nav-border);
+
+        box-shadow:
+            0 18px 40px rgba(0, 0, 0, 0.28),
+            0 0 0 1px var(--nav-border);
+
+        max-height: calc(100vh - 4.25rem);
+
+        backdrop-filter:
+            blur(28px)
+            saturate(180%)
+            brightness(1.02);
+
+        -webkit-backdrop-filter:
+            blur(28px)
+            saturate(180%)
+            brightness(1.02);
+    }
+
+
+    .dark .notification-panel {
+
+        box-shadow:
+            0 18px 44px rgba(0, 0, 0, 0.65),
+            0 0 0 1px var(--nav-border);
+
+        backdrop-filter:
+            blur(34px)
+            saturate(160%)
+            brightness(1.04);
+
+        -webkit-backdrop-filter:
+            blur(34px)
+            saturate(160%)
+            brightness(1.04);
+    }
+
+}
+
+
+@keyframes notificationPanelInMobile {
+
+    from {
+        opacity: 0;
+        transform:
+            translateY(-24px);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* =========================================================
+   THEME TOGGLE — Fallback Circle Reveal Overlay
+========================================================= */
+
+.theme-transition-overlay {
+
+    position: fixed;
+    inset: 0;
+
+    z-index: 9999;
+
+    pointer-events: none;
+
+    background: #0f0f0f;
+
+    clip-path:
+        circle(
+            0px
+            at
+            var(--tx, 50%)
+            var(--ty, 50%)
+        );
+
+    transition:
+        clip-path
+        620ms
+        cubic-bezier(0.4, 0, 0.2, 1);
+
+    will-change: clip-path;
+}
+
+
+.theme-transition-overlay--active {
+
+    clip-path:
+        circle(
+            150vmax
+            at
+            var(--tx, 50%)
+            var(--ty, 50%)
+        );
+}
+
+
+.theme-transition-overlay--fade-out {
+
+    opacity: 0;
+
+    transition:
+        opacity
+        220ms
+        ease-out;
+}
+
+
+/* =========================================================
+   VIEW TRANSITIONS API — Circle Reveal From Theme Toggle
+========================================================= */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+
+    animation: none;
+
+    mix-blend-mode: normal;
+}
+
+
+::view-transition-old(root) {
+
+    z-index: 1;
+}
+
+
+::view-transition-new(root) {
+
+    z-index: 2;
+
+    animation:
+        themeCircleReveal
+        620ms
+        cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+@keyframes themeCircleReveal {
+
+    from {
+        clip-path:
+            circle(
+                0px
+                at
+                var(--theme-toggle-x, 50%)
+                var(--theme-toggle-y, 50%)
+            );
+    }
+
+    to {
+        clip-path:
+            circle(
+                150vmax
+                at
+                var(--theme-toggle-x, 50%)
+                var(--theme-toggle-y, 50%)
+            );
     }
 }

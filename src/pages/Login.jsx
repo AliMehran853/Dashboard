@@ -1,3 +1,7 @@
+// =========================================================
+// Login.jsx
+// =========================================================
+
 import {
     useEffect,
     useState,
@@ -166,10 +170,6 @@ function Login() {
             password.trim();
 
 
-        // =====================================================
-        // Validation
-        // =====================================================
-
         if (!cleanEmail) {
 
             setError(
@@ -196,10 +196,6 @@ function Login() {
         }
 
 
-        // =====================================================
-        // Start Loading
-        // =====================================================
-
         setIsLoading(true);
 
 
@@ -211,10 +207,6 @@ function Login() {
                     cleanPassword
                 );
 
-
-            // =================================================
-            // Failed Login
-            // =================================================
 
             if (
                 !result ||
@@ -235,10 +227,6 @@ function Login() {
             }
 
 
-            // =================================================
-            // Remember Email
-            // =================================================
-
             if (rememberMe) {
 
                 localStorage.setItem(
@@ -254,10 +242,6 @@ function Login() {
 
             }
 
-
-            // =================================================
-            // Navigation
-            // =================================================
 
             navigate(
                 '/dashboard',
@@ -322,7 +306,7 @@ function Login() {
         >
 
             {/* =================================================
-                Ambient Background
+                Ambient Background — Accent-driven
             ================================================== */}
 
             <div
@@ -351,10 +335,18 @@ function Login() {
 
                         rounded-full
 
-                        bg-emerald-500/[0.08]
-
                         blur-3xl
                     "
+
+                    style={{
+                        background: `
+                            radial-gradient(
+                                circle at center,
+                                var(--accent-glow) 0%,
+                                transparent 70%
+                            )
+                        `,
+                    }}
                 />
 
 
@@ -375,10 +367,19 @@ function Login() {
 
                         rounded-full
 
-                        bg-cyan-500/[0.07]
-
                         blur-3xl
                     "
+
+                    style={{
+                        background: `
+                            radial-gradient(
+                                circle at center,
+                                var(--accent-glow) 0%,
+                                transparent 70%
+                            )
+                        `,
+                        opacity: 0.7,
+                    }}
                 />
 
 
@@ -402,10 +403,18 @@ function Login() {
 
                         rounded-full
 
-                        bg-emerald-500/[0.035]
-
                         blur-3xl
                     "
+
+                    style={{
+                        background: `
+                            radial-gradient(
+                                circle at center,
+                                var(--accent-soft) 0%,
+                                transparent 70%
+                            )
+                        `,
+                    }}
                 />
 
 
@@ -460,7 +469,7 @@ function Login() {
                 >
 
                     {/* =================================================
-                        Logo
+                        Logo — Accent Gradient
                     ================================================== */}
 
                     <div
@@ -485,10 +494,13 @@ function Login() {
 
                                     rounded-2xl
 
-                                    bg-emerald-500/[0.12]
-
                                     blur-xl
                                 "
+
+                                style={{
+                                    background:
+                                        'var(--accent-soft-heavy)',
+                                }}
                             />
 
 
@@ -512,15 +524,22 @@ function Login() {
                                     rounded-2xl
 
                                     border
-                                    border-emerald-400/30
 
-                                    bg-gradient-to-br
-                                    from-emerald-400
-                                    via-emerald-500
-                                    to-emerald-600
-
-                                    shadow-[0_12px_35px_rgba(16,185,129,0.22)]
+                                    shadow-[0_12px_35px_var(--accent-glow)]
                                 "
+
+                                style={{
+                                    background: `
+                                        linear-gradient(
+                                            135deg,
+                                            var(--accent-400),
+                                            var(--accent-500),
+                                            var(--accent-600)
+                                        )
+                                    `,
+                                    borderColor:
+                                        'var(--accent-border)',
+                                }}
                             >
 
                                 <div
@@ -657,7 +676,7 @@ function Login() {
                 >
 
                     {/* =================================================
-                        Card Accent
+                        Card Accent Line — Top
                     ================================================== */}
 
                     <div
@@ -670,18 +689,24 @@ function Login() {
 
                             h-px
 
-                            bg-gradient-to-r
-                            from-transparent
-                            via-emerald-500/60
-                            to-transparent
-
                             opacity-80
                         "
+
+                        style={{
+                            background: `
+                                linear-gradient(
+                                    90deg,
+                                    transparent,
+                                    var(--accent-500),
+                                    transparent
+                                )
+                            `,
+                        }}
                     />
 
 
                     {/* =================================================
-                        Card Glow
+                        Card Glow — Accent
                     ================================================== */}
 
                     <div
@@ -698,10 +723,13 @@ function Login() {
 
                             rounded-full
 
-                            bg-emerald-500/[0.04]
-
                             blur-3xl
                         "
+
+                        style={{
+                            background:
+                                'var(--accent-soft)',
+                        }}
                     />
 
 
@@ -748,11 +776,17 @@ function Login() {
 
                                         rounded-lg
 
-                                        bg-emerald-500/10
-
-                                        text-emerald-600
-                                        dark:text-emerald-400
+                                        border
                                     "
+
+                                    style={{
+                                        background:
+                                            'var(--accent-soft)',
+                                        borderColor:
+                                            'var(--accent-border)',
+                                        color:
+                                            'var(--accent-600)',
+                                    }}
                                 >
 
                                     <ShieldCheck
@@ -834,10 +868,6 @@ function Login() {
                                     rounded-xl
 
                                     border
-                                    border-rose-500/20
-
-                                    bg-rose-500/[0.06]
-                                    dark:bg-rose-500/[0.08]
 
                                     px-3.5
                                     py-3
@@ -846,10 +876,16 @@ function Login() {
                                     sm:text-xs
 
                                     leading-5
-
-                                    text-rose-600
-                                    dark:text-rose-400
                                 "
+
+                                style={{
+                                    borderColor:
+                                        'rgba(239, 68, 68, 0.32)',
+                                    background:
+                                        'var(--danger-soft)',
+                                    color:
+                                        'var(--danger)',
+                                }}
                             >
 
                                 {error}
@@ -869,7 +905,7 @@ function Login() {
                             }
 
                             className="
-                                space-y-4.5
+                                space-y-4
                             "
                         >
 
@@ -975,6 +1011,8 @@ function Login() {
                                         }
 
                                         className="
+                                            login-input
+
                                             block
 
                                             w-full
@@ -982,9 +1020,9 @@ function Login() {
                                             rounded-xl
 
                                             border
-                                            border-[var(--border)]
+                                            border-[var(--input-border)]
 
-                                            bg-[var(--surface-muted)]
+                                            bg-[var(--input-bg)]
 
                                             py-3
 
@@ -1002,14 +1040,9 @@ function Login() {
                                             transition-all
                                             duration-200
 
-                                            hover:border-[var(--border-hover)]
+                                            hover:border-[var(--input-border-hover)]
 
-                                            focus:border-emerald-500/55
-
-                                            focus:bg-[var(--surface)]
-
-                                            focus:ring-2
-                                            focus:ring-emerald-500/10
+                                            focus:bg-[var(--input-bg-focus)]
 
                                             disabled:cursor-not-allowed
                                             disabled:opacity-60
@@ -1077,17 +1110,30 @@ function Login() {
 
                                             font-medium
 
-                                            text-emerald-600
-                                            dark:text-emerald-400
-
                                             transition-colors
-
-                                            hover:text-emerald-500
-                                            dark:hover:text-emerald-300
 
                                             disabled:cursor-not-allowed
                                             disabled:opacity-50
                                         "
+
+                                        style={{
+                                            color:
+                                                'var(--accent-600)',
+                                        }}
+
+                                        onMouseEnter={(event) => {
+
+                                            event.currentTarget.style.color =
+                                                'var(--accent-500)';
+
+                                        }}
+
+                                        onMouseLeave={(event) => {
+
+                                            event.currentTarget.style.color =
+                                                'var(--accent-600)';
+
+                                        }}
                                     >
 
                                         {
@@ -1175,6 +1221,8 @@ function Login() {
                                         }
 
                                         className="
+                                            login-input
+
                                             block
 
                                             w-full
@@ -1182,9 +1230,9 @@ function Login() {
                                             rounded-xl
 
                                             border
-                                            border-[var(--border)]
+                                            border-[var(--input-border)]
 
-                                            bg-[var(--surface-muted)]
+                                            bg-[var(--input-bg)]
 
                                             py-3
 
@@ -1202,14 +1250,9 @@ function Login() {
                                             transition-all
                                             duration-200
 
-                                            hover:border-[var(--border-hover)]
+                                            hover:border-[var(--input-border-hover)]
 
-                                            focus:border-emerald-500/55
-
-                                            focus:bg-[var(--surface)]
-
-                                            focus:ring-2
-                                            focus:ring-emerald-500/10
+                                            focus:bg-[var(--input-bg-focus)]
 
                                             disabled:cursor-not-allowed
                                             disabled:opacity-60
@@ -1344,10 +1387,13 @@ function Login() {
 
                                         border
 
-                                        accent-emerald-500
-
                                         disabled:cursor-not-allowed
                                     "
+
+                                    style={{
+                                        accentColor:
+                                            'var(--accent-500)',
+                                    }}
                                 />
 
 
@@ -1372,7 +1418,7 @@ function Login() {
 
 
                             {/* =================================================
-                                Submit
+                                Submit — Accent Gradient
                             ================================================== */}
 
                             <button
@@ -1396,11 +1442,6 @@ function Login() {
                                     rounded-xl
 
                                     border
-                                    border-emerald-400/20
-
-                                    bg-gradient-to-r
-                                    from-emerald-500
-                                    to-emerald-600
 
                                     py-3
 
@@ -1410,17 +1451,10 @@ function Login() {
 
                                     text-white
 
-                                    shadow-[0_10px_25px_rgba(16,185,129,0.18)]
-
                                     transition-all
                                     duration-200
 
                                     hover:-translate-y-0.5
-
-                                    hover:from-emerald-400
-                                    hover:to-emerald-500
-
-                                    hover:shadow-[0_14px_30px_rgba(16,185,129,0.22)]
 
                                     active:translate-y-0
 
@@ -1428,6 +1462,50 @@ function Login() {
                                     disabled:opacity-60
                                     disabled:hover:translate-y-0
                                 "
+
+                                style={{
+                                    background: `
+                                        linear-gradient(
+                                            90deg,
+                                            var(--accent-500),
+                                            var(--accent-600)
+                                        )
+                                    `,
+                                    borderColor:
+                                        'var(--accent-border)',
+                                    boxShadow:
+                                        '0 10px 25px var(--accent-glow)',
+                                }}
+
+                                onMouseEnter={(event) => {
+
+                                    event.currentTarget.style.background = `
+                                        linear-gradient(
+                                            90deg,
+                                            var(--accent-400),
+                                            var(--accent-500)
+                                        )
+                                    `;
+
+                                    event.currentTarget.style.boxShadow =
+                                        '0 14px 30px var(--accent-glow-strong)';
+
+                                }}
+
+                                onMouseLeave={(event) => {
+
+                                    event.currentTarget.style.background = `
+                                        linear-gradient(
+                                            90deg,
+                                            var(--accent-500),
+                                            var(--accent-600)
+                                        )
+                                    `;
+
+                                    event.currentTarget.style.boxShadow =
+                                        '0 10px 25px var(--accent-glow)';
+
+                                }}
                             >
 
                                 <span>
