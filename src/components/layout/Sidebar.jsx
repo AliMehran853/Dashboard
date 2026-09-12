@@ -1014,6 +1014,7 @@ function Sidebar({
 
                     {/* =================================================
                         Desktop Collapse Button
+                        (Hidden on mobile — fixed with !hidden / lg:!flex)
                     ================================================== */}
 
                     <button
@@ -1056,8 +1057,8 @@ function Sidebar({
 
                             absolute
 
-                            hidden
-                            lg:flex
+                            !hidden
+                            lg:!flex
 
                             h-8
                             w-8
