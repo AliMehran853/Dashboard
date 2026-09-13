@@ -122,10 +122,6 @@ const enTranslate = {
         empty: "No sales have been recorded today yet.",
       },
 
-      // =====================================================
-      // Last 30 Days Sales
-      // =====================================================
-
       thirtyDaySalesChart: {
         title: "Sales - Last 30 Days",
         description: "Daily sales activity over the last 30 days",
@@ -135,10 +131,6 @@ const enTranslate = {
         loading: "Loading 30-day sales data...",
         empty: "No sales have been recorded in the last 30 days.",
       },
-
-      // =====================================================
-      // Last 12 Months Sales
-      // =====================================================
 
       monthlySalesChart: {
         title: "Monthly Sales",
@@ -203,6 +195,20 @@ const enTranslate = {
     // =====================================================
 
     products: {
+      // New nested shape (used by Products page header)
+      page: {
+        title: "Products",
+        description: "Manage products and inventory",
+        addProduct: "Add Product",
+      },
+
+      // Section header above the four stat cards
+      statsSection: {
+        title: "Product Summary",
+        description: "Current status of products and inventory",
+      },
+
+      // Legacy flat keys (kept for backward compatibility)
       pageTitle: "Products",
       pageDescription: "Manage products and inventory",
       addProduct: "Add Product",
@@ -325,6 +331,7 @@ const enTranslate = {
           delete: "Delete Product",
         },
       },
+
       details: {
         title: "Product Details",
         subtitle: "View complete product information",
@@ -639,9 +646,6 @@ const enTranslate = {
     // Credit
     // =====================================================
 
-    // ==========================
-    // English - en
-    // ==========================
     credit: {
       page: {
         title: "Credit Accounts",
@@ -803,11 +807,9 @@ const enTranslate = {
           creditSale: "Credit Sale",
 
           creditSalesTitle: "Credit Sales",
-
           creditSalesDescription: "Customer credit sales history",
 
           paymentsTitle: "Customer Payments",
-
           paymentsDescription: "Customer payment history",
 
           noPayments: "No payments have been recorded for this account yet.",
@@ -938,6 +940,10 @@ const enTranslate = {
       },
     },
 
+    // =====================================================
+    // Reports
+    // =====================================================
+
     reports: {
       page: {
         title: "Reports",
@@ -953,6 +959,7 @@ const enTranslate = {
 
       errors: {
         load: "Failed to load the report.",
+        export: "Failed to create the export file.",
       },
 
       empty: "No information is available to display.",
@@ -992,13 +999,9 @@ const enTranslate = {
         description: "Overview of sales performance",
 
         bestCategory: "Best-Selling Category",
-
         averageSale: "Average Sale",
-
         totalItems: "Items Sold",
-
         itemUnit: "items",
-
         bestCategorySales: "Top Category Sales",
       },
 
@@ -1028,6 +1031,10 @@ const enTranslate = {
         },
       },
     },
+
+    // =====================================================
+    // Shopping List
+    // =====================================================
 
     shoppingList: {
       page: {
@@ -1091,7 +1098,6 @@ const enTranslate = {
           namePlaceholder: "e.g. Coca-Cola",
 
           quantity: "Quantity",
-
           unit: "Unit",
 
           category: "Category",
@@ -1141,13 +1147,10 @@ const enTranslate = {
         title: "Delete Shopping Item",
 
         messageBefore: "Are you sure you want to delete",
-
         messageAfter: "from the shopping list?",
 
         cancel: "Cancel",
-
         delete: "Delete",
-
         deleting: "Deleting...",
       },
 
@@ -1158,14 +1161,12 @@ const enTranslate = {
         itemLabel: "Shopping Item",
 
         statusLabel: "Status",
-
         status: {
           completed: "Purchased",
           pending: "Pending Purchase",
         },
 
         priorityLabel: "Priority",
-
         priority: {
           low: "Low",
           normal: "Normal",
@@ -1174,15 +1175,11 @@ const enTranslate = {
         },
 
         quantityLabel: "Required Quantity",
-
         defaultUnit: "unit",
-
         categoryLabel: "Category",
-
         noteLabel: "Description",
 
         createdAt: "Created At",
-
         updatedAt: "Last Updated",
 
         notAvailable: "---",
@@ -1197,7 +1194,6 @@ const enTranslate = {
 
       table: {
         title: "Shopping Items",
-
         itemCount: "items",
 
         columns: {
@@ -1213,7 +1209,6 @@ const enTranslate = {
         },
 
         categoryPrefix: "Category:",
-
         noName: "Unnamed",
 
         priority: {
@@ -1238,6 +1233,10 @@ const enTranslate = {
         },
       },
     },
+
+    // =====================================================
+    // Settings
+    // =====================================================
 
     settings: {
       page: {
@@ -1348,17 +1347,14 @@ const enTranslate = {
 
         jalaliMonths: {
           title: "Jalali Month Names",
-
           description:
             "Choose how Jalali month names are displayed throughout the application.",
 
           afghanistan: "Afghanistan",
-
           afghanistanMonths:
             "Hamal, Saur, Jawza, Saratan, Asad, Sonbola, Mizan, Aqrab, Qaws, Jadi, Dalwa, Hoot",
 
           iran: "Iran",
-
           iranMonths:
             "Farvardin, Ordibehesht, Khordad, Tir, Mordad, Shahrivar, Mehr, Aban, Azar, Dey, Bahman, Esfand",
         },
@@ -1434,14 +1430,12 @@ const enTranslate = {
 
         messages: {
           exportSuccess: "Backup created and downloaded successfully.",
-
           importSuccess:
             "Data restored successfully. The page will reload to apply the changes.",
         },
 
         errors: {
           export: "Failed to create the backup.",
-
           import: "The Backup file is invalid or could not be restored.",
         },
       },
@@ -1508,6 +1502,10 @@ const enTranslate = {
         },
       },
     },
+
+    // =====================================================
+    // Login
+    // =====================================================
 
     login: {
       brand: {
