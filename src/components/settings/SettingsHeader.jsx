@@ -5,12 +5,10 @@ function SettingsHeader() {
     const { t, i18n } = useTranslation();
 
     return (
-        <section dir={i18n.dir()} className="ui-card-tint p-4 sm:p-5 md:p-6">
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
-                <div className="absolute -start-20 -top-20 h-52 w-52 rounded-full bg-[var(--accent-soft-heavy)] blur-3xl" />
-                <div className="absolute -end-16 -bottom-24 h-44 w-44 rounded-full bg-[var(--accent-soft)] blur-3xl" />
-            </div>
-
+        <section
+            dir={i18n.dir()}
+            className="ui-card-tint p-4 sm:p-5 md:p-6"
+        >
             <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent-500)] sm:h-12 sm:w-12">
                     <Settings size={21} strokeWidth={1.9} />
@@ -19,6 +17,7 @@ function SettingsHeader() {
                 <div className="min-w-0">
                     <div className="flex items-center gap-2">
                         <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--accent-500)] shadow-[0_0_12px_var(--accent-glow)]" />
+
                         <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--accent-600)]">
                             Taqwa
                         </span>

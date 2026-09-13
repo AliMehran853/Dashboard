@@ -326,9 +326,7 @@ function Sidebar({
                                 : undefined
                         }
 
-                        className={({
-                            isActive,
-                        }) =>
+                        className={({ isActive }) =>
                             `
                                 ui-nav-item
 
@@ -366,16 +364,12 @@ function Sidebar({
                         }
                     >
 
-                        {({
-                            isActive,
-                        }) => (
+                        {({ isActive }) => (
 
                             <>
 
                                 {/* =================================================
                                     Active Indicator
-                                    Positioned fully inside the item so its
-                                    glow is never clipped by rounded corners.
                                 ================================================== */}
 
                                 <span
@@ -413,9 +407,11 @@ function Sidebar({
                                                 var(--accent-600)
                                             )
                                         `,
-                                        boxShadow: isActive
-                                            ? '0 0 8px var(--accent-glow)'
-                                            : 'none',
+
+                                        boxShadow:
+                                            isActive
+                                                ? '0 0 8px var(--accent-glow)'
+                                                : 'none',
                                     }}
                                 />
 
@@ -547,9 +543,11 @@ function Sidebar({
                                                 var(--accent-600)
                                             )
                                         `,
-                                        boxShadow: isActive
-                                            ? '0 0 8px var(--accent-glow)'
-                                            : 'none',
+
+                                        boxShadow:
+                                            isActive
+                                                ? '0 0 8px var(--accent-glow)'
+                                                : 'none',
                                     }}
                                 />
 
@@ -714,12 +712,17 @@ function Sidebar({
 
                     lg:shadow-[var(--shadow-md)]
                 `}
+
+                style={{
+                    [isEnglish
+                        ? 'borderRight'
+                        : 'borderLeft']:
+                        '1px solid var(--accent-border-hover)',
+                }}
             >
 
                 {/* =================================================
                     Bottom Ambient Glow
-                    (kept subtle — no top glow so nothing leaks
-                    under the store header)
                 ================================================== */}
 
                 <div
@@ -748,7 +751,6 @@ function Sidebar({
 
                 {/* =================================================
                     Accent Gradient Side Line
-                    (very subtle — border already carries accent)
                 ================================================== */}
 
                 <div
@@ -834,7 +836,7 @@ function Sidebar({
                         >
 
                             {/* =================================================
-                                Store Icon (Accent Gradient)
+                                Store Icon
                             ================================================== */}
 
                             <div
@@ -1014,7 +1016,6 @@ function Sidebar({
 
                     {/* =================================================
                         Desktop Collapse Button
-                        (Hidden on mobile — fixed with !hidden / lg:!flex)
                     ================================================== */}
 
                     <button
@@ -1149,7 +1150,6 @@ function Sidebar({
 
                     {/* =================================================
                         Mobile Close
-                        Visible ONLY below lg
                     ================================================== */}
 
                     <button
@@ -1200,7 +1200,7 @@ function Sidebar({
 
 
                 {/* =================================================
-                    Divider (Accent Gradient)
+                    Divider
                 ================================================== */}
 
                 <div
@@ -1247,8 +1247,6 @@ function Sidebar({
 
                 {/* =================================================
                     Navigation
-                    NOTE: no overflow-x clipping so active item's
-                    outer glow renders fully (never cut off).
                 ================================================== */}
 
                 <nav
@@ -1383,7 +1381,7 @@ function Sidebar({
 
 
                 {/* =================================================
-                    Logout (Accent Gradient Section)
+                    Logout
                 ================================================== */}
 
                 <div

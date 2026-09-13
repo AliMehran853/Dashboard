@@ -18,6 +18,8 @@ import Header
 
 
 // ==========================================
+// Dashboard Layout
+// ==========================================
 function DashboardLayout() {
 
     const {
@@ -150,59 +152,139 @@ function DashboardLayout() {
 
 
                     {/* =================================================
-                        Main Content
+                        Main Viewport
                     ================================================== */}
 
-                    <main
+                    <div
                         className="
-                            main-scrollbar
-
+                            relative
                             min-h-0
                             flex-1
-
-                            overflow-x-hidden
-                            overflow-y-auto
-
-                            scroll-smooth
-
-                            px-3
-                            py-3
-
-                            sm:px-4
-                            sm:py-4
-
-                            md:px-5
-                            md:py-5
-
-                            lg:px-6
-                            lg:py-6
+                            overflow-hidden
                         "
                     >
 
                         {/* =================================================
-                            Content Surface
+                            Dashboard Grid Background
                         ================================================== */}
 
                         <div
+                            aria-hidden="true"
+
                             className="
-                                min-h-full
-                                w-full
-                                min-w-0
+                                dashboard-grid-bg
 
-                                rounded-2xl
+                                pointer-events-none
 
-                                bg-transparent
+                                absolute
+                                inset-0
 
-                                transition-colors
-                                duration-300
+                                z-0
+
+                                overflow-hidden
                             "
                         >
 
-                            <Outlet />
+                            {/* Grid */}
+                            <div
+                                className="
+                                    dashboard-grid-lines
+                                    absolute
+                                    inset-0
+                                "
+                            />
+
+                            {/* Top glow */}
+                            <div
+                                className="
+                                    dashboard-grid-glow
+                                    dashboard-grid-glow--top
+                                    absolute
+                                "
+                            />
+
+                            {/* Bottom glow */}
+                            <div
+                                className="
+                                    dashboard-grid-glow
+                                    dashboard-grid-glow--bottom
+                                    absolute
+                                "
+                            />
+
+                            {/* Vignette */}
+                            <div
+                                className="
+                                    dashboard-grid-vignette
+                                    absolute
+                                    inset-0
+                                "
+                            />
 
                         </div>
 
-                    </main>
+
+                        {/* =================================================
+                            Main Content
+                        ================================================== */}
+
+                        <main
+                            className="
+                                main-scrollbar
+
+                                relative
+                                z-10
+
+                                h-full
+                                min-h-0
+
+                                overflow-x-hidden
+                                overflow-y-auto
+
+                                scroll-smooth
+
+                                bg-transparent
+
+                                px-3
+                                py-3
+
+                                sm:px-4
+                                sm:py-4
+
+                                md:px-5
+                                md:py-5
+
+                                lg:px-6
+                                lg:py-6
+                            "
+                        >
+
+                            {/* =================================================
+                                Content Surface
+                            ================================================== */}
+
+                            <div
+                                className="
+                                    min-h-full
+                                    w-full
+                                    min-w-0
+
+                                    rounded-2xl
+
+                                    bg-transparent
+
+                                    transition-colors
+                                    duration-300
+                                "
+                            >
+
+                                <Outlet />
+
+                            </div>
+
+                        </main>
+
+                    </div>
 
                 </div>
 

@@ -99,6 +99,17 @@ function Header({
         useRef(null);
 
 
+    /*
+     * این ref مخصوص پنل Notification است.
+     *
+     * چون پنل را خارج از Header قرار داده‌ایم تا
+     * زیر لایه Blur نرود، برای تشخیص click خارج از
+     * Notification به یک ref جداگانه نیاز داریم.
+     */
+    const notificationPanelRef =
+        useRef(null);
+
+
     const notificationOpenRef =
         useRef(false);
 
@@ -108,7 +119,7 @@ function Header({
 
 
     // =====================================================
-    // Theme Toggle Button Ref (for circle reveal origin)
+    // Theme Toggle Button Ref
     // =====================================================
 
     const themeButtonRef =
@@ -345,6 +356,7 @@ function Header({
 
                 setNotifications([]);
 
+
                 setUnreadCount(
                     0
                 );
@@ -402,6 +414,7 @@ function Header({
                 recordSuccessfulAction(
                     event.type
                 );
+
 
                 loadNotifications();
 
@@ -768,6 +781,7 @@ function Header({
                     unread
                 );
 
+
                 setUnreadCount(
                     0
                 );
@@ -910,20 +924,27 @@ function Header({
         const handleOutsideClick =
             (event) => {
 
-                if (
+                const clickedInsideButton =
                     notificationRef.current &&
-                    !notificationRef.current.contains(
+                    notificationRef.current.contains(
                         event.target
-                    )
+                    );
+
+
+                const clickedInsidePanel =
+                    notificationPanelRef.current &&
+                    notificationPanelRef.current.contains(
+                        event.target
+                    );
+
+
+                if (
+                    !clickedInsideButton &&
+                    !clickedInsidePanel &&
+                    notificationOpenRef.current
                 ) {
 
-                    if (
-                        notificationOpenRef.current
-                    ) {
-
-                        closeNotifications();
-
-                    }
+                    closeNotifications();
 
                 }
 
@@ -1019,29 +1040,30 @@ function Header({
             const originX =
                 rect.left + rect.width / 2;
 
+
             const originY =
                 rect.top + rect.height / 2;
 
-
-            // If browser supports View Transitions API (Chrome/Edge)
-            // use the fancy circle-reveal. Otherwise fallback to
-            // a CSS overlay circle animation.
 
             const supportsViewTransition =
                 typeof document.startViewTransition ===
                 'function';
 
 
-            setThemeAnimating(true);
+            setThemeAnimating(
+                true
+            );
 
 
-            if (supportsViewTransition) {
+            if (
+                supportsViewTransition
+            ) {
 
-                // Set CSS variables so the keyframes use correct origin
                 document.documentElement.style.setProperty(
                     '--theme-toggle-x',
                     `${originX}px`
                 );
+
 
                 document.documentElement.style.setProperty(
                     '--theme-toggle-y',
@@ -1059,14 +1081,13 @@ function Header({
 
                 transition.finished.finally(
                     () => {
-                        setThemeAnimating(false);
+                        setThemeAnimating(
+                            false
+                        );
                     }
                 );
 
             } else {
-
-                // Fallback: overlay circle for browsers without
-                // View Transitions (Safari/Firefox).
 
                 const overlay =
                     document.createElement(
@@ -1080,8 +1101,8 @@ function Header({
 
                 const endColor =
                     isDark
-                        ? '#ffffff'   // switching to light
-                        : '#0f0f0f';  // switching to dark
+                        ? '#ffffff'
+                        : '#0f0f0f';
 
 
                 overlay.style.background =
@@ -1092,6 +1113,7 @@ function Header({
                     '--tx',
                     `${originX}px`
                 );
+
 
                 overlay.style.setProperty(
                     '--ty',
@@ -1104,43 +1126,53 @@ function Header({
                 );
 
 
-                requestAnimationFrame(() => {
+                requestAnimationFrame(
+                    () => {
 
-                    overlay.classList.add(
-                        'theme-transition-overlay--active'
-                    );
+                        overlay.classList.add(
+                            'theme-transition-overlay--active'
+                        );
 
-                });
+                    }
+                );
 
 
                 const cleanupDelay =
                     650;
 
 
-                window.setTimeout(() => {
+                window.setTimeout(
+                    () => {
 
-                    toggleTheme();
-
-
-                    overlay.classList.remove(
-                        'theme-transition-overlay--active'
-                    );
+                        toggleTheme();
 
 
-                    overlay.classList.add(
-                        'theme-transition-overlay--fade-out'
-                    );
+                        overlay.classList.remove(
+                            'theme-transition-overlay--active'
+                        );
 
 
-                    window.setTimeout(() => {
+                        overlay.classList.add(
+                            'theme-transition-overlay--fade-out'
+                        );
 
-                        overlay.remove();
 
-                        setThemeAnimating(false);
+                        window.setTimeout(
+                            () => {
 
-                    }, 220);
+                                overlay.remove();
 
-                }, cleanupDelay);
+                                setThemeAnimating(
+                                    false
+                                );
+
+                            },
+                            220
+                        );
+
+                    },
+                    cleanupDelay
+                );
 
             }
 
@@ -1152,6 +1184,403 @@ function Header({
 
 
     // =====================================================
+    // Notification Panel Header
+    // =====================================================
+
+    const renderNotificationHeader =
+        () => (
+
+            <div
+                className="
+                    relative
+
+                    flex
+
+                    items-center
+                    justify-between
+
+                    gap-3
+
+                    border-b
+                    border-[var(--nav-border)]
+
+                    px-4
+                    py-3
+                "
+            >
+
+                <div
+                    className="
+                        flex
+                        min-w-0
+
+                        items-center
+
+                        gap-2
+                    "
+                >
+
+                    <div
+                        className="
+                            flex
+                            h-7
+                            w-7
+                            shrink-0
+
+                            items-center
+                            justify-center
+
+                            rounded-lg
+
+                            text-white
+
+                            shadow-[0_4px_14px_var(--accent-glow)]
+                        "
+
+                        style={{
+                            background: `
+                                linear-gradient(
+                                    135deg,
+                                    var(--accent-400),
+                                    var(--accent-600)
+                                )
+                            `,
+                        }}
+                    >
+
+                        <Bell
+                            size={15}
+                        />
+
+                    </div>
+
+
+                    <h3
+                        className="
+                            truncate
+
+                            text-sm
+                            font-medium
+
+                            text-[var(--nav-text)]
+                        "
+                    >
+
+                        {
+                            t(
+                                'common.notifications'
+                            )
+                        }
+
+                    </h3>
+
+                </div>
+
+
+                {/* X Close Button */}
+
+                <button
+                    type="button"
+
+                    onClick={
+                        closeNotifications
+                    }
+
+                    aria-label={
+                        t(
+                            'common.closeMenu'
+                        )
+                    }
+
+                    title={
+                        t(
+                            'common.closeMenu'
+                        )
+                    }
+
+                    className="
+                        ui-icon-button
+
+                        h-7
+                        w-7
+
+                        min-h-0
+
+                        shrink-0
+
+                        p-0
+                    "
+                >
+
+                    <X
+                        size={14}
+                    />
+
+                </button>
+
+            </div>
+        );
+
+
+    // =====================================================
+    // Notification Panel Content
+    // =====================================================
+
+    const renderNotificationsContent =
+        (mobile = false) => (
+
+            <div
+                className="
+                    main-scrollbar
+
+                    overflow-y-auto
+
+                    p-2
+                "
+
+                style={
+                    mobile
+                        ? {
+                            maxHeight:
+                                'calc(100dvh - 6rem)',
+                        }
+                        : {
+                            maxHeight:
+                                '22rem',
+                        }
+                }
+            >
+
+                {notificationsLoading ? (
+
+                    <div
+                        className="
+                            py-10
+
+                            text-center
+
+                            text-xs
+
+                            text-[var(--nav-text-muted)]
+                        "
+                    >
+
+                        {
+                            t(
+                                'settings.account.loading'
+                            )
+                        }
+
+                    </div>
+
+                ) : notifications.length === 0 ? (
+
+                    <div
+                        className="
+                            px-5
+                            py-10
+
+                            text-center
+                        "
+                    >
+
+                        <div
+                            className="
+                                mx-auto
+                                mb-3
+
+                                flex
+                                h-11
+                                w-11
+
+                                items-center
+                                justify-center
+
+                                rounded-full
+
+                                border
+                                border-[var(--nav-border)]
+
+                                bg-[var(--nav-surface)]
+
+                                text-[var(--nav-text-soft)]
+                            "
+                        >
+
+                            <Bell
+                                size={17}
+                            />
+
+                        </div>
+
+
+                        <p
+                            className="
+                                text-xs
+
+                                text-[var(--nav-text-muted)]
+                            "
+                        >
+
+                            {
+                                t(
+                                    'reports.empty'
+                                )
+                            }
+
+                        </p>
+
+                    </div>
+
+                ) : (
+
+                    notifications.map(
+                        (item) => {
+
+                            const {
+                                icon:
+                                    Icon,
+
+                                className,
+                            } =
+                                getNotificationIcon(
+                                    item.type
+                                );
+
+
+                            const {
+                                title,
+                                description,
+                            } =
+                                getNotificationText(
+                                    item
+                                );
+
+
+                            return (
+
+                                <div
+                                    key={
+                                        item.id
+                                    }
+
+                                    className="
+                                        group
+
+                                        flex
+                                        items-start
+
+                                        gap-3
+
+                                        rounded-xl
+
+                                        border
+                                        border-transparent
+
+                                        p-3
+
+                                        transition-all
+                                        duration-200
+
+                                        hover:border-[var(--nav-border)]
+
+                                        hover:bg-[var(--nav-surface)]
+                                    "
+                                >
+
+                                    <div
+                                        className={`
+                                            flex
+
+                                            h-9
+                                            w-9
+
+                                            shrink-0
+
+                                            items-center
+                                            justify-center
+
+                                            rounded-lg
+
+                                            ${className}
+
+                                            transition-transform
+                                            duration-200
+
+                                            group-hover:scale-[1.03]
+                                        `}
+                                    >
+
+                                        <Icon
+                                            size={17}
+                                        />
+
+                                    </div>
+
+
+                                    <div
+                                        className="
+                                            min-w-0
+                                            flex-1
+                                        "
+                                    >
+
+                                        <p
+                                            className="
+                                                break-words
+
+                                                text-xs
+                                                font-medium
+
+                                                leading-5
+
+                                                text-[var(--nav-text)]
+                                            "
+                                        >
+
+                                            {
+                                                title
+                                            }
+
+                                        </p>
+
+
+                                        <p
+                                            className="
+                                                mt-1
+
+                                                break-words
+
+                                                text-[11px]
+
+                                                leading-5
+
+                                                text-[var(--nav-text-muted)]
+                                            "
+                                        >
+
+                                            {
+                                                description
+                                            }
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            );
+
+                        }
+                    )
+
+                )}
+
+            </div>
+        );
+
+
+    // =====================================================
     // Render
     // =====================================================
 
@@ -1159,13 +1588,17 @@ function Header({
 
         <>
 
+            {/* =====================================================
+                HEADER
+            ====================================================== */}
+
             <header
                 className="
                     glass-nav
 
                     relative
 
-                    z-30
+                    z-[1000]
 
                     flex
                     h-16
@@ -1183,6 +1616,14 @@ function Header({
                     transition-[background-color,border-color,box-shadow]
                     duration-300
                 "
+
+                style={{
+                    borderBottom:
+                        '1px solid var(--accent-border-hover)',
+
+                    boxShadow:
+                        'inset 0 1px 0 var(--nav-highlight), 0 1px 0 var(--accent-border)',
+                }}
             >
 
                 {/* =================================================
@@ -1204,6 +1645,7 @@ function Header({
                 >
 
                     {/* Mobile Menu */}
+
                     <button
                         type="button"
 
@@ -1248,6 +1690,7 @@ function Header({
 
 
                     {/* Page Information */}
+
                     <div
                         className="
                             min-w-0
@@ -1264,6 +1707,7 @@ function Header({
                                 min-w-0
 
                                 items-center
+
                                 gap-2
                             "
                         >
@@ -1348,7 +1792,7 @@ function Header({
                 <div
                     className="
                         relative
-                        z-10
+                        z-50
 
                         flex
                         shrink-0
@@ -1361,6 +1805,7 @@ function Header({
                 >
 
                     {/* Theme Toggle */}
+
                     <button
                         ref={
                             themeButtonRef
@@ -1409,11 +1854,12 @@ function Header({
                         "
                     >
 
-                        {/* Rotating icon swap */}
                         <span
                             className="
                                 relative
+
                                 flex
+
                                 items-center
                                 justify-center
 
@@ -1431,6 +1877,7 @@ function Header({
 
                                     transition-all
                                     duration-500
+
                                     ease-[cubic-bezier(0.22,1,0.36,1)]
 
                                     ${
@@ -1451,6 +1898,7 @@ function Header({
 
                                     transition-all
                                     duration-500
+
                                     ease-[cubic-bezier(0.22,1,0.36,1)]
 
                                     ${
@@ -1466,7 +1914,10 @@ function Header({
                     </button>
 
 
-                    {/* Notifications */}
+                    {/* =================================================
+                        Notifications Button
+                    ================================================== */}
+
                     <div
                         ref={
                             notificationRef
@@ -1474,6 +1925,7 @@ function Header({
 
                         className="
                             relative
+                            z-[100]
                         "
                     >
 
@@ -1608,447 +2060,11 @@ function Header({
 
                         </button>
 
-
-                        {/* =================================================
-                            Notification Panel
-                        ================================================== */}
-
-                        {notificationOpen && (
-
-                            <>
-
-                                {/* Mobile Full-Screen Blur Backdrop */}
-                                <div
-                                    className="
-                                        fixed
-                                        inset-0
-
-                                        z-40
-
-                                        lg:hidden
-                                        lg:!hidden
-
-                                        notification-backdrop
-                                    "
-
-                                    onClick={
-                                        closeNotifications
-                                    }
-
-                                    aria-hidden="true"
-                                />
-
-
-                                {/* Panel */}
-                                <div
-                                    className="
-                                        notification-panel
-
-                                        glass-nav
-
-                                        fixed
-                                        sm:absolute
-
-                                        end-0
-                                        sm:end-0
-
-                                        top-[4.25rem]
-                                        sm:top-full
-
-                                        z-50
-
-                                        sm:mt-2
-
-                                        w-screen
-                                        sm:w-[min(22rem,calc(100vw-1.5rem))]
-
-                                        mx-0
-                                        sm:mx-0
-
-                                        overflow-hidden
-
-                                        rounded-t-2xl
-                                        sm:rounded-2xl
-
-                                        shadow-[var(--shadow-xl)]
-                                    "
-                                >
-
-                                    {/* Panel Header */}
-                                    <div
-                                        className="
-                                            relative
-
-                                            flex
-
-                                            items-center
-                                            justify-between
-
-                                            gap-3
-
-                                            border-b
-                                            border-[var(--nav-border)]
-
-                                            px-4
-                                            py-3
-                                        "
-                                    >
-
-                                        <div
-                                            className="
-                                                flex
-                                                min-w-0
-
-                                                items-center
-
-                                                gap-2
-                                            "
-                                        >
-
-                                            <div
-                                                className="
-                                                    flex
-                                                    h-7
-                                                    w-7
-
-                                                    shrink-0
-
-                                                    items-center
-                                                    justify-center
-
-                                                    rounded-lg
-
-                                                    text-white
-
-                                                    shadow-[0_4px_14px_var(--accent-glow)]
-                                                "
-
-                                                style={{
-                                                    background: `
-                                                        linear-gradient(
-                                                            135deg,
-                                                            var(--accent-400),
-                                                            var(--accent-600)
-                                                        )
-                                                    `,
-                                                }}
-                                            >
-
-                                                <Bell
-                                                    size={15}
-                                                />
-
-                                            </div>
-
-
-                                            <h3
-                                                className="
-                                                    truncate
-
-                                                    text-sm
-                                                    font-medium
-
-                                                    text-[var(--nav-text)]
-                                                "
-                                            >
-
-                                                {
-                                                    t(
-                                                        'common.notifications'
-                                                    )
-                                                }
-
-                                            </h3>
-
-                                        </div>
-
-
-                                        <button
-                                            type="button"
-
-                                            onClick={
-                                                closeNotifications
-                                            }
-
-                                            aria-label={
-                                                t(
-                                                    'common.closeMenu'
-                                                )
-                                            }
-
-                                            className="
-                                                ui-button-ghost
-
-                                                h-7
-                                                w-7
-                                                min-h-0
-
-                                                shrink-0
-
-                                                p-0
-                                            "
-                                        >
-
-                                            <X
-                                                size={14}
-                                            />
-
-                                        </button>
-
-                                    </div>
-
-
-                                    {/* Panel Content */}
-                                    <div
-                                        className="
-                                            relative
-
-                                            main-scrollbar
-
-                                            max-h-[calc(100vh-10rem)]
-                                            sm:max-h-[22rem]
-
-                                            overflow-y-auto
-
-                                            p-2
-                                        "
-                                    >
-
-                                        {notificationsLoading ? (
-
-                                            <div
-                                                className="
-                                                    py-10
-
-                                                    text-center
-
-                                                    text-xs
-
-                                                    text-[var(--nav-text-muted)]
-                                                "
-                                            >
-
-                                                {
-                                                    t(
-                                                        'settings.account.loading'
-                                                    )
-                                                }
-
-                                            </div>
-
-                                        ) : notifications.length === 0 ? (
-
-                                            <div
-                                                className="
-                                                    px-5
-                                                    py-10
-
-                                                    text-center
-                                                "
-                                            >
-
-                                                <div
-                                                    className="
-                                                        mx-auto
-                                                        mb-3
-
-                                                        flex
-                                                        h-11
-                                                        w-11
-
-                                                        items-center
-                                                        justify-center
-
-                                                        rounded-full
-
-                                                        border
-                                                        border-[var(--nav-border)]
-
-                                                        bg-[var(--nav-surface)]
-
-                                                        text-[var(--nav-text-soft)]
-                                                    "
-                                                >
-
-                                                    <Bell
-                                                        size={17}
-                                                    />
-
-                                                </div>
-
-
-                                                <p
-                                                    className="
-                                                        text-xs
-
-                                                        text-[var(--nav-text-muted)]
-                                                    "
-                                                >
-
-                                                    {
-                                                        t(
-                                                            'reports.empty'
-                                                        )
-                                                    }
-
-                                                </p>
-
-                                            </div>
-
-                                        ) : (
-
-                                            notifications.map(
-                                                (item) => {
-
-                                                    const {
-                                                        icon:
-                                                            Icon,
-
-                                                        className,
-                                                    } =
-                                                        getNotificationIcon(
-                                                            item.type
-                                                        );
-
-
-                                                    const {
-                                                        title,
-                                                        description,
-                                                    } =
-                                                        getNotificationText(
-                                                            item
-                                                        );
-
-
-                                                    return (
-
-                                                        <div
-                                                            key={
-                                                                item.id
-                                                            }
-
-                                                            className="
-                                                                group
-
-                                                                flex
-                                                                items-start
-
-                                                                gap-3
-
-                                                                rounded-xl
-
-                                                                border
-                                                                border-transparent
-
-                                                                p-3
-
-                                                                transition-all
-                                                                duration-200
-
-                                                                hover:border-[var(--nav-border)]
-
-                                                                hover:bg-[var(--nav-surface)]
-                                                            "
-                                                        >
-
-                                                            <div
-                                                                className={`
-                                                                    flex
-
-                                                                    h-9
-                                                                    w-9
-
-                                                                    shrink-0
-
-                                                                    items-center
-                                                                    justify-center
-
-                                                                    rounded-lg
-
-                                                                    ${className}
-
-                                                                    transition-transform
-                                                                    duration-200
-
-                                                                    group-hover:scale-[1.03]
-                                                                `}
-                                                            >
-
-                                                                <Icon
-                                                                    size={17}
-                                                                />
-
-                                                            </div>
-
-
-                                                            <div
-                                                                className="
-                                                                    min-w-0
-                                                                    flex-1
-                                                                "
-                                                            >
-
-                                                                <p
-                                                                    className="
-                                                                        truncate
-
-                                                                        text-xs
-                                                                        font-medium
-
-                                                                        leading-5
-
-                                                                        text-[var(--nav-text)]
-                                                                    "
-                                                                >
-
-                                                                    {
-                                                                        title
-                                                                    }
-
-                                                                </p>
-
-
-                                                                <p
-                                                                    className="
-                                                                        mt-1
-
-                                                                        text-[11px]
-
-                                                                        leading-5
-
-                                                                        text-[var(--nav-text-muted)]
-                                                                    "
-                                                                >
-
-                                                                    {
-                                                                        description
-                                                                    }
-
-                                                                </p>
-
-                                                            </div>
-
-                                                        </div>
-
-                                                    );
-
-                                                }
-                                            )
-
-                                        )}
-
-                                    </div>
-
-                                </div>
-
-                            </>
-
-                        )}
-
                     </div>
 
 
                     {/* Divider */}
+
                     <div
                         className="
                             hidden
@@ -2074,11 +2090,178 @@ function Header({
 
 
                     {/* Profile */}
+
                     <ProfileMenu />
 
                 </div>
 
             </header>
+
+
+            {/* =====================================================
+                GLOBAL NOTIFICATION BACKDROP
+
+                این لایه خارج از Header است.
+
+                z-[1001]
+
+                بنابراین:
+                - Header زیر Blur قرار می‌گیرد
+                - Sidebar زیر Blur قرار می‌گیرد
+                - Main Content زیر Blur قرار می‌گیرد
+                - Grid زیر Blur قرار می‌گیرد
+            ====================================================== */}
+
+            {notificationOpen && (
+
+                <div
+                    className="
+                        fixed
+                        inset-0
+
+                        z-[1001]
+
+                        bg-black/[0.015]
+                        dark:bg-black/[0.04]
+
+                        backdrop-blur-[4px]
+
+                        pointer-events-auto
+                    "
+
+                    onClick={
+                        closeNotifications
+                    }
+
+                    aria-hidden="true"
+                />
+
+            )}
+
+
+            {/* =====================================================
+                NOTIFICATION PANELS
+
+                این wrapper برای این است که:
+                - هر دو Panel بالاتر از Blur باشند
+                - click داخل Panel به‌عنوان click خارج شناخته نشود
+            ====================================================== */}
+
+            {notificationOpen && (
+
+                <div
+                    ref={
+                        notificationPanelRef
+                    }
+
+                    className="
+                        pointer-events-none
+
+                        fixed
+                        inset-0
+
+                        z-[1002]
+                    "
+                >
+
+                    {/* =================================================
+                        Mobile Notification Panel
+                    ================================================== */}
+
+                    <div
+                        className="
+                            notification-panel
+
+                            pointer-events-auto
+
+                            fixed
+
+                            inset-x-2
+
+                            top-[4.75rem]
+
+                            w-auto
+
+                            overflow-hidden
+
+                            rounded-2xl
+
+                            border
+                            border-[var(--nav-border)]
+
+                            bg-[var(--nav-bg)]
+
+                            shadow-[var(--shadow-xl)]
+
+                            lg:hidden
+                        "
+                    >
+
+                        {
+                            renderNotificationHeader()
+                        }
+
+                        {
+                            renderNotificationsContent(
+                                true
+                            )
+                        }
+
+                    </div>
+
+
+                    {/* =================================================
+                        Desktop Notification Panel
+                    ================================================== */}
+
+                    <div
+                        className="
+                            notification-panel
+
+                            pointer-events-auto
+
+                            fixed
+
+                            end-3
+                            sm:end-4
+                            md:end-6
+
+                            top-[4.75rem]
+
+                            hidden
+
+                            w-[min(22rem,calc(100vw-1.5rem))]
+
+                            overflow-hidden
+
+                            rounded-2xl
+
+                            border
+                            border-[var(--nav-border)]
+
+                            bg-[var(--nav-bg)]
+
+                            shadow-[var(--shadow-xl)]
+
+                            lg:block
+                        "
+                    >
+
+                        {
+                            renderNotificationHeader()
+                        }
+
+                        {
+                            renderNotificationsContent(
+                                false
+                            )
+                        }
+
+                    </div>
+
+                </div>
+
+            )}
 
         </>
 
