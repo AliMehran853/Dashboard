@@ -10,7 +10,7 @@
 export function toEnglishNumbers(value) {
 
     if (value === null || value === undefined) {
-        return '';
+        return ''
     }
 
     return String(value)

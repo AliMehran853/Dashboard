@@ -1,6 +1,6 @@
 import {
     Eye, Package, AlertTriangle, CheckCircle2, XCircle,
-    MoreHorizontal, Pencil, Trash2,
+    MoreHorizontal, Pencil, Trash2, Star,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,9 +15,20 @@ const toEnglishNumbers = (value) =>
         .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
         .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
 
+const getLocale = (language) =>
+    String(language || '').toLowerCase().startsWith('en') ? 'en-US' : 'fa-IR';
+
 const formatNumber = (number, language) => {
-    const locale = String(language || '').toLowerCase().startsWith('en') ? 'en-US' : 'fa-IR';
+    const locale = getLocale(language);
     return new Intl.NumberFormat(locale).format(Number(toEnglishNumbers(number)) || 0);
+};
+
+const formatDecimal = (number, language, digits = 1) => {
+    const locale = getLocale(language);
+    return new Intl.NumberFormat(locale, {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits,
+    }).format(Number(toEnglishNumbers(number)) || 0);
 };
 
 const formatDisplayDate = (date, language, jalaliMonthStyle) => {
@@ -25,7 +36,9 @@ const formatDisplayDate = (date, language, jalaliMonthStyle) => {
     const parsed = new Date(date);
     if (Number.isNaN(parsed.getTime())) return '-';
     if (String(language || '').toLowerCase().startsWith('en')) {
-        return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(parsed);
+        return new Intl.DateTimeFormat('en-US', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+        }).format(parsed);
     }
     return formatJalaliDate(parsed, { monthStyle: jalaliMonthStyle, withMonthName: true });
 };
@@ -58,6 +71,31 @@ const getStockStatus = (product, t) => {
     };
 };
 
+/**
+ * Get the primary sale option (default, or first) for display.
+ */
+const getPrimarySaleOption = (product) => {
+    const opts = Array.isArray(product?.saleOptions) ? product.saleOptions : [];
+    const opt = opts.find((o) => o.isDefault) || opts[0] || null;
+    if (!opt) return null;
+    return {
+        id: opt.id,
+        unit: opt.unit,
+        factor: Number(opt.factor) || 1,
+        price: Number(opt.price) || 0,
+        isDefault: Boolean(opt.isDefault),
+    };
+};
+
+// =========================================================
+// Row Action Tones (static — Tailwind safe)
+// =========================================================
+
+const MOBILE_ACTION_TONES = {
+    blue: 'hover:border-blue-500/20 hover:bg-blue-500/5 hover:text-blue-500 dark:hover:text-blue-400',
+    rose: 'hover:border-rose-500/20 hover:bg-rose-500/5 hover:text-rose-500 dark:hover:text-rose-400',
+};
+
 // =========================================================
 // Product Table
 // =========================================================
@@ -72,7 +110,8 @@ function ProductTable({ products = [], loading = false, onViewDetails, onEdit, o
     const [jalaliMonthStyle, setJalaliMonthStyle] = useState(getJalaliMonthStyle());
 
     useEffect(() => {
-        const onStyleChange = (event) => setJalaliMonthStyle(event?.detail || getJalaliMonthStyle());
+        const onStyleChange = (event) =>
+            setJalaliMonthStyle(event?.detail || getJalaliMonthStyle());
         const onStorage = (event) => {
             if (event.key === 'jalaliMonthStyle') setJalaliMonthStyle(getJalaliMonthStyle());
         };
@@ -86,7 +125,9 @@ function ProductTable({ products = [], loading = false, onViewDetails, onEdit, o
 
     useEffect(() => {
         const onDown = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) setOpenMenuId(null);
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setOpenMenuId(null);
+            }
         };
         const onKey = (event) => {
             if (event.key === 'Escape') setOpenMenuId(null);
@@ -172,15 +213,17 @@ function DesktopTable({
     openMenuId, menuRef, onToggleMenu, onViewDetails, onEdit, onDelete,
 }) {
     const columns = [
-        { key: 'product', label: t('products.table.columns.product'), align: 'start' },
+        { key: 'product',  label: t('products.table.columns.product'),  align: 'start' },
         { key: 'category', label: t('products.table.columns.category'), align: 'start' },
-        { key: 'buyPrice', label: t('products.table.columns.buyPrice'), align: 'start' },
-        { key: 'sellPrice', label: t('products.table.columns.sellPrice'), align: 'start' },
-        { key: 'stock', label: t('products.table.columns.stock'), align: 'start' },
-        { key: 'status', label: t('products.table.columns.status'), align: 'start' },
-        { key: 'updated', label: t('products.table.columns.updated'), align: 'start' },
-        { key: 'actions', label: t('products.table.columns.actions'), align: 'center' },
+        { key: 'cost',     label: t('products.table.columns.buyPrice'), align: 'start' },
+        { key: 'price',    label: t('products.table.columns.sellPrice'), align: 'start' },
+        { key: 'stock',    label: t('products.table.columns.stock'),    align: 'start' },
+        { key: 'status',   label: t('products.table.columns.status'),   align: 'start' },
+        { key: 'updated',  label: t('products.table.columns.updated'),  align: 'start' },
+        { key: 'actions',  label: t('products.table.columns.actions'),  align: 'center' },
     ];
+
+    const currency = isEnglish ? 'AF' : 'افغانی';
 
     return (
         <div className="hidden overflow-x-auto md:block">
@@ -190,7 +233,7 @@ function DesktopTable({
                         {columns.map((col) => (
                             <th
                                 key={col.key}
-                                className={`px-4 py-3 text-${col.align} text-[10px] font-semibold text-[var(--text-muted)] first:ps-5 last:pe-5`}
+                                className={`px-4 py-3 text-${col.align} text-[10px] font-medium text-[var(--text-muted)] first:ps-5 last:pe-5`}
                             >
                                 {col.label}
                             </th>
@@ -201,7 +244,11 @@ function DesktopTable({
                     {products.map((product) => {
                         const stockStatus = getStockStatus(product, t);
                         const StatusIcon = stockStatus.icon;
-                        const currency = isEnglish ? 'AF' : 'افغانی';
+                        const isMenuOpen = openMenuId === product.id;
+                        const avgCost = Number(toEnglishNumbers(product.avgCost)) || 0;
+                        const saleInfo = getPrimarySaleOption(product);
+                        const baseUnit = product.baseUnit || '';
+
                         return (
                             <tr
                                 key={product.id}
@@ -214,7 +261,9 @@ function DesktopTable({
                                             <Package size={17} className="text-[var(--text-muted)] transition-colors group-hover:text-emerald-500 dark:group-hover:text-emerald-400" />
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="truncate text-xs font-semibold text-[var(--text-primary)]">{product.name}</p>
+                                            <p className="truncate text-xs font-medium text-[var(--text-primary)]">
+                                                {product.name}
+                                            </p>
                                             <p dir={isEnglish ? 'ltr' : 'rtl'} className="mt-1 text-[10px] text-[var(--text-muted)]">
                                                 #{formatNumber(product.id, language)}
                                             </p>
@@ -229,26 +278,59 @@ function DesktopTable({
                                     </span>
                                 </td>
 
-                                <PriceCell value={product.buyPrice} currency={currency} language={language} isEnglish={isEnglish} />
-
+                                {/* Avg Cost */}
                                 <td className="whitespace-nowrap px-4 py-4">
-                                    <div className="flex items-baseline gap-1">
-                                        <span dir={isEnglish ? 'ltr' : 'rtl'} className="number-font text-xs font-bold text-[var(--text-primary)]">
-                                            {formatNumber(product.sellPrice, language)}
-                                        </span>
-                                        <span className="text-[9px] text-[var(--text-muted)]">{currency}</span>
+                                    <div className="flex flex-col gap-0.5">
+                                        <div className="flex items-baseline gap-1">
+                                            <span dir={isEnglish ? 'ltr' : 'rtl'} className="number-font text-xs font-medium text-[var(--text-secondary)]">
+                                                {formatNumber(avgCost, language)}
+                                            </span>
+                                            <span className="text-[9px] text-[var(--text-muted)]">{currency}</span>
+                                        </div>
+                                        {baseUnit && (
+                                            <span className="text-[9px] text-[var(--text-muted)]">
+                                                / {baseUnit}
+                                            </span>
+                                        )}
                                     </div>
                                 </td>
 
+                                {/* Sale Price */}
+                                <td className="whitespace-nowrap px-4 py-4">
+                                    {saleInfo ? (
+                                        <div className="flex flex-col gap-0.5">
+                                            <div className="flex items-baseline gap-1">
+                                                <span dir={isEnglish ? 'ltr' : 'rtl'} className="number-font text-xs font-medium text-[var(--text-primary)]">
+                                                    {formatNumber(saleInfo.price, language)}
+                                                </span>
+                                                <span className="text-[9px] text-[var(--text-muted)]">{currency}</span>
+                                                {saleInfo.isDefault && (
+                                                    <Star size={9} className="text-[var(--accent-500)] fill-current" />
+                                                )}
+                                            </div>
+                                            <span className="text-[9px] text-[var(--text-muted)]">
+                                                / {saleInfo.unit}
+                                                {saleInfo.factor !== 1 && (
+                                                    <> × {formatDecimal(saleInfo.factor, language)}</>
+                                                )}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <span className="text-[10px] text-[var(--text-muted)]">—</span>
+                                    )}
+                                </td>
+
+                                {/* Stock */}
                                 <td className="whitespace-nowrap px-4 py-4">
                                     <div className="flex items-baseline gap-1">
-                                        <span dir={isEnglish ? 'ltr' : 'rtl'} className="number-font text-xs font-semibold text-[var(--text-secondary)]">
+                                        <span dir={isEnglish ? 'ltr' : 'rtl'} className="number-font text-xs font-medium text-[var(--text-secondary)]">
                                             {formatNumber(product.stock, language)}
                                         </span>
-                                        <span className="text-[9px] text-[var(--text-muted)]">{product.unit || ''}</span>
+                                        <span className="text-[9px] text-[var(--text-muted)]">{baseUnit}</span>
                                     </div>
                                 </td>
 
+                                {/* Status */}
                                 <td className="px-4 py-4">
                                     <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[10px] font-medium ${stockStatus.className}`}>
                                         <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${stockStatus.dotClass}`} />
@@ -257,12 +339,14 @@ function DesktopTable({
                                     </span>
                                 </td>
 
+                                {/* Updated */}
                                 <td className="whitespace-nowrap px-4 py-4">
                                     <span className="text-[10px] text-[var(--text-muted)]">
                                         {formatDisplayDate(product.updatedAt, language, jalaliMonthStyle)}
                                     </span>
                                 </td>
 
+                                {/* Actions */}
                                 <td className="px-5 py-4">
                                     <div className="relative flex items-center justify-center gap-1">
                                         <button
@@ -275,41 +359,40 @@ function DesktopTable({
                                             <Eye size={15} />
                                         </button>
 
-                                        <div
-                                            className="relative"
-                                            ref={openMenuId === product.id ? menuRef : null}
-                                        >
+                                        <div className="relative" ref={isMenuOpen ? menuRef : null}>
                                             <button
                                                 type="button"
                                                 onClick={() => onToggleMenu(product.id)}
-                                                className={`ui-icon-button h-8 w-8 rounded-lg ${openMenuId === product.id ? 'border-slate-300 bg-[var(--surface-muted)] text-[var(--text-primary)] dark:border-slate-700' : ''}`}
+                                                className={`ui-icon-button h-8 w-8 rounded-lg ${isMenuOpen ? 'border-slate-300 bg-[var(--surface-muted)] text-[var(--text-primary)] dark:border-slate-700' : ''}`}
                                                 title={t('products.table.actions.options')}
                                                 aria-label={t('products.table.actions.options')}
                                             >
                                                 <MoreHorizontal size={15} />
                                             </button>
 
-                                            {openMenuId === product.id && (
+                                            {isMenuOpen && (
                                                 <div
-                                                    className={`absolute top-1/2 z-[100] w-40 -translate-y-1/2 overflow-hidden rounded-xl border border-slate-200/80 bg-white/95 p-1.5 shadow-2xl shadow-black/15 backdrop-blur-md backdrop-saturate-150 dark:border-slate-700/80 dark:bg-slate-900/95 ${isEnglish ? 'right-[calc(100%+8px)]' : 'left-[calc(100%+8px)]'}`}
+                                                    className={`absolute top-1/2 z-[100] w-max min-w-[8.5rem] -translate-y-1/2 overflow-hidden rounded-xl border border-slate-200/80 bg-white/95 p-1 shadow-2xl shadow-black/20 backdrop-blur-md backdrop-saturate-150 dark:border-slate-700/80 dark:bg-slate-900/95 ${isEnglish ? 'right-[calc(100%+8px)]' : 'left-[calc(100%+8px)]'}`}
                                                 >
                                                     <div className="pointer-events-none absolute inset-0 bg-white/30 dark:bg-white/[0.02]" />
-                                                    <div className="relative z-10">
+
+                                                    <div className="relative z-10 flex flex-col">
                                                         <button
                                                             type="button"
                                                             onClick={() => onEdit(product)}
-                                                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-xs text-[var(--text-secondary)] transition-colors hover:bg-blue-500/5 hover:text-blue-600 dark:hover:text-blue-400"
+                                                            className="flex w-full items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-2 text-[10px] leading-none text-[var(--text-secondary)] transition-colors hover:bg-blue-500/5 hover:text-blue-600 dark:hover:text-blue-400"
                                                         >
-                                                            <Pencil size={14} className="shrink-0" />
-                                                            {t('products.table.actions.edit')}
+                                                            <Pencil size={12} className="shrink-0" />
+                                                            <span>{t('products.table.actions.edit')}</span>
                                                         </button>
+
                                                         <button
                                                             type="button"
                                                             onClick={() => onDelete(product)}
-                                                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-xs text-rose-500 transition-colors hover:bg-rose-500/5 dark:text-rose-400"
+                                                            className="flex w-full items-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-2 text-[10px] leading-none text-rose-500 transition-colors hover:bg-rose-500/5 dark:text-rose-400"
                                                         >
-                                                            <Trash2 size={14} className="shrink-0" />
-                                                            {t('products.table.actions.delete')}
+                                                            <Trash2 size={12} className="shrink-0" />
+                                                            <span>{t('products.table.actions.delete')}</span>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -326,97 +409,128 @@ function DesktopTable({
     );
 }
 
-function PriceCell({ value, currency, language, isEnglish }) {
-    return (
-        <td className="whitespace-nowrap px-4 py-4">
-            <div className="flex items-baseline gap-1">
-                <span dir={isEnglish ? 'ltr' : 'rtl'} className="number-font text-xs font-medium text-[var(--text-secondary)]">
-                    {formatNumber(value, language)}
-                </span>
-                <span className="text-[9px] text-[var(--text-muted)]">{currency}</span>
-            </div>
-        </td>
-    );
-}
-
 // =========================================================
 // Mobile List
 // =========================================================
 
 function MobileList({ products, t, language, isEnglish, jalaliMonthStyle, onViewDetails, onEdit, onDelete }) {
     const currency = isEnglish ? 'AF' : 'افغانی';
+
     return (
         <div className="divide-y divide-[var(--border)] md:hidden">
             {products.map((product) => {
                 const stockStatus = getStockStatus(product, t);
                 const StatusIcon = stockStatus.icon;
+                const avgCost = Number(toEnglishNumbers(product.avgCost)) || 0;
+                const saleInfo = getPrimarySaleOption(product);
+                const baseUnit = product.baseUnit || '';
+
                 return (
-                    <article key={product.id} className="min-w-0 p-4 transition-colors hover:bg-[var(--surface-muted)]">
-                        <div className="flex min-w-0 items-start justify-between gap-3">
-                            <div className="flex min-w-0 flex-1 items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-muted)]">
-                                    <Package size={17} className="text-[var(--text-muted)]" />
+                    <article key={product.id} className="min-w-0 p-3.5 transition-colors hover:bg-[var(--surface-muted)]">
+                        <div className="flex min-w-0 items-start justify-between gap-2.5">
+                            <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-muted)]">
+                                    <Package size={15} className="text-[var(--text-muted)]" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="truncate text-xs font-semibold text-[var(--text-primary)]">{product.name}</p>
-                                    <p className="mt-1 truncate text-[10px] text-[var(--text-muted)]">{product.category || '-'}</p>
+                                    <p className="truncate text-[11px] font-medium text-[var(--text-primary)]">
+                                        {product.name}
+                                    </p>
+                                    <p className="mt-0.5 truncate text-[9.5px] text-[var(--text-muted)]">
+                                        {product.category || '-'}
+                                        {baseUnit && <> • {baseUnit}</>}
+                                    </p>
                                 </div>
                             </div>
 
-                            <span className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-lg border px-2 py-1 text-[9px] font-medium whitespace-nowrap ${stockStatus.className}`}>
-                                <span className={`h-1.5 w-1.5 rounded-full ${stockStatus.dotClass}`} />
-                                <StatusIcon size={11} />
+                            <span className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-lg border px-1.5 py-1 text-[9px] font-medium whitespace-nowrap ${stockStatus.className}`}>
+                                <span className={`h-1 w-1 rounded-full ${stockStatus.dotClass}`} />
+                                <StatusIcon size={10} />
                                 {stockStatus.label}
                             </span>
                         </div>
 
-                        <div className="mt-4 space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-3">
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                        <div className="mt-3 space-y-3 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-2.5">
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                                 <MobileField
                                     label={t('products.table.columns.buyPrice')}
-                                    value={formatNumber(product.buyPrice, language)}
+                                    value={formatNumber(avgCost, language)}
                                     suffix={currency}
                                     dir={isEnglish ? 'ltr' : 'rtl'}
                                 />
                                 <MobileField
                                     label={t('products.table.columns.sellPrice')}
-                                    value={formatNumber(product.sellPrice, language)}
-                                    suffix={currency}
+                                    value={saleInfo ? formatNumber(saleInfo.price, language) : '—'}
+                                    suffix={saleInfo ? currency : ''}
                                     strong
                                     alignEnd
                                     dir={isEnglish ? 'ltr' : 'rtl'}
                                 />
                             </div>
 
+                            {saleInfo && (
+                                <>
+                                    <div className="h-px bg-[var(--border)]" />
+                                    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                                        <MobileField
+                                            label={isEnglish ? 'Sale Unit' : 'واحد فروش'}
+                                            value={saleInfo.unit}
+                                            suffix={
+                                                saleInfo.factor !== 1
+                                                    ? `× ${formatDecimal(saleInfo.factor, language)}`
+                                                    : ''
+                                            }
+                                        />
+                                        <MobileField
+                                            label={t('products.table.columns.stock')}
+                                            value={formatNumber(product.stock, language)}
+                                            suffix={baseUnit}
+                                            alignEnd
+                                            dir={isEnglish ? 'ltr' : 'rtl'}
+                                        />
+                                    </div>
+                                </>
+                            )}
+
                             <div className="h-px bg-[var(--border)]" />
 
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                                <MobileField
-                                    label={t('products.table.columns.stock')}
-                                    value={formatNumber(product.stock, language)}
-                                    suffix={product.unit || ''}
-                                    dir={isEnglish ? 'ltr' : 'rtl'}
-                                />
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                                 <MobileField
                                     label={t('products.table.columns.updated')}
                                     value={formatDisplayDate(product.updatedAt, language, jalaliMonthStyle)}
+                                />
+                                <MobileField
+                                    label={isEnglish ? 'Cost / unit' : 'قیمت هر واحد'}
+                                    value={formatNumber(avgCost, language)}
+                                    suffix={`${currency}/${baseUnit}`}
                                     alignEnd
+                                    dir={isEnglish ? 'ltr' : 'rtl'}
                                 />
                             </div>
                         </div>
 
-                        <div className="mt-3 grid grid-cols-[1fr_auto_auto] gap-2">
+                        <div className="mt-2.5 grid grid-cols-[1fr_auto_auto] gap-1.5">
                             <button
                                 type="button"
                                 onClick={() => onViewDetails?.(product)}
-                                className="flex h-10 min-w-0 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-xs text-[var(--text-muted)] transition-all duration-200 hover:border-emerald-500/20 hover:bg-emerald-500/5 hover:text-emerald-500 dark:hover:text-emerald-400"
+                                className="flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-2.5 text-[11px] text-[var(--text-muted)] transition-all duration-200 hover:border-emerald-500/20 hover:bg-emerald-500/5 hover:text-emerald-500 dark:hover:text-emerald-400"
                             >
-                                <Eye size={15} className="shrink-0" />
+                                <Eye size={14} className="shrink-0" />
                                 <span className="truncate">{t('products.table.actions.details')}</span>
                             </button>
 
-                            <MobileAction onClick={() => onEdit(product)} icon={Pencil} tone="blue" label={t('products.table.actions.edit')} />
-                            <MobileAction onClick={() => onDelete(product)} icon={Trash2} tone="rose" label={t('products.table.actions.delete')} />
+                            <MobileAction
+                                onClick={() => onEdit(product)}
+                                icon={Pencil}
+                                tone="blue"
+                                label={t('products.table.actions.edit')}
+                            />
+                            <MobileAction
+                                onClick={() => onDelete(product)}
+                                icon={Trash2}
+                                tone="rose"
+                                label={t('products.table.actions.delete')}
+                            />
                         </div>
                     </article>
                 );
@@ -431,25 +545,30 @@ function MobileField({ label, value, suffix, strong, alignEnd, dir }) {
             <p className="text-[9px] text-[var(--text-muted)]">{label}</p>
             <p
                 dir={dir}
-                className={`mt-1 truncate ${strong ? 'number-font text-xs font-bold text-[var(--text-primary)]' : 'text-xs text-[var(--text-secondary)]'}`}
+                className={`mt-0.5 truncate text-[11px] ${strong ? 'number-font font-medium text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}
             >
                 {value}
-                {suffix && <span className="ms-1 font-sans text-[9px] font-normal text-[var(--text-muted)]">{suffix}</span>}
+                {suffix && (
+                    <span className="ms-1 font-sans text-[9px] font-normal text-[var(--text-muted)]">
+                        {suffix}
+                    </span>
+                )}
             </p>
         </div>
     );
 }
 
 function MobileAction({ onClick, icon: Icon, tone, label }) {
+    const toneClass = MOBILE_ACTION_TONES[tone] || MOBILE_ACTION_TONES.blue;
     return (
         <button
             type="button"
             onClick={onClick}
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] transition-all duration-200 hover:border-${tone}-500/20 hover:bg-${tone}-500/5 hover:text-${tone}-500 dark:hover:text-${tone}-400`}
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] transition-all duration-200 ${toneClass}`}
             title={label}
             aria-label={label}
         >
-            <Icon size={15} />
+            <Icon size={14} />
         </button>
     );
 }
@@ -473,7 +592,7 @@ function TableEmpty({ t }) {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)]">
                 <Package size={26} className="text-[var(--text-muted)]" />
             </div>
-            <h3 className="mt-4 text-sm font-semibold text-[var(--text-primary)]">
+            <h3 className="mt-4 text-sm font-medium text-[var(--text-primary)]">
                 {t('products.table.empty.title')}
             </h3>
             <p className="mt-2 max-w-md text-[11px] leading-5 text-[var(--text-muted)]">

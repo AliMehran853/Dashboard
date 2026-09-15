@@ -4,7 +4,6 @@ import { TrendingUp, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getSales } from '../../services/salesService';
 
-// ---------- helpers ----------
 const getSaleDate = (sale) => sale?.date || sale?.createdAt || null;
 const getSaleTotal = (sale) => {
     if (sale?.total != null) { const n = Number(sale.total); if (Number.isFinite(n)) return n; }
@@ -113,7 +112,6 @@ function SalesChart() {
 
     const fmt = (v) => Number(v || 0).toLocaleString(isEnglish ? 'en-US' : 'fa-IR');
 
-    // palette-aware tokens
     const theme = useMemo(() => ({
         accent: getCssVar('--accent-500', '#10b981'),
         warning: getCssVar('--warning', '#f59e0b'),
@@ -130,10 +128,13 @@ function SalesChart() {
     const options = useMemo(() => ({
         chart: {
             type: 'area', background: 'transparent',
-            toolbar: { show: false }, zoom: { enabled: false },
+            toolbar: { show: false },
+            zoom: { enabled: false },
+            selection: { enabled: false },
+            brush: { enabled: false },
             fontFamily: 'inherit', foreColor: theme.text,
             animations: { enabled: false },
-            redrawOnWindowResize: true, redrawOnParentResize: false,
+            redrawOnWindowResize: true, redrawOnParentResize: true,
         },
         colors: [theme.accent, theme.warning],
         stroke: { curve: 'smooth', width: 2.5 },
@@ -168,7 +169,10 @@ function SalesChart() {
         },
         tooltip: {
             theme: theme.tooltip,
-            shared: true, intersect: false,
+            shared: false,
+            intersect: true,
+            followCursor: false,
+            fixed: { enabled: false },
             y: { formatter: (value) => `${fmt(value)} ${t('common.currency')}` },
         },
         legend: {
@@ -202,7 +206,6 @@ function SalesChart() {
 
     return (
         <section dir={isEnglish ? 'ltr' : 'rtl'} className="ui-card min-w-0 overflow-hidden p-4 sm:p-5 lg:p-6">
-            {/* header */}
             <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                     <div className="flex items-center gap-2">

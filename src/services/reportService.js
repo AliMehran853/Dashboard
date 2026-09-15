@@ -3,11 +3,9 @@ import {
     initializeDatabase,
 } from '../database/db';
 
-
 // =========================================================
 // Report Service
 // =========================================================
-
 
 // =========================================================
 // Helpers
@@ -17,748 +15,251 @@ import {
 // Sale Date
 // ---------------------------------------------------------
 
-const getSaleDate = (
-    sale
-) => {
-
-    return (
-        sale?.date ||
-        sale?.createdAt ||
-        sale?.updatedAt ||
-        null
-    );
-
-};
-
+const getSaleDate = (sale) =>
+    sale?.date ||
+    sale?.createdAt ||
+    sale?.updatedAt ||
+    null;
 
 // ---------------------------------------------------------
 // Sale Amount
 // ---------------------------------------------------------
 
-const getSaleAmount = (
-    sale
-) => {
+const getSaleAmount = (sale) => {
+    if (!sale) return 0;
 
-    if (!sale) {
-
-        return 0;
-
-    }
-
-
-    // =====================================================
-    // Direct Amount
-    // =====================================================
-
+    // ─── Direct amount candidates ───
     const amountCandidates = [
-
         sale.total,
-
         sale.totalAmount,
-
         sale.totalPrice,
-
         sale.amount,
-
         sale.saleAmount,
-
         sale.finalAmount,
-
         sale.finalPrice,
-
         sale.payableAmount,
-
         sale.grandTotal,
-
     ];
 
-
-    for (
-        const candidate of
-        amountCandidates
-    ) {
-
-        if (
-            candidate === null ||
-            candidate === undefined ||
-            candidate === ''
-        ) {
-
-            continue;
-
-        }
-
-
-        const number =
-            Number(
-                candidate
-            );
-
-
-        if (
-            Number.isFinite(
-                number
-            )
-        ) {
-
-            return number;
-
-        }
-
+    for (const candidate of amountCandidates) {
+        if (candidate === null || candidate === undefined || candidate === '') continue;
+        const number = Number(candidate);
+        if (Number.isFinite(number)) return number;
     }
 
-
-    // =====================================================
-    // Price × Quantity
-    // =====================================================
-
-    const price =
-        Number(
-            sale.sellPrice ??
-            sale.price ??
-            sale.unitPrice ??
-            0
-        );
-
-
-    const quantity =
-        Number(
-            sale.quantity ??
-            sale.qty ??
-            1
-        );
-
-
-    if (
-        Number.isFinite(price) &&
-        Number.isFinite(quantity)
-    ) {
-
-        return (
-            price *
-            quantity
-        );
-
-    }
-
-
-    // =====================================================
-    // Multiple Items
-    // =====================================================
-
-    if (
-        Array.isArray(
-            sale.items
-        )
-    ) {
-
-        return sale.items.reduce(
-            (
-                total,
-                item
-            ) => {
-
-                const itemPrice =
-                    Number(
-                        item?.sellPrice ??
-                        item?.price ??
-                        item?.unitPrice ??
-                        0
-                    );
-
-
-                const itemQuantity =
-                    Number(
-                        item?.quantity ??
-                        item?.qty ??
-                        1
-                    );
-
-
-                if (
-                    !Number.isFinite(
-                        itemPrice
-                    ) ||
-                    !Number.isFinite(
-                        itemQuantity
-                    )
-                ) {
-
-                    return total;
-
-                }
-
-
-                return (
-                    total +
-                    (
-                        itemPrice *
-                        itemQuantity
-                    )
-                );
-
-            },
-            0
-        );
-
-    }
-
-
-    return 0;
-
-};
-
-
-// ---------------------------------------------------------
-// Sale Quantity
-// ---------------------------------------------------------
-
-const getSaleQuantity = (
-    sale
-) => {
-
-    const quantity =
-        Number(
-            sale?.quantity ??
-            sale?.qty
-        );
-
-
-    if (
-        Number.isFinite(
-            quantity
-        )
-    ) {
-
-        return quantity;
-
-    }
-
-
-    if (
-        Array.isArray(
-            sale?.items
-        )
-    ) {
-
-        return sale.items.reduce(
-            (
-                total,
-                item
-            ) => {
-
-                const itemQuantity =
-                    Number(
-                        item?.quantity ??
-                        item?.qty ??
-                        0
-                    );
-
-
-                return (
-                    total +
-                    (
-                        Number.isFinite(
-                            itemQuantity
-                        )
-                            ? itemQuantity
-                            : 0
-                    )
-                );
-
-            },
-            0
-        );
-
-    }
-
-
-    return 0;
-
-};
-
-
-// ---------------------------------------------------------
-// Start Of Day
-// ---------------------------------------------------------
-
-const startOfDay = (
-    date
-) => {
-
-    const result =
-        new Date(
-            date
-        );
-
-
-    result.setHours(
-        0,
-        0,
-        0,
+    // ─── Price × Quantity fallback ───
+    const price = Number(
+        sale.sellPrice ??
+        sale.price ??
+        sale.unitPrice ??
         0
     );
+    const quantity = Number(sale.quantity ?? sale.qty ?? 1);
 
+    if (Number.isFinite(price) && Number.isFinite(quantity)) {
+        return price * quantity;
+    }
 
-    return result;
+    // ─── Multiple items fallback ───
+    if (Array.isArray(sale.items)) {
+        return sale.items.reduce((total, item) => {
+            const itemPrice = Number(
+                item?.sellPrice ??
+                item?.price ??
+                item?.unitPrice ??
+                0
+            );
+            const itemQuantity = Number(item?.quantity ?? item?.qty ?? 1);
 
+            if (!Number.isFinite(itemPrice) || !Number.isFinite(itemQuantity)) {
+                return total;
+            }
+            return total + itemPrice * itemQuantity;
+        }, 0);
+    }
+
+    return 0;
 };
 
-
 // ---------------------------------------------------------
-// End Of Day
+// Sale Quantity (in BASE units)
 // ---------------------------------------------------------
 
-const endOfDay = (
-    date
-) => {
+/**
+ * مقدار فروش بر حسب واحد پایه (base unit).
+ *
+ * In the new multi-unit architecture, a sale record has:
+ *   - quantity:      in the SALE unit (e.g. 5 cartons)
+ *   - saleFactor:    pieces per sale unit (e.g. 12)
+ *   - quantityInBase: quantity × saleFactor (e.g. 60 pieces)
+ *
+ * For correct aggregation across mixed sale units, we MUST use
+ * quantityInBase. The other branches are legacy fallbacks.
+ */
+const getSaleQuantity = (sale) => {
+    // ─── Preferred: enriched records ───
+    const inBase = Number(sale?.quantityInBase);
+    if (Number.isFinite(inBase) && inBase > 0) return inBase;
 
-    const result =
-        new Date(
-            date
-        );
+    // ─── Fallback: reconstruct from quantity × factor ───
+    const q = Number(sale?.quantity ?? sale?.qty);
+    const f = Number(sale?.saleFactor) || 1;
+    if (Number.isFinite(q)) return q * f;
 
+    // ─── Legacy: multiple items ───
+    if (Array.isArray(sale?.items)) {
+        return sale.items.reduce((total, item) => {
+            const itemQuantity = Number(item?.quantity ?? item?.qty ?? 0);
+            return total + (Number.isFinite(itemQuantity) ? itemQuantity : 0);
+        }, 0);
+    }
 
-    result.setHours(
-        23,
-        59,
-        59,
-        999
-    );
-
-
-    return result;
-
+    return 0;
 };
 
+// ---------------------------------------------------------
+// Date bounds
+// ---------------------------------------------------------
+
+const startOfDay = (date) => {
+    const result = new Date(date);
+    result.setHours(0, 0, 0, 0);
+    return result;
+};
+
+const endOfDay = (date) => {
+    const result = new Date(date);
+    result.setHours(23, 59, 59, 999);
+    return result;
+};
 
 // ---------------------------------------------------------
 // Local Date Key
 // ---------------------------------------------------------
 
-const getLocalDateKey = (
-    date
-) => {
-
-    const year =
-        date.getFullYear();
-
-
-    const month =
-        String(
-            date.getMonth() + 1
-        ).padStart(
-            2,
-            '0'
-        );
-
-
-    const day =
-        String(
-            date.getDate()
-        ).padStart(
-            2,
-            '0'
-        );
-
-
-    return (
-        `${year}-${month}-${day}`
-    );
-
+const getLocalDateKey = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
-
 
 // ---------------------------------------------------------
 // Period Range
 // ---------------------------------------------------------
 
-const getPeriodRange = (
-    period
-) => {
+/**
+ * Returns { start, end } Date bounds for a period key.
+ *
+ * Supported keys:
+ *   - 'today'     → today
+ *   - 'yesterday' → yesterday
+ *   - 'week'      → last 7 days (default)
+ *   - 'month'     → current month so far
+ *   - 'year'      → current year so far
+ *   - 'all'       → last 365 days (capped for trend-chart performance)
+ *   - unknown     → falls back to 'week'
+ */
+const getPeriodRange = (period) => {
+    const today = new Date();
 
-    const today =
-        new Date();
-
-
-    // =====================================================
-    // Today
-    // =====================================================
-
-    if (
-        period === 'today'
-    ) {
-
-        return {
-
-            start:
-                startOfDay(
-                    today
-                ),
-
-            end:
-                endOfDay(
-                    today
-                ),
-
-        };
-
+    // ─── Today ───
+    if (period === 'today') {
+        return { start: startOfDay(today), end: endOfDay(today) };
     }
 
-
-    // =====================================================
-    // Yesterday
-    // =====================================================
-
-    if (
-        period === 'yesterday'
-    ) {
-
-        const yesterday =
-            new Date(
-                today
-            );
-
-
-        yesterday.setDate(
-            yesterday.getDate() - 1
-        );
-
-
-        return {
-
-            start:
-                startOfDay(
-                    yesterday
-                ),
-
-            end:
-                endOfDay(
-                    yesterday
-                ),
-
-        };
-
+    // ─── Yesterday ───
+    if (period === 'yesterday') {
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        return { start: startOfDay(yesterday), end: endOfDay(yesterday) };
     }
 
-
-    // =====================================================
-    // Week
-    // =====================================================
-
-    if (
-        period === 'week'
-    ) {
-
-        const start =
-            new Date(
-                today
-            );
-
-
-        start.setDate(
-            start.getDate() - 6
-        );
-
-
-        return {
-
-            start:
-                startOfDay(
-                    start
-                ),
-
-            end:
-                endOfDay(
-                    today
-                ),
-
-        };
-
+    // ─── Month ───
+    if (period === 'month') {
+        const start = new Date(today.getFullYear(), today.getMonth(), 1);
+        return { start: startOfDay(start), end: endOfDay(today) };
     }
 
-
-    // =====================================================
-    // Month
-    // =====================================================
-
-    if (
-        period === 'month'
-    ) {
-
-        const start =
-            new Date(
-                today.getFullYear(),
-                today.getMonth(),
-                1
-            );
-
-
-        return {
-
-            start:
-                startOfDay(
-                    start
-                ),
-
-            end:
-                endOfDay(
-                    today
-                ),
-
-        };
-
+    // ─── Year ───
+    if (period === 'year') {
+        const start = new Date(today.getFullYear(), 0, 1);
+        return { start: startOfDay(start), end: endOfDay(today) };
     }
 
-
-    // =====================================================
-    // Year
-    // =====================================================
-
-    if (
-        period === 'year'
-    ) {
-
-        const start =
-            new Date(
-                today.getFullYear(),
-                0,
-                1
-            );
-
-
-        return {
-
-            start:
-                startOfDay(
-                    start
-                ),
-
-            end:
-                endOfDay(
-                    today
-                ),
-
-        };
-
+    // ─── All (capped to last 365 days) ───
+    // We cap "all" because the trend chart generates one point per day
+    // and thousands of points would freeze the browser.
+    if (period === 'all') {
+        const start = new Date(today);
+        start.setDate(start.getDate() - 364);
+        return { start: startOfDay(start), end: endOfDay(today) };
     }
 
-
-    // =====================================================
-    // Default = Week
-    // =====================================================
-
-    const start =
-        new Date(
-            today
-        );
-
-
-    start.setDate(
-        start.getDate() - 6
-    );
-
-
-    return {
-
-        start:
-            startOfDay(
-                start
-            ),
-
-        end:
-            endOfDay(
-                today
-            ),
-
-    };
-
+    // ─── Week (default) ───
+    const start = new Date(today);
+    start.setDate(start.getDate() - 6);
+    return { start: startOfDay(start), end: endOfDay(today) };
 };
-
 
 // ---------------------------------------------------------
 // Normalize Payment Type
 // ---------------------------------------------------------
 
-const normalizePaymentType = (
-    paymentType
-) => {
+const normalizePaymentType = (paymentType) =>
+    String(paymentType || '').trim().toLowerCase();
 
-    return String(
-        paymentType || ''
-    )
-        .trim()
-        .toLowerCase();
-
+const isCashPayment = (paymentType) => {
+    const value = normalizePaymentType(paymentType);
+    return value === 'cash' || value === 'نقدی' || value === 'نقد';
 };
 
-
-// ---------------------------------------------------------
-// Is Cash
-// ---------------------------------------------------------
-
-const isCashPayment = (
-    paymentType
-) => {
-
-    const value =
-        normalizePaymentType(
-            paymentType
-        );
-
-
-    return (
-
-        value === 'cash' ||
-
-        value === 'نقدی' ||
-
-        value === 'نقد'
-
-    );
-
+const isCreditPayment = (paymentType) => {
+    const value = normalizePaymentType(paymentType);
+    return value === 'credit' || value === 'نسیه';
 };
 
-
 // ---------------------------------------------------------
-// Is Credit
-// ---------------------------------------------------------
-
-const isCreditPayment = (
-    paymentType
-) => {
-
-    const value =
-        normalizePaymentType(
-            paymentType
-        );
-
-
-    return (
-
-        value === 'credit' ||
-
-        value === 'نسیه'
-
-    );
-
-};
-
-
-// ---------------------------------------------------------
-// Normalize Sale Date
+// Sale Date Parser
 // ---------------------------------------------------------
 
-const parseSaleDate = (
-    sale
-) => {
+const parseSaleDate = (sale) => {
+    const value = getSaleDate(sale);
+    if (!value) return null;
 
-    const value =
-        getSaleDate(
-            sale
-        );
-
-
-    if (!value) {
-
-        return null;
-
-    }
-
-
-    const date =
-        new Date(
-            value
-        );
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return null;
-
-    }
-
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
 
     return date;
-
 };
 
-
 // ---------------------------------------------------------
-// Normalize Search
-// ---------------------------------------------------------
-
-const normalizeSearch = (
-    value
-) => {
-
-    return String(
-        value || ''
-    )
-        .trim()
-        .toLowerCase();
-
-};
-
-
-// ---------------------------------------------------------
-// Sale Matches Search
+// Search
 // ---------------------------------------------------------
 
-const saleMatchesSearch = (
-    sale,
-    search
-) => {
+const normalizeSearch = (value) =>
+    String(value || '').trim().toLowerCase();
 
-    const normalizedSearch =
-        normalizeSearch(
-            search
-        );
-
-
-    if (
-        !normalizedSearch
-    ) {
-
-        return true;
-
-    }
-
+const saleMatchesSearch = (sale, search) => {
+    const normalizedSearch = normalizeSearch(search);
+    if (!normalizedSearch) return true;
 
     const searchableText = [
-
         sale?.productName,
-
         sale?.category,
-
         sale?.customerName,
-
         sale?.customerPhone,
-
         sale?.note,
-
         sale?.paymentType,
-
+        sale?.saleUnit,
+        sale?.baseUnit,
     ]
-        .filter(
-            Boolean
-        )
-        .join(
-            ' '
-        )
+        .filter(Boolean)
+        .join(' ')
         .toLowerCase();
 
-
-    return searchableText.includes(
-        normalizedSearch
-    );
-
+    return searchableText.includes(normalizedSearch);
 };
-
 
 // =========================================================
 // Main Report
@@ -770,580 +271,177 @@ export const getSalesReport = async ({
     category = 'all',
     search = '',
 } = {}) => {
-
     await initializeDatabase();
 
+    // ═══ Load all sales ═══
+    const allSales = await db.sales.toArray();
 
-    // =====================================================
-    // Get All Sales
-    // =====================================================
+    // ═══ Period range ═══
+    const { start, end } = getPeriodRange(period);
 
-    const allSales =
-        await db.sales.toArray();
+    // ═══ Normalize filters ═══
+    const normalizedPaymentType = normalizePaymentType(paymentType);
+    const normalizedSearch = normalizeSearch(search);
 
+    // ═══ Filter ═══
+    const filteredSales = allSales.filter((sale) => {
+        // Date
+        const saleDate = parseSaleDate(sale);
+        if (!saleDate) return false;
+        if (saleDate < start || saleDate > end) return false;
 
-    // =====================================================
-    // Period
-    // =====================================================
+        // Payment
+        if (normalizedPaymentType !== 'all') {
+            const salePayment = normalizePaymentType(sale?.paymentType);
+            if (salePayment !== normalizedPaymentType) return false;
+        }
 
-    const {
-        start,
-        end,
-    } =
-        getPeriodRange(
-            period
-        );
+        // Category
+        if (category !== 'all') {
+            const saleCategory = String(sale?.category || '').trim();
+            if (saleCategory !== String(category).trim()) return false;
+        }
 
+        // Search
+        if (normalizedSearch && !saleMatchesSearch(sale, normalizedSearch)) {
+            return false;
+        }
 
-    // =====================================================
-    // Normalize Filters
-    // =====================================================
+        return true;
+    });
 
-    const normalizedPaymentType =
-        normalizePaymentType(
-            paymentType
-        );
-
-
-    const normalizedSearch =
-        normalizeSearch(
-            search
-        );
-
-
-    // =====================================================
-    // Filter Sales
-    // =====================================================
-
-    const filteredSales =
-        allSales.filter(
-            (sale) => {
-
-                // -----------------------------------------
-                // Date
-                // -----------------------------------------
-
-                const saleDate =
-                    parseSaleDate(
-                        sale
-                    );
-
-
-                if (!saleDate) {
-
-                    return false;
-
-                }
-
-
-                if (
-                    saleDate < start ||
-                    saleDate > end
-                ) {
-
-                    return false;
-
-                }
-
-
-                // -----------------------------------------
-                // Payment
-                // -----------------------------------------
-
-                if (
-                    normalizedPaymentType !==
-                    'all'
-                ) {
-
-                    const salePayment =
-                        normalizePaymentType(
-                            sale?.paymentType
-                        );
-
-
-                    if (
-                        salePayment !==
-                        normalizedPaymentType
-                    ) {
-
-                        return false;
-
-                    }
-
-                }
-
-
-                // -----------------------------------------
-                // Category
-                // -----------------------------------------
-
-                if (
-                    category !== 'all'
-                ) {
-
-                    const saleCategory =
-                        String(
-                            sale?.category ||
-                            ''
-                        ).trim();
-
-
-                    if (
-                        saleCategory !==
-                        String(
-                            category
-                        ).trim()
-                    ) {
-
-                        return false;
-
-                    }
-
-                }
-
-
-                // -----------------------------------------
-                // Search
-                // -----------------------------------------
-
-                if (
-                    normalizedSearch
-                ) {
-
-                    if (
-                        !saleMatchesSearch(
-                            sale,
-                            normalizedSearch
-                        )
-                    ) {
-
-                        return false;
-
-                    }
-
-                }
-
-
-                return true;
-
-            }
-        );
-
-
-    // =====================================================
-    // Statistics
-    // =====================================================
-
+    // ═══ Statistics ═══
     let totalRevenue = 0;
-
     let cashSales = 0;
-
     let creditSales = 0;
-
     let totalItems = 0;
 
+    filteredSales.forEach((sale) => {
+        const amount = getSaleAmount(sale);
+        totalRevenue += amount;
 
-    filteredSales.forEach(
-        (sale) => {
-
-            // ---------------------------------------------
-            // Amount
-            // ---------------------------------------------
-
-            const amount =
-                getSaleAmount(
-                    sale
-                );
-
-
-            totalRevenue +=
-                amount;
-
-
-            // ---------------------------------------------
-            // Payment
-            // ---------------------------------------------
-
-            if (
-                isCashPayment(
-                    sale?.paymentType
-                )
-            ) {
-
-                cashSales +=
-                    amount;
-
-            } else if (
-                isCreditPayment(
-                    sale?.paymentType
-                )
-            ) {
-
-                creditSales +=
-                    amount;
-
-            } else {
-
-                // Unknown payment types are treated as cash
-                // to keep the financial total consistent.
-
-                cashSales +=
-                    amount;
-
-            }
-
-
-            // ---------------------------------------------
-            // Quantity
-            // ---------------------------------------------
-
-            totalItems +=
-                getSaleQuantity(
-                    sale
-                );
-
+        if (isCashPayment(sale?.paymentType)) {
+            cashSales += amount;
+        } else if (isCreditPayment(sale?.paymentType)) {
+            creditSales += amount;
+        } else {
+            // Unknown → treat as cash to keep financial totals consistent
+            cashSales += amount;
         }
-    );
 
+        totalItems += getSaleQuantity(sale);
+    });
 
-    // =====================================================
-    // Transactions
-    // =====================================================
+    // ═══ Transactions ═══
+    const totalTransactions = filteredSales.length;
 
-    const totalTransactions =
-        filteredSales.length;
+    // ═══ Average Sale ═══
+    const averageSale = totalTransactions > 0
+        ? Math.round(totalRevenue / totalTransactions)
+        : 0;
 
-
-    // =====================================================
-    // Average Sale
-    // =====================================================
-
-    const averageSale =
-        totalTransactions > 0
-
-            ? Math.round(
-                totalRevenue /
-                totalTransactions
-            )
-
-            : 0;
-
-
-    // =====================================================
-    // Sales Trend
-    // =====================================================
-
+    // ═══ Sales trend (per-day buckets) ═══
     const salesByDate = {};
 
+    filteredSales.forEach((sale) => {
+        const date = parseSaleDate(sale);
+        if (!date) return;
 
-    filteredSales.forEach(
-        (sale) => {
-
-            const date =
-                parseSaleDate(
-                    sale
-                );
-
-
-            if (!date) {
-
-                return;
-
-            }
-
-
-            const key =
-                getLocalDateKey(
-                    date
-                );
-
-
-            if (
-                !salesByDate[key]
-            ) {
-
-                salesByDate[key] =
-                    0;
-
-            }
-
-
-            salesByDate[key] +=
-                getSaleAmount(
-                    sale
-                );
-
-        }
-    );
-
-
-    // =====================================================
-    // Build Trend
-    // =====================================================
+        const key = getLocalDateKey(date);
+        if (!salesByDate[key]) salesByDate[key] = 0;
+        salesByDate[key] += getSaleAmount(sale);
+    });
 
     const salesTrend = [];
+    const current = new Date(start);
 
+    while (current <= end) {
+        const key = getLocalDateKey(current);
 
-    const current =
-        new Date(
-            start
-        );
-
-
-    while (
-        current <= end
-    ) {
-
-        const key =
-            getLocalDateKey(
-                current
-            );
-
-
-        const dayName =
-            current.toLocaleDateString(
-                'fa-AF',
-                {
-                    weekday:
-                        'long',
-                }
-            );
-
-
-        salesTrend.push({
-
-            date:
-                dayName,
-
-            isoDate:
-                key,
-
-            sales:
-                salesByDate[key] ||
-                0,
-
+        const dayName = current.toLocaleDateString('fa-AF', {
+            weekday: 'long',
         });
 
+        salesTrend.push({
+            date: dayName,
+            isoDate: key,
+            sales: salesByDate[key] || 0,
+        });
 
-        current.setDate(
-            current.getDate() + 1
-        );
-
+        current.setDate(current.getDate() + 1);
     }
 
-
-    // =====================================================
-    // Payment Distribution
-    // =====================================================
-
+    // ═══ Payment distribution ═══
     const paymentDistribution = [
-
-        {
-
-            name:
-                'نقدی',
-
-            value:
-                cashSales,
-
-        },
-
-        {
-
-            name:
-                'نسیه',
-
-            value:
-                creditSales,
-
-        },
-
+        { name: 'نقدی', value: cashSales },
+        { name: 'نسیه', value: creditSales },
     ];
 
-
-    // =====================================================
-    // Category Sales
-    // =====================================================
-
+    // ═══ Category sales ═══
     const categoryMap = {};
 
+    filteredSales.forEach((sale) => {
+        const saleCategory = String(sale?.category || '').trim();
+        const categoryName = saleCategory || 'بدون دسته‌بندی';
+        const amount = getSaleAmount(sale);
 
-    filteredSales.forEach(
-        (sale) => {
+        if (!categoryMap[categoryName]) categoryMap[categoryName] = 0;
+        categoryMap[categoryName] += amount;
+    });
 
-            const saleCategory =
-                String(
-                    sale?.category ||
-                    ''
-                ).trim();
+    const categorySales = Object.entries(categoryMap)
+        .map(([categoryName, sales]) => ({
+            category: categoryName,
+            sales,
+        }))
+        .sort((a, b) => b.sales - a.sales);
 
+    // ═══ Best category ═══
+    const bestCategory = categorySales[0];
 
-            const categoryName =
-                saleCategory ||
-                'بدون دسته‌بندی';
-
-
-            const amount =
-                getSaleAmount(
-                    sale
-                );
-
-
-            if (
-                !categoryMap[
-                    categoryName
-                ]
-            ) {
-
-                categoryMap[
-                    categoryName
-                ] = 0;
-
-            }
-
-
-            categoryMap[
-                categoryName
-            ] +=
-                amount;
-
-        }
-    );
-
-
-    const categorySales =
-        Object.entries(
-            categoryMap
-        )
-            .map(
-                ([
-                    categoryName,
-                    sales,
-                ]) => ({
-
-                    category:
-                        categoryName,
-
-                    sales:
-                        sales,
-
-                })
-            )
-            .sort(
-                (
-                    first,
-                    second
-                ) =>
-                    second.sales -
-                    first.sales
-            );
-
-
-    // =====================================================
-    // Best Category
-    // =====================================================
-
-    const bestCategory =
-        categorySales[0];
-
-
-    // =====================================================
-    // Return
-    // =====================================================
-
+    // ═══ Return ═══
     return {
-
         statistics: {
-
-            // -------------------------------------------------
-            // IMPORTANT:
-            //
-            // totalSales = COUNT
-            // totalRevenue = MONEY
-            // -------------------------------------------------
-
-            totalSales:
-                totalTransactions,
-
-            totalTransactions:
-                totalTransactions,
-
-            totalRevenue:
-                totalRevenue,
-
-            cashSales:
-                cashSales,
-
-            creditSales:
-                creditSales,
-
+            // NOTE:
+            //   totalSales / totalTransactions = COUNT (number of transactions)
+            //   totalRevenue                   = MONEY
+            totalSales: totalTransactions,
+            totalTransactions,
+            totalRevenue,
+            cashSales,
+            creditSales,
         },
-
 
         salesTrend,
-
-
         paymentDistribution,
-
-
         categorySales,
 
-
         summary: {
-
-            bestCategory:
-                bestCategory?.category ||
-                '-',
-
-            bestCategorySales:
-                bestCategory?.sales ||
-                0,
-
-            averageSale:
-                averageSale,
-
-            totalItems:
-                totalItems,
-
+            bestCategory: bestCategory?.category || '-',
+            bestCategorySales: bestCategory?.sales || 0,
+            averageSale,
+            totalItems,
         },
 
-
         // Keep filtered sales for exports
-        rawSales:
-            filteredSales,
-
+        rawSales: filteredSales,
     };
-
 };
-
 
 // =========================================================
 // Categories For Report Filter
 // =========================================================
 
-export const getReportCategories =
-    async () => {
-
-        await initializeDatabase();
-
-
-        return db.categories
-            .orderBy(
-                'name'
-            )
-            .toArray();
-
-    };
-
+export const getReportCategories = async () => {
+    await initializeDatabase();
+    return db.categories.orderBy('name').toArray();
+};
 
 // =========================================================
 // Default Export
 // =========================================================
 
 export default {
-
     getSalesReport,
-
     getReportCategories,
-
 };

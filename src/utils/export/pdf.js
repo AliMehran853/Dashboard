@@ -1443,17 +1443,11 @@ const buildReportPage = ({
 
 
                 <span>
-
                     ${escapeHtml(
-
                         isEnglish
-
-                            ? 'Generated from Taqwa Shop Manager'
-
-                            : 'تهیه‌شده توسط سیستم مدیریت فروشگاه تقوا'
-
+                            ? 'Generated from Shop Manager'
+                            : 'تهیه‌شده توسط سیستم مدیریت فروشگاه'
                     )}
-
                 </span>
 
             </footer>
@@ -1544,12 +1538,6 @@ const getStyles = () => {
         }
 
 
-        /* =====================================================
-           Eyebrow
-           IMPORTANT:
-           Arabic/Persian must NOT use letter-spacing.
-        ====================================================== */
-
         .eyebrow {
 
             font-size: 10px;
@@ -1563,8 +1551,6 @@ const getStyles = () => {
             letter-spacing: 0;
         }
 
-
-        /* English only */
 
         .report-page[dir="ltr"] .eyebrow {
 

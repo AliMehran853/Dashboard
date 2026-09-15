@@ -67,7 +67,6 @@ function PaymentDistributionChart({ data = [] }) {
             text: isDark ? '#94a3b8' : '#64748b',
             title: isDark ? '#f8fafc' : '#0f172a',
             muted: isDark ? '#64748b' : '#94a3b8',
-            stroke: isDark ? '#111827' : '#ffffff',
             tooltip: isDark ? 'dark' : 'light',
         }),
         [isDark]
@@ -84,10 +83,14 @@ function PaymentDistributionChart({ data = [] }) {
                 redrawOnWindowResize: true,
                 redrawOnParentResize: true,
                 zoom: { enabled: false },
+                selection: { enabled: false },
+                brush: { enabled: false },
             },
             labels,
             colors: ['#10b981', '#f59e0b', '#38bdf8', '#8b5cf6'],
-            stroke: { width: 2, colors: [theme.stroke] },
+
+            stroke: { width: 0 },
+
             dataLabels: { enabled: false },
             legend: {
                 show: true,
@@ -141,10 +144,22 @@ function PaymentDistributionChart({ data = [] }) {
             tooltip: {
                 enabled: true,
                 theme: theme.tooltip,
+                shared: false,           /* ✅ FIX: صریحاً false */
+                intersect: true,
+                followCursor: false,
+                fixed: { enabled: false },
                 y: {
                     formatter: (value) => `${formatNumber(value, language)} ${isEnglish ? 'AF' : 'افغانی'}`,
                 },
             },
+            responsive: [
+                {
+                    breakpoint: 640,
+                    options: {
+                        plotOptions: { pie: { expandOnClick: false } },
+                    },
+                },
+            ],
         }),
         [labels, theme, total, t, language, isEnglish]
     );

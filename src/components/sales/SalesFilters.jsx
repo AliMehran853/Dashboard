@@ -3,7 +3,7 @@ import { Search, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getCategories } from '../../database/db';
 
-const DEFAULT_FILTERS = { search: '', paymentType: 'all', category: 'all' };
+const DEFAULT_FILTERS = { search: '', category: 'all' };
 
 const FIELD_CLASS = `
     h-11 w-full rounded-xl
@@ -19,7 +19,7 @@ function SalesFilters({ filters = DEFAULT_FILTERS, onChange }) {
     const { t, i18n } = useTranslation();
     const isEnglish = i18n.language === 'en';
 
-    const { search = '', paymentType = 'all', category = 'all' } = filters;
+    const { search = '', category = 'all' } = filters;
 
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
@@ -52,12 +52,6 @@ function SalesFilters({ filters = DEFAULT_FILTERS, onChange }) {
         };
     }, []);
 
-    const paymentTypes = useMemo(() => [
-        { value: 'all', label: t('sales.filters.allPayments') },
-        { value: 'cash', label: t('sales.filters.cash') },
-        { value: 'credit', label: t('sales.filters.credit') },
-    ], [t, i18n.language]);
-
     const categoryOptions = useMemo(() => {
         const map = new Map();
         categories.forEach((item) => {
@@ -74,13 +68,12 @@ function SalesFilters({ filters = DEFAULT_FILTERS, onChange }) {
         ];
     }, [categories, t, i18n.language]);
 
-    const hasFilters = search.trim() !== '' || paymentType !== 'all' || category !== 'all';
+    const hasFilters = search.trim() !== '' || category !== 'all';
 
     const handleClear = () => onChange?.({ ...DEFAULT_FILTERS });
 
     return (
         <section dir={isEnglish ? 'ltr' : 'rtl'} className="ui-card relative overflow-hidden rounded-2xl p-4">
-            {/* header */}
             <div className="mb-4 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
                 <div className="flex min-w-0 items-center gap-2.5">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)]">
@@ -108,8 +101,8 @@ function SalesFilters({ filters = DEFAULT_FILTERS, onChange }) {
                 )}
             </div>
 
-            {/* fields */}
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            {/* 2 columns: search + category */}
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div className="relative min-w-0">
                     <Search size={16} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-[var(--text-soft)]" />
                     <input
@@ -119,19 +112,6 @@ function SalesFilters({ filters = DEFAULT_FILTERS, onChange }) {
                         placeholder={t('sales.filters.searchPlaceholder')}
                         className={`${FIELD_CLASS} ps-10 pe-4`}
                     />
-                </div>
-
-                <div className="relative min-w-0">
-                    <select
-                        value={paymentType}
-                        onChange={(e) => onChange?.({ ...filters, paymentType: e.target.value })}
-                        className={`${FIELD_CLASS} cursor-pointer appearance-none ps-4 pe-10`}
-                    >
-                        {paymentTypes.map((item) => (
-                            <option key={item.value} value={item.value}>{item.label}</option>
-                        ))}
-                    </select>
-                    <ChevronDown size={16} className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-[var(--text-soft)]" />
                 </div>
 
                 <div className="relative min-w-0">
@@ -149,7 +129,6 @@ function SalesFilters({ filters = DEFAULT_FILTERS, onChange }) {
                 </div>
             </div>
 
-            {/* active filters */}
             {hasFilters && (
                 <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[var(--border-subtle)] pt-4">
                     <span className="text-[10px] text-[var(--text-muted)]">
@@ -160,15 +139,6 @@ function SalesFilters({ filters = DEFAULT_FILTERS, onChange }) {
                         <span className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-[var(--accent-border)] bg-[var(--accent-soft)] px-2.5 py-1.5 text-[10px] text-[var(--accent-600)] dark:text-[var(--accent-300)]">
                             <Search size={11} className="shrink-0" />
                             <span className="max-w-[12rem] truncate">{search}</span>
-                        </span>
-                    )}
-
-                    {paymentType !== 'all' && (
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-2.5 py-1.5 text-[10px] text-[var(--text-muted)]">
-                            {t('sales.filters.payment')}
-                            <span className="text-[var(--text-secondary)]">
-                                {paymentTypes.find((item) => item.value === paymentType)?.label}
-                            </span>
                         </span>
                     )}
 

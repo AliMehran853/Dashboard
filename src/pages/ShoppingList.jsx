@@ -621,6 +621,7 @@ function ShoppingList() {
             className="min-h-full space-y-5 pb-6 text-[var(--text-secondary)]"
         >
             {/* ================= Header ================= */}
+
             <section className="ui-card-tint p-4 sm:p-5 md:p-6">
                 <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 items-center gap-3">
@@ -632,15 +633,7 @@ function ShoppingList() {
                         </div>
 
                         <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                                <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--accent-500)] shadow-[0_0_12px_var(--accent-glow)]" />
-
-                                <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--accent-600)]">
-                                    Taqwa
-                                </span>
-                            </div>
-
-                            <h1 className="mt-2 truncate text-xl font-semibold tracking-[-0.02em] text-[var(--text)] sm:text-2xl lg:text-3xl">
+                            <h1 className="truncate text-xl font-semibold tracking-[-0.02em] text-[var(--text)] sm:text-2xl lg:text-3xl">
                                 {t(
                                     'shoppingList.page.title'
                                 )}
@@ -671,6 +664,7 @@ function ShoppingList() {
             </section>
 
             {/* ================= Error ================= */}
+
             {error && (
                 <div
                     role="alert"
@@ -756,6 +750,7 @@ function ShoppingList() {
                 )}
 
             {/* ================= Delete Modal ================= */}
+
             {deleteItem && (
                 <div
                     dir={direction}
@@ -773,6 +768,7 @@ function ShoppingList() {
                 >
                     <div className="ui-glass-tint relative w-full max-w-md overflow-hidden rounded-2xl border border-[var(--glass-border)] shadow-[var(--shadow-xl)]">
                         {/* Header */}
+
                         <div className="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] px-4 py-4 sm:px-5">
                             <div className="flex min-w-0 items-center gap-3">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-rose-500/10 bg-rose-500/10">
@@ -812,6 +808,7 @@ function ShoppingList() {
                         </div>
 
                         {/* Content */}
+
                         <div className="p-4 sm:p-5">
                             <div className="rounded-xl border border-rose-500/10 bg-rose-500/5 p-4">
                                 <div className="flex items-start gap-3">
@@ -846,6 +843,7 @@ function ShoppingList() {
                         </div>
 
                         {/* Footer */}
+
                         <div className="flex flex-col-reverse gap-2 border-t border-[var(--border-subtle)] bg-[var(--surface-muted)] p-4 sm:flex-row sm:justify-end sm:px-5">
                             <button
                                 type="button"

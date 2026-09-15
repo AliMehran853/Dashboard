@@ -20,6 +20,8 @@ import SalesTrendChart from '../components/reports/SalesTrendChart';
 import PaymentDistributionChart from '../components/reports/PaymentDistributionChart';
 import CategorySalesChart from '../components/reports/CategorySalesChart';
 import ReportsSummary from '../components/reports/ReportsSummary';
+import ReportsSalesTable from '../components/reports/ReportsSalesTable';
+import SaleDetails from '../components/sales/SaleDetails';
 
 import {
     getSalesReport,
@@ -64,8 +66,7 @@ const normalizeReportData = (result) => {
         return createDefaultReportData();
     }
 
-    const fallback =
-        createDefaultReportData();
+    const fallback = createDefaultReportData();
 
     return {
         statistics: {
@@ -75,21 +76,16 @@ const normalizeReportData = (result) => {
 
         salesTrend: asArray(result.salesTrend),
 
-        paymentDistribution:
-            asArray(
-                result.paymentDistribution
-            ),
+        paymentDistribution: asArray(result.paymentDistribution),
 
-        categorySales:
-            asArray(result.categorySales),
+        categorySales: asArray(result.categorySales),
 
         summary: {
             ...fallback.summary,
             ...(result.summary || {}),
         },
 
-        rawSales:
-            asArray(result.rawSales),
+        rawSales: asArray(result.rawSales),
     };
 };
 
@@ -100,56 +96,34 @@ const normalizeReportData = (result) => {
 function Reports() {
     const { t, i18n } = useTranslation();
 
-    const isEnglish = String(
-        i18n.language || 'fa'
-    )
+    const isEnglish = String(i18n.language || 'fa')
         .toLowerCase()
         .startsWith('en');
 
-    const direction = isEnglish
-        ? 'ltr'
-        : 'rtl';
+    const direction = isEnglish ? 'ltr' : 'rtl';
 
-    const [exportOpen, setExportOpen] =
-        useState(false);
-
-    const [exporting, setExporting] =
-        useState(false);
-
-    const [exportError, setExportError] =
-        useState('');
+    const [exportOpen, setExportOpen] = useState(false);
+    const [exporting, setExporting] = useState(false);
+    const [exportError, setExportError] = useState('');
 
     const exportButtonRef = useRef(null);
     const exportMenuRef = useRef(null);
 
-    const [menuStyle, setMenuStyle] =
-        useState({});
+    const [menuStyle, setMenuStyle] = useState({});
 
-    const [search, setSearch] =
-        useState('');
+    const [search, setSearch] = useState('');
+    const [period, setPeriod] = useState('week');
+    const [paymentType, setPaymentType] = useState('all');
+    const [category, setCategory] = useState('all');
 
-    const [period, setPeriod] =
-        useState('week');
+    const [categories, setCategories] = useState([]);
 
-    const [paymentType, setPaymentType] =
-        useState('all');
+    const [reportData, setReportData] = useState(createDefaultReportData());
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    const [category, setCategory] =
-        useState('all');
-
-    const [categories, setCategories] =
-        useState([]);
-
-    const [reportData, setReportData] =
-        useState(
-            createDefaultReportData()
-        );
-
-    const [loading, setLoading] =
-        useState(true);
-
-    const [error, setError] =
-        useState('');
+    // ═══ NEW: selected sale for details modal ═══
+    const [selectedSale, setSelectedSale] = useState(null);
 
     // Categories
     useEffect(() => {
@@ -157,19 +131,13 @@ function Reports() {
 
         (async () => {
             try {
-                const result =
-                    await getReportCategories();
+                const result = await getReportCategories();
 
                 if (!cancelled) {
-                    setCategories(
-                        asArray(result)
-                    );
+                    setCategories(asArray(result));
                 }
             } catch (err) {
-                console.error(
-                    'Failed to load report categories:',
-                    err
-                );
+                console.error('Failed to load report categories:', err);
 
                 if (!cancelled) {
                     setCategories([]);
@@ -191,35 +159,22 @@ function Reports() {
                 setLoading(true);
                 setError('');
 
-                const result =
-                    await getSalesReport({
-                        period,
-                        paymentType,
-                        category,
-                        search,
-                    });
+                const result = await getSalesReport({
+                    period,
+                    paymentType,
+                    category,
+                    search,
+                });
 
                 if (!cancelled) {
-                    setReportData(
-                        normalizeReportData(
-                            result
-                        )
-                    );
+                    setReportData(normalizeReportData(result));
                 }
             } catch (err) {
-                console.error(
-                    'Failed to load report:',
-                    err
-                );
+                console.error('Failed to load report:', err);
 
                 if (!cancelled) {
-                    setReportData(
-                        createDefaultReportData()
-                    );
-
-                    setError(
-                        t('reports.errors.load')
-                    );
+                    setReportData(createDefaultReportData());
+                    setError(t('reports.errors.load'));
                 }
             } finally {
                 if (!cancelled) {
@@ -231,50 +186,30 @@ function Reports() {
         return () => {
             cancelled = true;
         };
-    }, [
-        period,
-        paymentType,
-        category,
-        search,
-        t,
-    ]);
+    }, [period, paymentType, category, search, t]);
 
     // Menu position
     useLayoutEffect(() => {
         if (!exportOpen) return undefined;
 
         const compute = () => {
-            const node =
-                exportButtonRef.current;
-
+            const node = exportButtonRef.current;
             if (!node) return {};
 
-            const rect =
-                node.getBoundingClientRect();
-
+            const rect = node.getBoundingClientRect();
             const margin = 8;
 
             const style = {
                 position: 'fixed',
-                top:
-                    rect.bottom + margin,
+                top: rect.bottom + margin,
                 zIndex: 9999,
             };
 
             if (isEnglish) {
-                style.right = Math.max(
-                    margin,
-                    window.innerWidth -
-                        rect.right
-                );
-
+                style.right = Math.max(margin, window.innerWidth - rect.right);
                 style.left = 'auto';
             } else {
-                style.left = Math.max(
-                    margin,
-                    rect.left
-                );
-
+                style.left = Math.max(margin, rect.left);
                 style.right = 'auto';
             }
 
@@ -283,71 +218,29 @@ function Reports() {
 
         setMenuStyle(compute());
 
-        const reposition = () =>
-            setMenuStyle(compute());
+        const reposition = () => setMenuStyle(compute());
 
-        window.addEventListener(
-            'resize',
-            reposition
-        );
-
-        window.addEventListener(
-            'scroll',
-            reposition,
-            true
-        );
+        window.addEventListener('resize', reposition);
+        window.addEventListener('scroll', reposition, true);
 
         return () => {
-            window.removeEventListener(
-                'resize',
-                reposition
-            );
-
-            window.removeEventListener(
-                'scroll',
-                reposition,
-                true
-            );
+            window.removeEventListener('resize', reposition);
+            window.removeEventListener('scroll', reposition, true);
         };
-    }, [
-        exportOpen,
-        isEnglish,
-    ]);
+    }, [exportOpen, isEnglish]);
 
     // Outside click
     useEffect(() => {
         if (!exportOpen) return undefined;
 
         const handler = (event) => {
-            if (
-                exportMenuRef.current?.contains(
-                    event.target
-                )
-            ) {
-                return;
-            }
-
-            if (
-                exportButtonRef.current?.contains(
-                    event.target
-                )
-            ) {
-                return;
-            }
-
+            if (exportMenuRef.current?.contains(event.target)) return;
+            if (exportButtonRef.current?.contains(event.target)) return;
             setExportOpen(false);
         };
 
-        document.addEventListener(
-            'mousedown',
-            handler
-        );
-
-        return () =>
-            document.removeEventListener(
-                'mousedown',
-                handler
-            );
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
     }, [exportOpen]);
 
     const handleClearFilters = () => {
@@ -362,10 +255,7 @@ function Reports() {
         setExportOpen((v) => !v);
     };
 
-    const runExport = async (
-        fn,
-        fallback
-    ) => {
+    const runExport = async (fn, fallback) => {
         if (exporting) return;
 
         try {
@@ -378,22 +268,14 @@ function Reports() {
                 paymentType,
                 category,
                 search,
-                language:
-                    i18n.language,
+                language: i18n.language,
             });
 
             setExportOpen(false);
         } catch (err) {
-            console.error(
-                'Export failed:',
-                err
-            );
-
+            console.error('Export failed:', err);
             setExportError(
-                t('reports.errors.export', {
-                    defaultValue:
-                        fallback,
-                })
+                t('reports.errors.export', { defaultValue: fallback })
             );
         } finally {
             setExporting(false);
@@ -403,17 +285,13 @@ function Reports() {
     const handleExportExcel = () =>
         runExport(
             exportReportToExcel,
-            isEnglish
-                ? 'Excel export failed.'
-                : 'خروجی اکسل ایجاد نشد.'
+            isEnglish ? 'Excel export failed.' : 'خروجی اکسل ایجاد نشد.'
         );
 
     const handleExportPDF = () =>
         runExport(
             exportReportToPDF,
-            isEnglish
-                ? 'PDF export failed.'
-                : 'خروجی PDF ایجاد نشد.'
+            isEnglish ? 'PDF export failed.' : 'خروجی PDF ایجاد نشد.'
         );
 
     return (
@@ -426,80 +304,42 @@ function Reports() {
                 <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 items-center gap-3">
                         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent-500)]">
-                            <BarChart3
-                                size={20}
-                                strokeWidth={1.9}
-                            />
+                            <BarChart3 size={20} strokeWidth={1.9} />
                         </div>
 
                         <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                                <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--accent-500)] shadow-[0_0_12px_var(--accent-glow)]" />
-
-                                <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--accent-600)]">
-                                    Taqwa
-                                </span>
-                            </div>
-
-                            <h1 className="mt-2 truncate text-xl font-semibold tracking-[-0.02em] text-[var(--text)] sm:text-2xl lg:text-3xl">
-                                {t(
-                                    'reports.page.title'
-                                )}
+                            <h1 className="truncate text-xl font-semibold tracking-[-0.02em] text-[var(--text)] sm:text-2xl lg:text-3xl">
+                                {t('reports.page.title')}
                             </h1>
 
                             <p className="mt-1.5 max-w-2xl text-xs leading-5 text-[var(--text-muted)] sm:text-sm">
-                                {t(
-                                    'reports.page.description'
-                                )}
+                                {t('reports.page.description')}
                             </p>
                         </div>
                     </div>
 
-                    <div
-                        ref={
-                            exportButtonRef
-                        }
-                        className="relative w-full sm:w-auto"
-                    >
+                    <div ref={exportButtonRef} className="relative w-full sm:w-auto">
                         <button
                             type="button"
-                            onClick={
-                                handleExportClick
-                            }
-                            disabled={
-                                loading ||
-                                exporting
-                            }
+                            onClick={handleExportClick}
+                            disabled={loading || exporting}
                             aria-haspopup="menu"
-                            aria-expanded={
-                                exportOpen
-                            }
+                            aria-expanded={exportOpen}
                             className="ui-button-secondary group w-full px-4 text-xs font-medium sm:w-auto"
                         >
                             {exporting ? (
-                                <Loader2
-                                    size={15}
-                                    className="animate-spin"
-                                />
+                                <Loader2 size={15} className="animate-spin" />
                             ) : (
-                                <Download
-                                    size={15}
-                                />
+                                <Download size={15} />
                             )}
 
                             {exporting
-                                ? t(
-                                      'reports.actions.exporting',
-                                      {
-                                          defaultValue:
-                                              isEnglish
-                                                  ? 'Preparing...'
-                                                  : 'در حال آماده‌سازی...',
-                                      }
-                                  )
-                                : t(
-                                      'reports.actions.export'
-                                  )}
+                                ? t('reports.actions.exporting', {
+                                    defaultValue: isEnglish
+                                        ? 'Preparing...'
+                                        : 'در حال آماده‌سازی...',
+                                })
+                                : t('reports.actions.export')}
                         </button>
                     </div>
                 </div>
@@ -509,9 +349,7 @@ function Reports() {
             {exportOpen &&
                 createPortal(
                     <div
-                        ref={
-                            exportMenuRef
-                        }
+                        ref={exportMenuRef}
                         style={menuStyle}
                         data-export-menu="true"
                         className="ui-glass-tint w-64 max-w-[calc(100vw-1rem)] overflow-hidden rounded-2xl border border-[var(--glass-border)] p-1.5 shadow-2xl shadow-black/25 sm:w-72"
@@ -519,9 +357,7 @@ function Reports() {
                         <div className="ui-layer">
                             <div className="border-b border-[var(--border-subtle)] px-3 py-3">
                                 <p className="text-sm font-semibold text-[var(--text)]">
-                                    {t(
-                                        'reports.actions.export'
-                                    )}
+                                    {t('reports.actions.export')}
                                 </p>
 
                                 <p className="mt-1 text-[10px] leading-5 text-[var(--text-muted)]">
@@ -533,15 +369,9 @@ function Reports() {
 
                             <div className="space-y-1 p-1">
                                 <ExportItem
-                                    onClick={
-                                        handleExportExcel
-                                    }
-                                    disabled={
-                                        exporting
-                                    }
-                                    icon={
-                                        FileSpreadsheet
-                                    }
+                                    onClick={handleExportExcel}
+                                    disabled={exporting}
+                                    icon={FileSpreadsheet}
                                     iconClass="border-emerald-500/20 bg-emerald-500/10 text-emerald-500 dark:text-emerald-400"
                                     title="Excel"
                                     description={
@@ -552,15 +382,9 @@ function Reports() {
                                 />
 
                                 <ExportItem
-                                    onClick={
-                                        handleExportPDF
-                                    }
-                                    disabled={
-                                        exporting
-                                    }
-                                    icon={
-                                        FileText
-                                    }
+                                    onClick={handleExportPDF}
+                                    disabled={exporting}
+                                    icon={FileText}
                                     iconClass="border-rose-500/20 bg-rose-500/10 text-rose-500 dark:text-rose-400"
                                     title="PDF"
                                     description={
@@ -576,95 +400,55 @@ function Reports() {
                 )}
 
             {/* ================= Errors ================= */}
-            {exportError && (
-                <ErrorBanner
-                    message={exportError}
-                />
-            )}
-
-            {error && (
-                <ErrorBanner
-                    message={error}
-                />
-            )}
+            {exportError && <ErrorBanner message={exportError} />}
+            {error && <ErrorBanner message={error} />}
 
             {/* ================= Loading / Content ================= */}
             {loading ? (
                 <div className="flex min-h-[400px] flex-col items-center justify-center gap-3 text-[var(--text-muted)]">
                     <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--accent-border)] bg-[var(--accent-soft)]">
-                        <Loader2
-                            size={26}
-                            className="animate-spin text-[var(--accent-500)]"
-                        />
+                        <Loader2 size={26} className="animate-spin text-[var(--accent-500)]" />
                     </div>
 
-                    <span className="text-sm">
-                        {t(
-                            'reports.loading'
-                        )}
-                    </span>
+                    <span className="text-sm">{t('reports.loading')}</span>
                 </div>
             ) : (
                 <>
-                    <ReportsStats
-                        statistics={
-                            reportData.statistics
-                        }
-                    />
+                    <ReportsStats statistics={reportData.statistics} />
 
                     <ReportsFilters
                         search={search}
                         period={period}
-                        paymentType={
-                            paymentType
-                        }
+                        paymentType={paymentType}
                         category={category}
-                        categories={
-                            categories
-                        }
-                        onSearchChange={
-                            setSearch
-                        }
-                        onPeriodChange={
-                            setPeriod
-                        }
-                        onPaymentTypeChange={
-                            setPaymentType
-                        }
-                        onCategoryChange={
-                            setCategory
-                        }
-                        onClearFilters={
-                            handleClearFilters
-                        }
+                        categories={categories}
+                        onSearchChange={setSearch}
+                        onPeriodChange={setPeriod}
+                        onPaymentTypeChange={setPaymentType}
+                        onCategoryChange={setCategory}
+                        onClearFilters={handleClearFilters}
                     />
 
                     <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-                        <SalesTrendChart
-                            data={
-                                reportData.salesTrend
-                            }
-                        />
-
-                        <PaymentDistributionChart
-                            data={
-                                reportData.paymentDistribution
-                            }
-                        />
+                        <SalesTrendChart data={reportData.salesTrend} />
+                        <PaymentDistributionChart data={reportData.paymentDistribution} />
                     </div>
 
-                    <CategorySalesChart
-                        data={
-                            reportData.categorySales
-                        }
-                    />
+                    <CategorySalesChart data={reportData.categorySales} />
 
-                    <ReportsSummary
-                        summary={
-                            reportData.summary
-                        }
-                    />
+                    <ReportsSummary summary={reportData.summary} />
+
+                    {/* ✅ Combined Sales Table (cash + credit) */}
+                    <ReportsSalesTable onViewSale={setSelectedSale} />
                 </>
+            )}
+
+            {/* ✅ Sale Details Modal (reused from Sales page) */}
+            {selectedSale && (
+                <SaleDetails
+                    sale={selectedSale}
+                    onClose={() => setSelectedSale(null)}
+                />
             )}
         </div>
     );
@@ -674,14 +458,7 @@ function Reports() {
 // Small local components
 // =========================================================
 
-function ExportItem({
-    onClick,
-    disabled,
-    icon: Icon,
-    iconClass,
-    title,
-    description,
-}) {
+function ExportItem({ onClick, disabled, icon: Icon, iconClass, title, description }) {
     return (
         <button
             type="button"
@@ -689,17 +466,12 @@ function ExportItem({
             disabled={disabled}
             className="flex w-full items-center gap-3 rounded-xl p-3 text-start transition-all duration-200 hover:bg-[var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-50"
         >
-            <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${iconClass}`}
-            >
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${iconClass}`}>
                 <Icon size={18} />
             </div>
 
             <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-[var(--text)]">
-                    {title}
-                </p>
-
+                <p className="text-sm font-semibold text-[var(--text)]">{title}</p>
                 <p className="mt-0.5 truncate text-[10px] text-[var(--text-muted)]">
                     {description}
                 </p>

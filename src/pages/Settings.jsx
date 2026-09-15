@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import SettingsHeader from '../components/settings/SettingsHeader';
 import StoreSettings from '../components/settings/StoreSettings';
 import CategorySettings from '../components/settings/CategorySettings';
+import UnitsSettings from '../components/settings/UnitsSettings';
 import BackupSettings from '../components/settings/BackupSettings';
 import AppearanceSettings from '../components/settings/AppearanceSettings';
 import NotificationSettings from '../components/settings/NotificationSettings';
@@ -19,6 +20,7 @@ function Settings() {
             <SettingsHeader />
             <StoreSettings />
             <CategorySettings />
+            <UnitsSettings />
             <BackupSettings />
             <AppearanceSettings />
             <NotificationSettings />

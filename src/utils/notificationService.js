@@ -3,20 +3,18 @@ import {
     initializeDatabase,
 } from '../database/db';
 
-
 // =========================================================
 // Storage Keys
 // =========================================================
 
 export const NOTIFICATION_STORAGE_KEY =
-    'taqwa-notifications';
+    'app-notifications';
 
 export const NOTIFICATION_READ_STORAGE_KEY =
-    'taqwa-notifications-read';
+    'app-notifications-read';
 
 const SUCCESS_ACTION_STORAGE_KEY =
-    'taqwa-last-successful-action';
-
+    'app-last-successful-action';
 
 // =========================================================
 // Default Settings
@@ -29,151 +27,114 @@ const DEFAULT_NOTIFICATIONS = {
     successfulActions: true,
 };
 
-
 // =========================================================
 // Notification Settings
 // =========================================================
 
-export const getNotificationSettings = () => {
+export const getNotificationSettings =
+    () => {
+        try {
+            const raw =
+                localStorage.getItem(
+                    NOTIFICATION_STORAGE_KEY
+                );
 
-    try {
+            if (!raw) {
+                return {
+                    ...DEFAULT_NOTIFICATIONS,
+                };
+            }
 
-        const raw =
-            localStorage.getItem(
-                NOTIFICATION_STORAGE_KEY
+            const parsed =
+                JSON.parse(raw);
+
+            if (
+                !parsed ||
+                typeof parsed !==
+                    'object' ||
+                Array.isArray(parsed)
+            ) {
+                return {
+                    ...DEFAULT_NOTIFICATIONS,
+                };
+            }
+
+            return {
+                ...DEFAULT_NOTIFICATIONS,
+
+                lowStock:
+                    parsed.lowStock !== false,
+
+                newSale:
+                    parsed.newSale !== false,
+
+                credit:
+                    parsed.credit !== false,
+
+                successfulActions:
+                    parsed.successfulActions !== false,
+            };
+        } catch (error) {
+            console.error(
+                'Failed to read notification settings:',
+                error
             );
-
-
-        if (!raw) {
 
             return {
                 ...DEFAULT_NOTIFICATIONS,
             };
-
         }
-
-
-        const parsed =
-            JSON.parse(
-                raw
-            );
-
-
-        if (
-            !parsed ||
-            typeof parsed !== 'object' ||
-            Array.isArray(parsed)
-        ) {
-
-            return {
-                ...DEFAULT_NOTIFICATIONS,
-            };
-
-        }
-
-
-        return {
-
-            ...DEFAULT_NOTIFICATIONS,
-
-            lowStock:
-                parsed.lowStock !== false,
-
-            newSale:
-                parsed.newSale !== false,
-
-            credit:
-                parsed.credit !== false,
-
-            successfulActions:
-                parsed.successfulActions !== false,
-
-        };
-
-    } catch (error) {
-
-        console.error(
-            'Failed to read notification settings:',
-            error
-        );
-
-
-        return {
-            ...DEFAULT_NOTIFICATIONS,
-        };
-
-    }
-
-};
-
+    };
 
 // =========================================================
 // Read Notification IDs
 // =========================================================
 
-export const getReadNotificationIds = () => {
+export const getReadNotificationIds =
+    () => {
+        try {
+            const raw =
+                localStorage.getItem(
+                    NOTIFICATION_READ_STORAGE_KEY
+                );
 
-    try {
+            if (!raw) {
+                return [];
+            }
 
-        const raw =
-            localStorage.getItem(
-                NOTIFICATION_READ_STORAGE_KEY
-            );
+            const parsed =
+                JSON.parse(raw);
 
+            if (
+                !Array.isArray(parsed)
+            ) {
+                return [];
+            }
 
-        if (!raw) {
-
-            return [];
-
-        }
-
-
-        const parsed =
-            JSON.parse(
-                raw
-            );
-
-
-        if (
-            !Array.isArray(
-                parsed
-            )
-        ) {
-
-            return [];
-
-        }
-
-
-        return [
-            ...new Set(
-                parsed
-                    .filter(
-                        (id) =>
-                            typeof id === 'string' ||
-                            typeof id === 'number'
-                    )
-                    .map(
-                        (id) =>
+            return [
+                ...new Set(
+                    parsed
+                        .filter(
+                            (id) =>
+                                typeof id ===
+                                    'string' ||
+                                typeof id ===
+                                    'number'
+                        )
+                        .map((id) =>
                             String(id)
-                    )
-            ),
-        ];
+                        )
+                ),
+            ];
+        } catch (error) {
+            console.error(
+                'Failed to read notification read-state:',
+                error
+            );
 
-    } catch (error) {
-
-        console.error(
-            'Failed to read notification read-state:',
-            error
-        );
-
-
-        return [];
-
-    }
-
-};
-
+            return [];
+        }
+    };
 
 // =========================================================
 // Save Read Notification IDs
@@ -182,102 +143,71 @@ export const getReadNotificationIds = () => {
 const saveReadNotificationIds = (
     ids
 ) => {
-
     try {
-
-        const uniqueIds =
-            [
-                ...new Set(
-                    ids.map(
-                        (id) =>
-                            String(id)
-                    )
-                ),
-            ];
-
-
-        // -------------------------------------------------
-        // Keep localStorage reasonably small.
-        // -------------------------------------------------
+        const uniqueIds = [
+            ...new Set(
+                ids.map((id) =>
+                    String(id)
+                )
+            ),
+        ];
 
         const limitedIds =
-            uniqueIds.slice(
-                -200
-            );
-
+            uniqueIds.slice(-200);
 
         localStorage.setItem(
             NOTIFICATION_READ_STORAGE_KEY,
-
             JSON.stringify(
                 limitedIds
             )
         );
-
 
         window.dispatchEvent(
             new Event(
                 'notifications-read-updated'
             )
         );
-
-
     } catch (error) {
-
         console.error(
             'Failed to save notification read-state:',
             error
         );
-
     }
-
 };
-
 
 // =========================================================
 // Mark Notifications As Read
 // =========================================================
 
-export const markNotificationsAsRead = (
-    notificationIds = []
-) => {
+export const markNotificationsAsRead =
+    (
+        notificationIds = []
+    ) => {
+        if (
+            !Array.isArray(
+                notificationIds
+            ) ||
+            notificationIds.length === 0
+        ) {
+            return [];
+        }
 
-    if (
-        !Array.isArray(
-            notificationIds
-        ) ||
-        notificationIds.length === 0
-    ) {
+        const currentIds =
+            getReadNotificationIds();
 
-        return [];
+        const nextIds = [
+            ...currentIds,
+            ...notificationIds.map(
+                (id) => String(id)
+            ),
+        ];
 
-    }
+        saveReadNotificationIds(
+            nextIds
+        );
 
-
-    const currentIds =
-        getReadNotificationIds();
-
-
-    const nextIds = [
-        ...currentIds,
-
-        ...notificationIds.map(
-            (id) =>
-                String(id)
-        ),
-
-    ];
-
-
-    saveReadNotificationIds(
-        nextIds
-    );
-
-
-    return nextIds;
-
-};
-
+        return nextIds;
+    };
 
 // =========================================================
 // Mark All Current Notifications As Read
@@ -285,14 +215,11 @@ export const markNotificationsAsRead = (
 
 export const markAllNotificationsAsRead =
     async () => {
-
         try {
-
             const notifications =
                 await buildNotifications({
                     includeRead: true,
                 });
-
 
             const unreadNotifications =
                 notifications.filter(
@@ -300,67 +227,50 @@ export const markAllNotificationsAsRead =
                         !notification.isRead
                 );
 
-
             const ids =
                 unreadNotifications.map(
                     (notification) =>
                         notification.id
                 );
 
-
             markNotificationsAsRead(
                 ids
             );
 
-
             return ids;
-
         } catch (error) {
-
             console.error(
                 'Failed to mark notifications as read:',
                 error
             );
 
-
             return [];
-
         }
-
     };
-
 
 // =========================================================
 // Clear Read State
 // =========================================================
 
-export const clearNotificationReadState = () => {
+export const clearNotificationReadState =
+    () => {
+        try {
+            localStorage.removeItem(
+                NOTIFICATION_READ_STORAGE_KEY
+            );
 
-    try {
-
-        localStorage.removeItem(
-            NOTIFICATION_READ_STORAGE_KEY
-        );
-
-
-        window.dispatchEvent(
-            new Event(
-                'notifications-read-updated'
-            )
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            'Failed to clear notification read-state:',
-            error
-        );
-
-    }
-
-};
-
+            window.dispatchEvent(
+                new Event(
+                    'notifications-read-updated'
+                )
+            );
+        } catch (error) {
+            console.error(
+                'Failed to clear notification read-state:',
+                error
+            );
+        }
+    };
 
 // =========================================================
 // Amount Helper
@@ -369,19 +279,12 @@ export const clearNotificationReadState = () => {
 const getSaleAmount = (
     sale
 ) => {
-
     if (!sale) {
-
         return 0;
-
     }
 
-
     const directTotal =
-        Number(
-            sale.total
-        );
-
+        Number(sale.total);
 
     if (
         Number.isFinite(
@@ -389,31 +292,24 @@ const getSaleAmount = (
         ) &&
         directTotal > 0
     ) {
-
         return directTotal;
-
     }
-
 
     const quantity =
         Number(
             sale.quantity
         ) || 0;
 
-
     const unitPrice =
         Number(
             sale.unitPrice
         ) || 0;
 
-
     return (
         quantity *
         unitPrice
     );
-
 };
-
 
 // =========================================================
 // Date Helper
@@ -422,134 +318,92 @@ const getSaleAmount = (
 const getTime = (
     value
 ) => {
-
     const time =
         new Date(
             value || 0
         ).getTime();
 
-
-    return Number.isFinite(
-        time
-    )
+    return Number.isFinite(time)
         ? time
         : 0;
-
 };
-
 
 // =========================================================
 // Successful Action
 // =========================================================
 
-export const recordSuccessfulAction = (
-    action = 'action'
-) => {
+export const recordSuccessfulAction =
+    (
+        action = 'action'
+    ) => {
+        try {
+            const createdAt =
+                new Date().toISOString();
 
-    try {
-
-        const createdAt =
-            new Date().toISOString();
-
-
-        localStorage.setItem(
-            SUCCESS_ACTION_STORAGE_KEY,
-
-            JSON.stringify({
-
-                action:
-                    String(
+            localStorage.setItem(
+                SUCCESS_ACTION_STORAGE_KEY,
+                JSON.stringify({
+                    action: String(
                         action
                     ),
+                    createdAt,
+                })
+            );
 
-                createdAt,
-
-            })
-        );
-
-
-        window.dispatchEvent(
-            new Event(
-                'successful-action-updated'
-            )
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            'Failed to save successful action:',
-            error
-        );
-
-    }
-
-};
-
+            window.dispatchEvent(
+                new Event(
+                    'successful-action-updated'
+                )
+            );
+        } catch (error) {
+            console.error(
+                'Failed to save successful action:',
+                error
+            );
+        }
+    };
 
 // =========================================================
 // Get Successful Action
 // =========================================================
 
 const getSuccessfulAction = () => {
-
     try {
-
         const raw =
             localStorage.getItem(
                 SUCCESS_ACTION_STORAGE_KEY
             );
 
-
         if (!raw) {
-
             return null;
-
         }
 
-
         const parsed =
-            JSON.parse(
-                raw
-            );
-
+            JSON.parse(raw);
 
         if (
             !parsed ||
-            typeof parsed !== 'object' ||
+            typeof parsed !==
+                'object' ||
             Array.isArray(parsed)
         ) {
-
             return null;
-
         }
 
-
-        if (
-            !parsed.createdAt
-        ) {
-
+        if (!parsed.createdAt) {
             return null;
-
         }
-
 
         return parsed;
-
     } catch (error) {
-
         console.error(
             'Failed to read successful action:',
             error
         );
 
-
         return null;
-
     }
-
 };
-
 
 // =========================================================
 // Database Data
@@ -557,25 +411,18 @@ const getSuccessfulAction = () => {
 
 export const getNotificationData =
     async () => {
-
         await initializeDatabase();
-
 
         const products =
             await db.products.toArray();
 
-
         const sales =
             await db.sales.toArray();
-
 
         const creditSales =
             await db.creditSales.toArray();
 
-
-        let creditPayments =
-            [];
-
+        let creditPayments = [];
 
         const paymentTable =
             db.tables.find(
@@ -584,31 +431,18 @@ export const getNotificationData =
                     'creditPayments'
             );
 
-
-        if (
-            paymentTable
-        ) {
-
+        if (paymentTable) {
             creditPayments =
                 await paymentTable.toArray();
-
         }
 
-
         return {
-
             products,
-
             sales,
-
             creditSales,
-
             creditPayments,
-
         };
-
     };
-
 
 // =========================================================
 // Build Notifications
@@ -618,11 +452,9 @@ export const buildNotifications =
     async (
         options = {}
     ) => {
-
         const {
             includeRead = false,
         } = options;
-
 
         const {
             products,
@@ -632,51 +464,39 @@ export const buildNotifications =
         } =
             await getNotificationData();
 
-
         const settings =
             getNotificationSettings();
-
 
         const readIds =
             new Set(
                 getReadNotificationIds()
             );
 
-
-        const notifications =
-            [];
-
+        const notifications = [];
 
         // =================================================
         // Low Stock
         // =================================================
 
-        if (
-            settings.lowStock
-        ) {
-
+        if (settings.lowStock) {
             const lowStockProducts =
                 products
                     .filter(
                         (product) => {
-
                             const stock =
                                 Number(
                                     product.stock
                                 ) || 0;
-
 
                             const minStock =
                                 Number(
                                     product.minStock
                                 ) || 0;
 
-
                             return (
                                 stock <=
                                 minStock
                             );
-
                         }
                     )
                     .sort(
@@ -693,26 +513,19 @@ export const buildNotifications =
                             )
                     );
 
-
             lowStockProducts
-                .slice(
-                    0,
-                    3
-                )
+                .slice(0, 3)
                 .forEach(
                     (product) => {
-
                         const stock =
                             Number(
                                 product.stock
                             ) || 0;
 
-
                         const updatedAt =
                             product.updatedAt ||
                             product.createdAt ||
                             '';
-
 
                         const notificationId =
                             [
@@ -722,17 +535,14 @@ export const buildNotifications =
                                 updatedAt,
                             ].join(':');
 
-
                         notifications.push({
-
                             id:
                                 notificationId,
 
                             type:
                                 'lowStock',
 
-                            priority:
-                                3,
+                            priority: 3,
 
                             productId:
                                 product.id,
@@ -750,23 +560,16 @@ export const buildNotifications =
                                 readIds.has(
                                     notificationId
                                 ),
-
                         });
-
                     }
                 );
-
         }
-
 
         // =================================================
         // New Sales
         // =================================================
 
-        if (
-            settings.newSale
-        ) {
-
+        if (settings.newSale) {
             const recentSales =
                 [...sales]
                     .sort(
@@ -780,29 +583,21 @@ export const buildNotifications =
                                 a.createdAt
                             )
                     )
-                    .slice(
-                        0,
-                        5
-                    );
-
+                    .slice(0, 5);
 
             recentSales.forEach(
                 (sale) => {
-
                     const notificationId =
                         `sale-${sale.id}`;
 
-
                     notifications.push({
-
                         id:
                             notificationId,
 
                         type:
                             'newSale',
 
-                        priority:
-                            2,
+                        priority: 2,
 
                         saleId:
                             sale.id,
@@ -825,14 +620,10 @@ export const buildNotifications =
                             readIds.has(
                                 notificationId
                             ),
-
                     });
-
                 }
             );
-
         }
-
 
         // =================================================
         // Credit
@@ -842,7 +633,6 @@ export const buildNotifications =
             settings.credit &&
             creditSales.length > 0
         ) {
-
             const creditSaleById =
                 new Map(
                     sales.map(
@@ -853,17 +643,13 @@ export const buildNotifications =
                     )
                 );
 
-
             const paymentsByCustomer =
                 new Map();
 
-
             creditPayments.forEach(
                 (payment) => {
-
                     const customerId =
                         payment.customerId;
-
 
                     const amount =
                         Number(
@@ -872,132 +658,95 @@ export const buildNotifications =
                             payment.paidAmount
                         ) || 0;
 
-
                     if (
                         !customerId ||
                         amount <= 0
                     ) {
-
                         return;
-
                     }
 
-
                     paymentsByCustomer.set(
-
                         customerId,
-
                         (
                             paymentsByCustomer.get(
                                 customerId
                             ) || 0
                         ) + amount
-
                     );
-
                 }
             );
-
 
             const debtByCustomer =
                 new Map();
 
-
             creditSales.forEach(
                 (creditSale) => {
-
                     const sale =
                         creditSaleById.get(
                             creditSale.saleId
                         );
 
-
                     if (!sale) {
-
                         return;
-
                     }
-
 
                     const customerId =
                         creditSale.customerId;
 
-
                     if (
-                        customerId === null ||
-                        customerId === undefined
+                        customerId ===
+                            null ||
+                        customerId ===
+                            undefined
                     ) {
-
                         return;
-
                     }
-
 
                     const amount =
                         getSaleAmount(
                             sale
                         );
 
-
-                    if (
-                        amount <= 0
-                    ) {
-
+                    if (amount <= 0) {
                         return;
-
                     }
 
-
                     debtByCustomer.set(
-
                         customerId,
-
                         (
                             debtByCustomer.get(
                                 customerId
                             ) || 0
                         ) + amount
-
                     );
-
                 }
             );
-
 
             debtByCustomer.forEach(
                 (
                     totalCredit,
                     customerId
                 ) => {
-
                     const paid =
                         paymentsByCustomer.get(
                             customerId
                         ) || 0;
 
-
                     const remaining =
                         Math.max(
                             0,
                             totalCredit -
-                            paid
+                                paid
                         );
 
-
-                    if (
-                        remaining <= 0
-                    ) {
-
+                    if (remaining <= 0) {
                         return;
-
                     }
-
 
                     const roundedRemaining =
                         Math.round(
                             remaining * 100
                         ) / 100;
-
 
                     const notificationId =
                         [
@@ -1006,38 +755,30 @@ export const buildNotifications =
                             roundedRemaining,
                         ].join(':');
 
-
                     notifications.push({
-
                         id:
                             notificationId,
 
                         type:
                             'credit',
 
-                        priority:
-                            1,
+                        priority: 1,
 
                         customerId,
 
                         amount:
                             roundedRemaining,
 
-                        createdAt:
-                            null,
+                        createdAt: null,
 
                         isRead:
                             readIds.has(
                                 notificationId
                             ),
-
                     });
-
                 }
             );
-
         }
-
 
         // =================================================
         // Successful Action
@@ -1046,19 +787,13 @@ export const buildNotifications =
         if (
             settings.successfulActions
         ) {
-
             const successfulAction =
                 getSuccessfulAction();
 
-
-            if (
-                successfulAction
-            ) {
-
+            if (successfulAction) {
                 const actionCreatedAt =
                     successfulAction.createdAt ||
                     '';
-
 
                 const notificationId =
                     [
@@ -1066,17 +801,14 @@ export const buildNotifications =
                         actionCreatedAt,
                     ].join(':');
 
-
                 notifications.push({
-
                     id:
                         notificationId,
 
                     type:
                         'successfulActions',
 
-                    priority:
-                        4,
+                    priority: 4,
 
                     action:
                         successfulAction.action ||
@@ -1089,13 +821,9 @@ export const buildNotifications =
                         readIds.has(
                             notificationId
                         ),
-
                 });
-
             }
-
         }
-
 
         // =================================================
         // Sort
@@ -1104,24 +832,22 @@ export const buildNotifications =
         const sorted =
             notifications.sort(
                 (a, b) => {
-
                     const priorityDifference =
                         (
-                            a.priority || 99
+                            a.priority ||
+                            99
                         ) -
                         (
-                            b.priority || 99
+                            b.priority ||
+                            99
                         );
 
-
                     if (
-                        priorityDifference !== 0
+                        priorityDifference !==
+                        0
                     ) {
-
                         return priorityDifference;
-
                     }
-
 
                     return (
                         getTime(
@@ -1131,26 +857,19 @@ export const buildNotifications =
                             a.createdAt
                         )
                     );
-
                 }
             );
-
 
         // =================================================
         // Result
         // =================================================
 
-        if (
-            includeRead
-        ) {
-
+        if (includeRead) {
             return sorted.slice(
                 0,
                 10
             );
-
         }
-
 
         return sorted
             .filter(
@@ -1161,9 +880,7 @@ export const buildNotifications =
                 0,
                 10
             );
-
     };
-
 
 // =========================================================
 // Unread Notifications
@@ -1171,11 +888,8 @@ export const buildNotifications =
 
 export const getUnreadNotifications =
     async () => {
-
         return buildNotifications();
-
     };
-
 
 // =========================================================
 // Unread Count
@@ -1183,11 +897,8 @@ export const getUnreadNotifications =
 
 export const getUnreadNotificationCount =
     async () => {
-
         const unread =
             await getUnreadNotifications();
 
-
         return unread.length;
-
     };

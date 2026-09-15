@@ -1,5 +1,6 @@
 import { AlertCircle, CheckCircle2, CreditCard, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useCountUp } from '../../hooks/useCountUp';
 
 const TONES = {
     warning: {
@@ -20,36 +21,75 @@ const TONES = {
     },
 };
 
+// =========================================================
+// AnimatedNumber
+// =========================================================
+
+function AnimatedNumber({ value, language, className, dir }) {
+    const animated = useCountUp(Number(value) || 0, { duration: 900 });
+
+    const isEnglish = String(language || '').toLowerCase().startsWith('en');
+    const formatted = new Intl.NumberFormat(
+        isEnglish ? 'en-US' : 'fa-IR',
+        { minimumFractionDigits: 0, maximumFractionDigits: 2 }
+    ).format(animated);
+
+    return (
+        <span dir={dir} className={className}>
+            {formatted}
+        </span>
+    );
+}
+
+// =========================================================
+// CreditStats
+// =========================================================
+
 function CreditStats({ statistics = {}, loading = false }) {
     const { t, i18n } = useTranslation();
-    const isEnglish = String(i18n.language || '').toLowerCase().startsWith('en');
-
-    const fmt = (n) => new Intl.NumberFormat(isEnglish ? 'en-US' : 'fa-IR').format(Number(n) || 0);
+    const language = i18n.language || 'fa';
+    const isEnglish = String(language).toLowerCase().startsWith('en');
 
     const stats = [
         {
-            id: 'total-debt', tone: 'warning', icon: CreditCard,
+            id: 'total-debt',
+            tone: 'warning',
+            icon: CreditCard,
             title: t('credit.stats.totalDebt.title'),
             value: Number(statistics.totalDebt) || 0,
             unit: t('common.currency'),
             label: t('credit.stats.totalDebt.description'),
         },
         {
-            id: 'remaining', tone: 'orange', icon: AlertCircle,
-            title: t('credit.stats.remaining.title', { defaultValue: 'بدهی باقی‌مانده' }),
+            id: 'remaining',
+            tone: 'orange',
+            icon: AlertCircle,
+            title: t('credit.stats.remaining.title', {
+                defaultValue: isEnglish
+                    ? 'Outstanding Debt'
+                    : 'بدهی باقی‌مانده',
+            }),
             value: Number(statistics.totalRemaining) || 0,
             unit: t('common.currency'),
-            label: t('credit.stats.remaining.description', { defaultValue: 'مجموع بدهی پرداخت‌نشده مشتریان' }),
+            label: t('credit.stats.remaining.description', {
+                defaultValue: isEnglish
+                    ? 'Total unpaid debt across all customers'
+                    : 'مجموع بدهی پرداخت‌نشده مشتریان',
+            }),
         },
         {
-            id: 'debtors', tone: 'cyan', icon: Users,
+            id: 'debtors',
+            tone: 'cyan',
+            icon: Users,
             title: t('credit.stats.debtors.title'),
             value: Number(statistics.debtorCount) || 0,
             unit: t('credit.stats.debtors.unit'),
             label: t('credit.stats.debtors.description'),
         },
         {
-            id: 'settled', tone: 'success', icon: CheckCircle2,
+            id: 'settled',
+            tone: 'success',
+            icon: CheckCircle2,
             title: t('credit.stats.settled.title'),
             value: Number(statistics.totalPaid) || 0,
             unit: t('common.currency'),
@@ -76,35 +116,60 @@ function CreditStats({ statistics = {}, loading = false }) {
                     const Icon = stat.icon;
                     const tone = TONES[stat.tone];
                     return (
-                        <article key={stat.id} className="ui-card group relative min-w-0 overflow-hidden rounded-2xl p-4 sm:p-5">
+                        <article
+                            key={stat.id}
+                            className="ui-card group relative min-w-0 overflow-hidden rounded-2xl p-4 sm:p-5"
+                        >
                             <div className="relative z-10 flex items-start justify-between gap-3">
-                                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border sm:h-11 sm:w-11 ${tone.iconBg}`}>
-                                    <Icon size={20} strokeWidth={1.9} className={tone.iconText} />
+                                <div
+                                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border sm:h-11 sm:w-11 ${tone.iconBg}`}
+                                >
+                                    {loading ? (
+                                        <span className="h-5 w-5 animate-pulse rounded-full bg-[var(--surface-muted)]" />
+                                    ) : (
+                                        <Icon
+                                            size={20}
+                                            strokeWidth={1.9}
+                                            className={tone.iconText}
+                                        />
+                                    )}
                                 </div>
-                                {loading ? (
-                                    <span className="h-5 w-14 animate-pulse rounded-md bg-[var(--surface-muted)]" />
-                                ) : (
-                                    <span className="rounded-md border border-[var(--border)] bg-[var(--surface-muted)] px-2 py-1 text-[9px] font-medium text-[var(--text-muted)] sm:text-[10px]">
-                                        {t('common.today')}
-                                    </span>
-                                )}
+                                <span className="rounded-md border border-[var(--border)] bg-[var(--surface-muted)] px-2 py-1 text-[9px] font-medium text-[var(--text-muted)] sm:text-[10px]">
+                                    {t('credit.stats.badge', {
+                                        defaultValue: isEnglish
+                                            ? 'All-time'
+                                            : 'کل دوره',
+                                    })}
+                                </span>
                             </div>
 
                             <div className="relative z-10 mt-4 sm:mt-5">
-                                <p className="text-xs font-medium text-[var(--text-secondary)] sm:text-sm">{stat.title}</p>
+                                <p className="text-xs font-medium text-[var(--text-secondary)] sm:text-sm">
+                                    {stat.title}
+                                </p>
                                 <div className="mt-1.5 flex min-w-0 items-baseline gap-1.5">
                                     {loading ? (
                                         <div className="h-8 w-28 animate-pulse rounded-lg bg-[var(--surface-muted)]" />
                                     ) : (
                                         <>
-                                            <h3 dir="ltr" className="number-font min-w-0 truncate text-2xl font-bold tracking-tight text-[var(--text)]">
-                                                {fmt(stat.value)}
+                                            <h3
+                                                dir="ltr"
+                                                className="number-font min-w-0 truncate text-2xl font-bold tracking-tight text-[var(--text)]"
+                                            >
+                                                <AnimatedNumber
+                                                    value={stat.value}
+                                                    language={language}
+                                                />
                                             </h3>
-                                            <span className="shrink-0 text-xs font-medium text-[var(--text-muted)] sm:text-sm">{stat.unit}</span>
+                                            <span className="shrink-0 text-xs font-medium text-[var(--text-muted)] sm:text-sm">
+                                                {stat.unit}
+                                            </span>
                                         </>
                                     )}
                                 </div>
-                                <p className="mt-2.5 min-h-[2.5rem] text-[10px] leading-5 text-[var(--text-muted)] sm:text-[11px]">{stat.label}</p>
+                                <p className="mt-2.5 min-h-[2.5rem] text-[10px] leading-5 text-[var(--text-muted)] sm:text-[11px]">
+                                    {stat.label}
+                                </p>
                             </div>
                         </article>
                     );

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X, ShoppingCart, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getCategories } from '../../database/db';
+import { getCategories, getUnits } from '../../database/db';
 
 const FIELD_CLASS = `
     w-full h-11 px-3 rounded-xl
@@ -30,6 +30,8 @@ const TEXTAREA_CLASS = `
     transition
 `;
 
+const FALLBACK_UNITS = ['عدد', 'بسته', 'کارتن', 'کیلوگرم', 'گرم', 'لیتر', 'متر'];
+
 const getDefaultFormData = () => ({
     name: '',
     quantity: 1,
@@ -44,33 +46,41 @@ function ShoppingListForm({ item = null, saving = false, onClose, onSubmit }) {
 
     const [formData, setFormData] = useState(getDefaultFormData());
     const [categories, setCategories] = useState([]);
+    const [units, setUnits] = useState([]);
     const [error, setError] = useState('');
 
-    const units = [
-        { value: 'عدد', label: t('shoppingList.form.units.piece') },
-        { value: 'بسته', label: t('shoppingList.form.units.pack') },
-        { value: 'کارتن', label: t('shoppingList.form.units.carton') },
-        { value: 'کیلو', label: t('shoppingList.form.units.kilogram') },
-        { value: 'گرم', label: t('shoppingList.form.units.gram') },
-        { value: 'لیتر', label: t('shoppingList.form.units.liter') },
-        { value: 'متر', label: t('shoppingList.form.units.meter') },
-    ];
-
-    // Load categories
+    // ═══ Load categories + units from DB ═══
     useEffect(() => {
         let active = true;
+
         (async () => {
             try {
-                const data = await getCategories();
-                if (active) setCategories(Array.isArray(data) ? data : []);
+                const [cats, uns] = await Promise.all([
+                    getCategories(),
+                    getUnits(),
+                ]);
+
+                if (!active) return;
+
+                setCategories(Array.isArray(cats) ? cats : []);
+
+                // Use DB units if available, else fallback
+                const dbUnits = Array.isArray(uns) ? uns.map((u) => u.name) : [];
+                setUnits(dbUnits.length > 0 ? dbUnits : FALLBACK_UNITS);
             } catch (err) {
-                console.error('Failed to load categories:', err);
+                console.error('Failed to load form data:', err);
+                if (active) {
+                    setUnits(FALLBACK_UNITS);
+                }
             }
         })();
-        return () => { active = false; };
+
+        return () => {
+            active = false;
+        };
     }, []);
 
-    // Fill form on edit
+    // ═══ Fill form on edit ═══
     useEffect(() => {
         if (item) {
             setFormData({
@@ -90,6 +100,7 @@ function ShoppingListForm({ item = null, saving = false, onClose, onSubmit }) {
     const handleChange = (event) => {
         const { name, value } = event.target;
         setFormData((current) => ({ ...current, [name]: value }));
+        if (error) setError('');
     };
 
     const handleSubmit = async (event) => {
@@ -123,11 +134,18 @@ function ShoppingListForm({ item = null, saving = false, onClose, onSubmit }) {
         }
     };
 
+    // ═══ Merge current value into units list if missing ═══
+    const unitsToShow =
+        formData.unit && !units.includes(formData.unit)
+            ? [formData.unit, ...units]
+            : units;
+
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center p-3 backdrop-blur-md sm:p-4"
             style={{
-                background: 'radial-gradient(circle at 50% 50%, rgba(0,0,0,0.55), rgba(0,0,0,0.72))',
+                background:
+                    'radial-gradient(circle at 50% 50%, rgba(0,0,0,0.55), rgba(0,0,0,0.72))',
             }}
             onMouseDown={(event) => {
                 if (event.target === event.currentTarget && !saving) onClose();
@@ -145,7 +163,9 @@ function ShoppingListForm({ item = null, saving = false, onClose, onSubmit }) {
                         </div>
                         <div className="min-w-0">
                             <h2 className="truncate text-sm font-bold text-[var(--text)]">
-                                {item ? t('shoppingList.form.editTitle') : t('shoppingList.form.addTitle')}
+                                {item
+                                    ? t('shoppingList.form.editTitle')
+                                    : t('shoppingList.form.addTitle')}
                             </h2>
                             <p className="mt-1 text-[11px] leading-5 text-[var(--text-muted)]">
                                 {t('shoppingList.form.subtitle')}
@@ -227,8 +247,10 @@ function ShoppingListForm({ item = null, saving = false, onClose, onSubmit }) {
                                 dir={i18n.dir()}
                                 className={`${FIELD_CLASS} cursor-pointer`}
                             >
-                                {units.map((unit) => (
-                                    <option key={unit.value} value={unit.value}>{unit.label}</option>
+                                {unitsToShow.map((u) => (
+                                    <option key={u} value={u}>
+                                        {u}
+                                    </option>
                                 ))}
                             </select>
                         </div>
@@ -255,7 +277,10 @@ function ShoppingListForm({ item = null, saving = false, onClose, onSubmit }) {
                             {categories.map((category) => {
                                 if (!category?.id && !category?.name) return null;
                                 return (
-                                    <option key={category.id ?? category.name} value={category.name} />
+                                    <option
+                                        key={category.id ?? category.name}
+                                        value={category.name}
+                                    />
                                 );
                             })}
                             {item?.category &&

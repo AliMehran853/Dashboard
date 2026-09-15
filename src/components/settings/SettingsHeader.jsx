@@ -15,15 +15,7 @@ function SettingsHeader() {
                 </div>
 
                 <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                        <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--accent-500)] shadow-[0_0_12px_var(--accent-glow)]" />
-
-                        <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--accent-600)]">
-                            Taqwa
-                        </span>
-                    </div>
-
-                    <h1 className="mt-2 truncate text-xl font-semibold tracking-[-0.02em] text-[var(--text)] sm:text-2xl md:text-3xl">
+                    <h1 className="truncate text-xl font-semibold tracking-[-0.02em] text-[var(--text)] sm:text-2xl md:text-3xl">
                         {t('settings.page.title')}
                     </h1>
 

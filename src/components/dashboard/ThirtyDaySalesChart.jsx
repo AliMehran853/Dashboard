@@ -4,7 +4,6 @@ import { CalendarDays, TrendingUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatJalaliDate, getJalaliMonthStyle } from '../../utils/date/jalali';
 
-// ---------- helpers ----------
 const getSaleAmount = (sale) => {
     if (!sale) return 0;
     const direct = Number(sale.totalAmount ?? sale.total ?? sale.amount ?? sale.finalAmount ?? sale.payableAmount ?? sale.grandTotal);
@@ -26,7 +25,6 @@ const getCssVar = (name, fallback) => {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 };
 
-// ---------- component ----------
 function ThirtyDaySalesChart({ sales = [], loading = false }) {
     const { t, i18n } = useTranslation();
     const chartScrollRef = useRef(null);
@@ -122,8 +120,11 @@ function ThirtyDaySalesChart({ sales = [], loading = false }) {
     const options = useMemo(() => ({
         chart: {
             type: 'area', background: 'transparent', fontFamily: 'inherit',
-            parentHeightOffset: 0, redrawOnWindowResize: true,
-            toolbar: { show: false }, zoom: { enabled: false },
+            parentHeightOffset: 0, redrawOnWindowResize: true, redrawOnParentResize: true,
+            toolbar: { show: false },
+            zoom: { enabled: false },
+            selection: { enabled: false },
+            brush: { enabled: false },
             animations: { enabled: false },
         },
         colors: [tokens.accent],
@@ -166,7 +167,10 @@ function ThirtyDaySalesChart({ sales = [], loading = false }) {
         },
         tooltip: {
             enabled: true, theme: isDark ? 'dark' : 'light',
-            shared: false, intersect: false,
+            shared: false,
+            intersect: true,
+            followCursor: false,
+            fixed: { enabled: false },
             x: {
                 show: true,
                 formatter: (_v, { dataPointIndex } = {}) =>
@@ -203,7 +207,6 @@ function ThirtyDaySalesChart({ sales = [], loading = false }) {
 
     return (
         <section dir={i18n.dir()} className="ui-card w-full min-w-0 overflow-hidden p-4 sm:p-5 lg:p-6">
-            {/* header */}
             <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                     <div className="flex items-center gap-2.5">
@@ -244,10 +247,11 @@ function ThirtyDaySalesChart({ sales = [], loading = false }) {
                 </div>
             </div>
 
-            {/* chart viewport */}
+            {/* ✅ FIX: touch-pan-x حذف شد → chart-hscroll جایش آمد
+                اجازه می‌دهد هم افقی چارت اسکرول شود، هم عمودی صفحه. */}
             <div
                 ref={chartScrollRef}
-                className="w-full min-w-0 overflow-x-auto overflow-y-hidden overscroll-x-contain touch-pan-x pb-2 sm:overflow-x-hidden sm:pb-0 scrollbar-thin"
+                className="chart-hscroll w-full min-w-0 overflow-x-auto overflow-y-hidden pb-2 sm:overflow-x-hidden sm:pb-0 scrollbar-thin"
             >
                 <div className="h-[300px] w-[1800px] sm:h-[320px] sm:w-full lg:h-[350px]">
                     {loading ? (

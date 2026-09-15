@@ -26,19 +26,15 @@ const getDateValue = (r) => r?.date || r?.createdAt || r?.updatedAt || null;
 const getTimestamp = (r) => {
     const v = getDateValue(r);
     if (!v) return 0;
-
     const t = new Date(v).getTime();
     return Number.isFinite(t) ? t : 0;
 };
 
 const isToday = (v) => {
     if (!v) return false;
-
     const d = new Date(v);
     if (Number.isNaN(d.getTime())) return false;
-
     const today = new Date();
-
     return (
         d.getFullYear() === today.getFullYear() &&
         d.getMonth() === today.getMonth() &&
@@ -64,7 +60,7 @@ function Credit() {
                 ? 'ltr'
                 : 'rtl';
 
-    const isEnglish = i18n.language === 'en';
+    const isEnglish = String(i18n.language || 'fa').toLowerCase().startsWith('en');
 
     const refreshLabel = t('common.refresh', {
         defaultValue: isEnglish ? 'Refresh' : 'تازه‌سازی',
@@ -93,22 +89,18 @@ function Credit() {
         async ({ silent = false } = {}) => {
             try {
                 if (!silent) setLoading(true);
-
                 setError('');
-
                 await initializeDatabase();
 
-                const [customers, creditSales, creditPayments] =
-                    await Promise.all([
-                        db.customers.toArray(),
-                        db.creditSales.toArray(),
-                        db.creditPayments.toArray(),
-                    ]);
+                const [customers, creditSales, creditPayments] = await Promise.all([
+                    db.customers.toArray(),
+                    db.creditSales.toArray(),
+                    db.creditPayments.toArray(),
+                ]);
 
                 const accounts = customers
                     .map((customer) => {
                         const customerId = normalizeId(customer.id);
-
                         if (!customerId) return null;
 
                         const custSales = creditSales.filter(
@@ -132,7 +124,6 @@ function Credit() {
                         const remaining = Math.max(0, totalDebt - paid);
 
                         let status = 'debt';
-
                         if (totalDebt <= 0 || remaining <= 0) {
                             status = 'settled';
                         } else if (paid > 0) {
@@ -142,29 +133,20 @@ function Credit() {
                         const latestSale =
                             custSales
                                 .slice()
-                                .sort(
-                                    (a, b) =>
-                                        getTimestamp(b) - getTimestamp(a)
-                                )[0] || null;
+                                .sort((a, b) => getTimestamp(b) - getTimestamp(a))[0] ||
+                            null;
 
                         const latestPayment =
                             custPayments
                                 .slice()
-                                .sort(
-                                    (a, b) =>
-                                        getTimestamp(b) - getTimestamp(a)
-                                )[0] || null;
+                                .sort((a, b) => getTimestamp(b) - getTimestamp(a))[0] ||
+                            null;
 
                         const latestRecord =
-                            [
-                                latestSale,
-                                latestPayment,
-                            ]
+                            [latestSale, latestPayment]
                                 .filter(Boolean)
-                                .sort(
-                                    (a, b) =>
-                                        getTimestamp(b) - getTimestamp(a)
-                                )[0] || null;
+                                .sort((a, b) => getTimestamp(b) - getTimestamp(a))[0] ||
+                            null;
 
                         return {
                             id: customerId,
@@ -178,10 +160,8 @@ function Credit() {
                             status,
                             creditSales: custSales,
                             payments: custPayments,
-                            transactions:
-                                custSales.length + custPayments.length,
-                            lastTransaction:
-                                getDateValue(latestRecord),
+                            transactions: custSales.length + custPayments.length,
+                            lastTransaction: getDateValue(latestRecord),
                             latestCreditSale: latestSale,
                             latestPayment,
                         };
@@ -191,7 +171,6 @@ function Credit() {
                 setCredits(accounts);
             } catch (err) {
                 console.error('Failed to load credit accounts:', err);
-
                 setError(
                     err?.message ||
                         t('credit.errors.load', {
@@ -214,27 +193,18 @@ function Credit() {
 
     useEffect(() => {
         const handler = () => loadCredits({ silent: true });
-
-        DB_EVENTS.forEach((e) =>
-            window.addEventListener(e, handler)
-        );
-
+        DB_EVENTS.forEach((e) => window.addEventListener(e, handler));
         return () =>
-            DB_EVENTS.forEach((e) =>
-                window.removeEventListener(e, handler)
-            );
+            DB_EVENTS.forEach((e) => window.removeEventListener(e, handler));
     }, [loadCredits]);
 
     const handleRefresh = async () => {
         if (loading || refreshing) return;
-
         setRefreshing(true);
-
         await loadCredits({ silent: true });
     };
 
-    const handleFiltersChange = (changes) =>
-        setFilters((p) => ({ ...p, ...changes }));
+    const handleFiltersChange = (changes) => setFilters((p) => ({ ...p, ...changes }));
 
     const handleResetFilters = () =>
         setFilters({
@@ -253,53 +223,36 @@ function Credit() {
 
         if (search) {
             result = result.filter((c) => {
-                const name = String(
-                    c.customerName || c.name || ''
-                ).toLocaleLowerCase();
-
+                const name = String(c.customerName || c.name || '').toLocaleLowerCase();
                 const phone = String(c.phone || '').toLocaleLowerCase();
-
-                return (
-                    name.includes(search) ||
-                    phone.includes(search)
-                );
+                return name.includes(search) || phone.includes(search);
             });
         }
 
         if (filters.status !== 'all') {
-            result = result.filter(
-                (c) => c.status === filters.status
-            );
+            result = result.filter((c) => c.status === filters.status);
         }
 
         result.sort((a, b) => {
             switch (filters.sort) {
                 case 'highest':
                     return (
-                        normalizeNumber(b.remaining) -
-                        normalizeNumber(a.remaining)
+                        normalizeNumber(b.remaining) - normalizeNumber(a.remaining)
                     );
-
                 case 'lowest':
                     return (
-                        normalizeNumber(a.remaining) -
-                        normalizeNumber(b.remaining)
+                        normalizeNumber(a.remaining) - normalizeNumber(b.remaining)
                     );
-
                 case 'oldest':
                     return (
                         getTimestamp(a.latestCreditSale) -
                         getTimestamp(b.latestCreditSale)
                     );
-
                 case 'name':
-                    return String(
-                        a.customerName || a.name || ''
-                    ).localeCompare(
+                    return String(a.customerName || a.name || '').localeCompare(
                         String(b.customerName || b.name || ''),
                         isEnglish ? 'en' : 'fa'
                     );
-
                 case 'newest':
                 default:
                     return (
@@ -318,49 +271,25 @@ function Credit() {
             (s, c) => s + normalizeNumber(c.totalDebt),
             0
         );
-
-        const totalPaid = credits.reduce(
-            (s, c) => s + normalizeNumber(c.paid),
-            0
-        );
-
+        const totalPaid = credits.reduce((s, c) => s + normalizeNumber(c.paid), 0);
         const totalRemaining = credits.reduce(
             (s, c) => s + normalizeNumber(c.remaining),
             0
         );
-
         const debtorCount = credits.filter(
             (c) => normalizeNumber(c.remaining) > 0
         ).length;
-
-        const settledCount = credits.filter(
-            (c) => c.status === 'settled'
-        ).length;
-
-        const partialCount = credits.filter(
-            (c) => c.status === 'partial'
-        ).length;
-
-        const debtCount = credits.filter(
-            (c) => c.status === 'debt'
-        ).length;
+        const settledCount = credits.filter((c) => c.status === 'settled').length;
+        const partialCount = credits.filter((c) => c.status === 'partial').length;
+        const debtCount = credits.filter((c) => c.status === 'debt').length;
 
         const todayDebt = credits.reduce(
             (sum, c) =>
                 sum +
-                (c.creditSales || []).reduce(
-                    (s, sale) => {
-                        if (!isToday(getDateValue(sale))) {
-                            return s;
-                        }
-
-                        return (
-                            s +
-                            normalizeNumber(sale.amount)
-                        );
-                    },
-                    0
-                ),
+                (c.creditSales || []).reduce((s, sale) => {
+                    if (!isToday(getDateValue(sale))) return s;
+                    return s + normalizeNumber(sale.amount);
+                }, 0),
             0
         );
 
@@ -387,7 +316,6 @@ function Credit() {
 
     const viewDetails = (customer) => {
         if (!customer) return;
-
         setError('');
         setSelectedCustomer(customer);
         setShowPaymentModal(false);
@@ -401,9 +329,7 @@ function Credit() {
 
     const openPayment = (customer) => {
         if (!customer) return;
-
         if (normalizeNumber(customer.remaining) <= 0) return;
-
         setError('');
         setSelectedCustomer(customer);
         setShowDetails(false);
@@ -419,12 +345,10 @@ function Credit() {
     const submitPayment = async (paymentData) => {
         try {
             setError('');
-
             if (!selectedCustomer) return;
 
             const customerId = normalizeId(
-                selectedCustomer.customerId ??
-                    selectedCustomer.id
+                selectedCustomer.customerId ?? selectedCustomer.id
             );
 
             if (!customerId) {
@@ -438,11 +362,7 @@ function Credit() {
             }
 
             const amount = Number(paymentData?.amount);
-
-            if (
-                !Number.isFinite(amount) ||
-                amount <= 0
-            ) {
+            if (!Number.isFinite(amount) || amount <= 0) {
                 throw new Error(
                     t('credit.errors.invalidPayment', {
                         defaultValue: isEnglish
@@ -452,28 +372,20 @@ function Credit() {
                 );
             }
 
-            const remaining = normalizeNumber(
-                selectedCustomer.remaining
-            );
-
+            const remaining = normalizeNumber(selectedCustomer.remaining);
             if (amount > remaining) {
                 throw new Error(
-                    t(
-                        'credit.errors.paymentExceedsRemaining',
-                        {
-                            defaultValue: isEnglish
-                                ? 'The payment amount cannot exceed the remaining debt.'
-                                : 'مبلغ پرداختی نمی‌تواند بیشتر از بدهی باقی‌مانده باشد.',
-                        }
-                    )
+                    t('credit.errors.paymentExceedsRemaining', {
+                        defaultValue: isEnglish
+                            ? 'The payment amount cannot exceed the remaining debt.'
+                            : 'مبلغ پرداختی نمی‌تواند بیشتر از بدهی باقی‌مانده باشد.',
+                    })
                 );
             }
 
             await initializeDatabase();
 
-            const customer =
-                await db.customers.get(customerId);
-
+            const customer = await db.customers.get(customerId);
             if (!customer) {
                 throw new Error(
                     t('credit.errors.invalidCustomer', {
@@ -489,10 +401,8 @@ function Credit() {
             await db.creditPayments.add({
                 customerId,
                 amount,
-                paymentMethod:
-                    paymentData?.paymentMethod || 'cash',
-                description:
-                    paymentData?.description?.trim() || '',
+                paymentMethod: paymentData?.paymentMethod || 'cash',
+                description: paymentData?.description?.trim() || '',
                 date: paymentData?.date || now,
                 createdAt: now,
             });
@@ -501,21 +411,13 @@ function Credit() {
             setShowDetails(false);
             setSelectedCustomer(null);
 
-            [
-                'credit-payments-updated',
-                'credit-sales-updated',
-                'database-updated',
-            ].forEach((e) =>
-                window.dispatchEvent(new Event(e))
+            ['credit-payments-updated', 'credit-sales-updated', 'database-updated'].forEach(
+                (e) => window.dispatchEvent(new Event(e))
             );
 
             await loadCredits({ silent: true });
         } catch (err) {
-            console.error(
-                'Failed to save credit payment:',
-                err
-            );
-
+            console.error('Failed to save credit payment:', err);
             setError(
                 err?.message ||
                     t('credit.errors.paymentSave', {
@@ -527,144 +429,138 @@ function Credit() {
         }
     };
 
-    // ---------- submit credit sale ----------
+    // ---------- submit credit sale (FIXED) ----------
     const submitCredit = async (data) => {
         try {
             setError('');
 
-            const customerName =
-                data?.customerName?.trim() || '';
-
-            const customerPhone =
-                data?.phone?.trim() || '';
-
-            const productName =
-                data?.product?.trim() || '';
-
-            const quantity = Number(data?.quantity);
-            const unitPrice = Number(data?.unitPrice);
-
+            // ═══ Customer validation ═══
+            const customerName = data?.customerName?.trim() || '';
             if (!customerName) {
                 throw new Error(
-                    t(
-                        'credit.saleForm.errors.customerRequired',
-                        {
-                            defaultValue: isEnglish
-                                ? 'Please enter the customer name.'
-                                : 'لطفاً نام مشتری را وارد کنید.',
-                        }
-                    )
-                );
-            }
-
-            if (!productName) {
-                throw new Error(
-                    t(
-                        'credit.saleForm.errors.productRequired',
-                        {
-                            defaultValue: isEnglish
-                                ? 'Please select the product.'
-                                : 'لطفاً محصول را انتخاب کنید.',
-                        }
-                    )
-                );
-            }
-
-            if (
-                !Number.isFinite(quantity) ||
-                quantity <= 0
-            ) {
-                throw new Error(
-                    t(
-                        'credit.saleForm.errors.quantityRequired',
-                        {
-                            defaultValue: isEnglish
-                                ? 'Quantity must be greater than zero.'
-                                : 'تعداد باید بیشتر از صفر باشد.',
-                        }
-                    )
-                );
-            }
-
-            if (
-                !Number.isFinite(unitPrice) ||
-                unitPrice < 0
-            ) {
-                throw new Error(
-                    t(
-                        'credit.saleForm.errors.priceInvalid',
-                        {
-                            defaultValue: isEnglish
-                                ? 'Please enter a valid unit price.'
-                                : 'لطفاً قیمت واحد معتبر وارد کنید.',
-                        }
-                    )
-                );
-            }
-
-            await initializeDatabase();
-
-            const products =
-                await db.products.toArray();
-
-            const normalized =
-                productName.trim().toLocaleLowerCase();
-
-            const product = products.find(
-                (p) =>
-                    String(p.name || '')
-                        .trim()
-                        .toLocaleLowerCase() === normalized
-            );
-
-            if (!product) {
-                throw new Error(
-                    t('credit.errors.productNotFound', {
+                    t('credit.saleForm.errors.customerRequired', {
                         defaultValue: isEnglish
-                            ? 'The selected product could not be found.'
-                            : 'محصول انتخاب‌شده پیدا نشد.',
+                            ? 'Please enter the customer name.'
+                            : 'لطفاً نام مشتری را وارد کنید.',
                     })
                 );
             }
 
-            const stock = normalizeNumber(product.stock);
+            // ═══ Resolve productId ═══
+            // New form sends productId directly. Older forms may only send
+            // a product name — in that case we look it up as a fallback.
+            let productId = normalizeId(data?.productId);
+            let productSnapshot = null;
 
-            if (stock < quantity) {
-                throw new Error(
-                    `${t(
-                        'credit.errors.insufficientStock',
-                        {
+            if (!productId) {
+                const productName = (data?.productName || data?.product || '').trim();
+                if (!productName) {
+                    throw new Error(
+                        t('credit.saleForm.errors.productRequired', {
                             defaultValue: isEnglish
-                                ? 'Insufficient stock. Available quantity:'
-                                : 'موجودی محصول کافی نیست. موجودی فعلی:',
-                        }
-                    )} ${stock}`
+                                ? 'Please select the product.'
+                                : 'لطفاً محصول را انتخاب کنید.',
+                        })
+                    );
+                }
+
+                await initializeDatabase();
+                const allProducts = await db.products.toArray();
+                const normalized = productName.toLowerCase();
+                const found = allProducts.find(
+                    (p) =>
+                        String(p.name || '')
+                            .trim()
+                            .toLowerCase() === normalized
+                );
+
+                if (!found) {
+                    throw new Error(
+                        t('credit.errors.productNotFound', {
+                            defaultValue: isEnglish
+                                ? 'The selected product could not be found.'
+                                : 'محصول انتخاب‌شده پیدا نشد.',
+                        })
+                    );
+                }
+
+                productId = found.id;
+                productSnapshot = found;
+            }
+
+            // ═══ Quantity validation ═══
+            const quantity = Number(data?.quantity);
+            if (!Number.isFinite(quantity) || quantity <= 0) {
+                throw new Error(
+                    t('credit.saleForm.errors.quantityRequired', {
+                        defaultValue: isEnglish
+                            ? 'Quantity must be greater than zero.'
+                            : 'تعداد باید بیشتر از صفر باشد.',
+                    })
                 );
             }
 
+            // ═══ Price validation ═══
+            const unitPrice = Number(data?.unitPrice);
+            if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+                throw new Error(
+                    t('credit.saleForm.errors.priceInvalid', {
+                        defaultValue: isEnglish
+                            ? 'Please enter a valid unit price.'
+                            : 'لطفاً قیمت واحد معتبر وارد کنید.',
+                    })
+                );
+            }
+
+            // ═══ Multi-unit fields (with safe fallbacks for legacy callers) ═══
+            const saleFactorRaw = Number(data?.saleFactor);
+            const saleFactor =
+                Number.isFinite(saleFactorRaw) && saleFactorRaw > 0
+                    ? saleFactorRaw
+                    : 1;
+
+            const quantityInBaseRaw = Number(data?.quantityInBase);
+            const quantityInBase =
+                Number.isFinite(quantityInBaseRaw) && quantityInBaseRaw > 0
+                    ? quantityInBaseRaw
+                    : quantity * saleFactor;
+
+            // ═══ Call addSale — it handles stock check + deduction in base units ═══
             await addSale({
-                productId: product.id,
-                category: product.category || '',
+                // Product
+                productId,
+                productName: data?.productName || productSnapshot?.name || '',
+                category: data?.category || productSnapshot?.category || '',
+
+                // Quantity (in sale unit + base)
                 quantity,
+                saleOptionId: data?.saleOptionId || null,
+                saleUnit: data?.saleUnit || '',
+                saleFactor,
+                quantityInBase,
+
+                // Price
                 unitPrice,
+                total: quantity * unitPrice,
+
+                // Payment
                 paymentType: 'credit',
+
+                // Customer
                 customerName,
-                customerPhone,
-                date:
-                    data?.date ||
-                    new Date().toISOString(),
+                customerPhone: data?.customerPhone || data?.phone || '',
+
+                // Meta
+                note: data?.note || '',
+                date: data?.date || new Date().toISOString(),
+                dueDate: data?.dueDate || null,
             });
 
             setShowCreditForm(false);
             setError('');
-
             await loadCredits({ silent: true });
         } catch (err) {
-            console.error(
-                'Failed to save credit sale:',
-                err
-            );
-
+            console.error('Failed to save credit sale:', err);
             setError(
                 err?.message ||
                     t('credit.errors.saleSave', {
@@ -680,9 +576,7 @@ function Credit() {
     const requestDelete = (customer) => {
         if (!customer) return;
 
-        if (
-            normalizeNumber(customer.remaining) > 0
-        ) {
+        if (normalizeNumber(customer.remaining) > 0) {
             setError(
                 t('credit.errors.cannotDeleteWithDebt', {
                     defaultValue: isEnglish
@@ -690,7 +584,6 @@ function Credit() {
                         : 'این مشتری هنوز بدهی باقی‌مانده دارد.',
                 })
             );
-
             return;
         }
 
@@ -700,7 +593,6 @@ function Credit() {
 
     const closeDeleteModal = () => {
         if (deleting) return;
-
         setDeleteCustomer(null);
     };
 
@@ -712,8 +604,7 @@ function Credit() {
             setError('');
 
             const customerId = normalizeId(
-                deleteCustomer.customerId ??
-                    deleteCustomer.id
+                deleteCustomer.customerId ?? deleteCustomer.id
             );
 
             if (!customerId) {
@@ -728,20 +619,10 @@ function Credit() {
 
             await initializeDatabase();
 
-            const [
-                customer,
-                creditSales,
-                creditPayments,
-            ] = await Promise.all([
+            const [customer, creditSales, creditPayments] = await Promise.all([
                 db.customers.get(customerId),
-                db.creditSales
-                    .where('customerId')
-                    .equals(customerId)
-                    .toArray(),
-                db.creditPayments
-                    .where('customerId')
-                    .equals(customerId)
-                    .toArray(),
+                db.creditSales.where('customerId').equals(customerId).toArray(),
+                db.creditPayments.where('customerId').equals(customerId).toArray(),
             ]);
 
             if (!customer) {
@@ -758,35 +639,25 @@ function Credit() {
                 (s, r) => s + normalizeNumber(r.amount),
                 0
             );
-
             const totalPaid = creditPayments.reduce(
                 (s, r) => s + normalizeNumber(r.amount),
                 0
             );
 
-            if (
-                Math.max(
-                    0,
-                    totalDebt - totalPaid
-                ) > 0
-            ) {
+            if (Math.max(0, totalDebt - totalPaid) > 0) {
                 throw new Error(
-                    t(
-                        'credit.errors.cannotDeleteWithDebt',
-                        {
-                            defaultValue: isEnglish
-                                ? 'This customer still has an outstanding debt.'
-                                : 'این مشتری هنوز بدهی باقی‌مانده دارد.',
-                        }
-                    )
+                    t('credit.errors.cannotDeleteWithDebt', {
+                        defaultValue: isEnglish
+                            ? 'This customer still has an outstanding debt.'
+                            : 'این مشتری هنوز بدهی باقی‌مانده دارد.',
+                    })
                 );
             }
 
-            const relatedSales =
-                await db.sales
-                    .where('customerId')
-                    .equals(customerId)
-                    .toArray();
+            const relatedSales = await db.sales
+                .where('customerId')
+                .equals(customerId)
+                .toArray();
 
             await db.transaction(
                 'rw',
@@ -796,27 +667,17 @@ function Credit() {
                 db.sales,
                 async () => {
                     for (const sale of relatedSales) {
-                        await db.sales.update(
-                            sale.id,
-                            {
-                                customerId: null,
-                            }
-                        );
+                        await db.sales.update(sale.id, { customerId: null });
                     }
-
                     await db.creditPayments
                         .where('customerId')
                         .equals(customerId)
                         .delete();
-
                     await db.creditSales
                         .where('customerId')
                         .equals(customerId)
                         .delete();
-
-                    await db.customers.delete(
-                        customerId
-                    );
+                    await db.customers.delete(customerId);
                 }
             );
 
@@ -831,17 +692,11 @@ function Credit() {
                 'credit-sales-updated',
                 'credit-payments-updated',
                 'database-updated',
-            ].forEach((e) =>
-                window.dispatchEvent(new Event(e))
-            );
+            ].forEach((e) => window.dispatchEvent(new Event(e)));
 
             await loadCredits({ silent: true });
         } catch (err) {
-            console.error(
-                'Failed to delete customer:',
-                err
-            );
-
+            console.error('Failed to delete customer:', err);
             setError(
                 err?.message ||
                     t('credit.errors.deleteCustomer', {
@@ -856,9 +711,7 @@ function Credit() {
     };
 
     const getDeleteName = () =>
-        deleteCustomer?.customerName ||
-        deleteCustomer?.name ||
-        '';
+        deleteCustomer?.customerName || deleteCustomer?.name || '';
 
     return (
         <div
@@ -870,11 +723,7 @@ function Credit() {
                 <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
                     <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-500/15 bg-amber-500/10 shadow-[var(--shadow-xs)] sm:h-12 sm:w-12">
-                            <CreditCard
-                                size={21}
-                                strokeWidth={2}
-                                className="text-amber-500"
-                            />
+                            <CreditCard size={21} strokeWidth={2} className="text-amber-500" />
                         </div>
 
                         <div className="min-w-0">
@@ -882,16 +731,12 @@ function Credit() {
                                 <h1 className="text-xl font-bold tracking-tight text-[var(--text)] sm:text-2xl lg:text-[28px]">
                                     {t('credit.page.title')}
                                 </h1>
-
                                 <span className="inline-flex items-center rounded-lg border border-amber-500/15 bg-amber-500/10 px-2.5 py-1 text-[9px] font-bold text-amber-500 sm:text-[10px]">
                                     {t('credit.page.badge')}
                                 </span>
                             </div>
-
                             <p className="mt-1 max-w-2xl text-[11px] leading-5 text-[var(--text-muted)] sm:text-xs sm:leading-6">
-                                {t(
-                                    'credit.page.description'
-                                )}
+                                {t('credit.page.description')}
                             </p>
                         </div>
                     </div>
@@ -899,25 +744,17 @@ function Credit() {
                     <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end lg:w-auto">
                         <div className="order-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 sm:order-1 sm:w-auto sm:min-w-[125px]">
                             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--surface)]">
-                                <Users
-                                    size={14}
-                                    className="text-[var(--text-muted)]"
-                                />
+                                <Users size={14} className="text-[var(--text-muted)]" />
                             </div>
-
                             <span className="text-[11px] font-medium text-[var(--text-secondary)]">
-                                {t(
-                                    'credit.page.debtorCustomers'
-                                )}
+                                {t('credit.page.debtorCustomers')}
                             </span>
-
                             <span
                                 dir="ltr"
                                 className="number-font text-sm font-bold text-[var(--text)]"
                             >
                                 {statistics.debtorCount}
                             </span>
-
                             <span className="text-[10px] text-[var(--text-muted)]">
                                 {t('credit.page.person')}
                             </span>
@@ -931,13 +768,8 @@ function Credit() {
                         >
                             <RefreshCw
                                 size={15}
-                                className={
-                                    refreshing
-                                        ? 'animate-spin'
-                                        : ''
-                                }
+                                className={refreshing ? 'animate-spin' : ''}
                             />
-
                             <span>{refreshLabel}</span>
                         </button>
 
@@ -951,12 +783,7 @@ function Credit() {
                                 strokeWidth={2.2}
                                 className="transition-transform duration-200 group-hover:rotate-90"
                             />
-
-                            <span>
-                                {t(
-                                    'credit.page.newCredit'
-                                )}
-                            </span>
+                            <span>{t('credit.page.newCredit')}</span>
                         </button>
                     </div>
                 </div>
@@ -971,10 +798,7 @@ function Credit() {
                 </div>
             )}
 
-            <CreditStats
-                statistics={statistics}
-                loading={loading}
-            />
+            <CreditStats statistics={statistics} loading={loading} />
 
             <CreditFilters
                 filters={filters}
@@ -993,9 +817,7 @@ function Credit() {
 
             {showCreditForm && (
                 <CreditSaleForm
-                    onClose={() =>
-                        setShowCreditForm(false)
-                    }
+                    onClose={() => setShowCreditForm(false)}
                     onSubmit={submitCredit}
                 />
             )}
@@ -1025,44 +847,29 @@ function Credit() {
                 >
                     <div
                         className="ui-modal w-full max-w-sm animate-[profileModalIn_180ms_ease-out]"
-                        onMouseDown={(e) =>
-                            e.stopPropagation()
-                        }
+                        onMouseDown={(e) => e.stopPropagation()}
                         role="dialog"
                         aria-modal="true"
                     >
                         <div className="ui-modal-header relative overflow-hidden px-4 py-4 sm:px-5 sm:py-5">
                             <div className="relative flex items-start gap-3">
                                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-rose-500/10 bg-rose-500/10">
-                                    <Trash2
-                                        size={19}
-                                        className="text-rose-500"
-                                    />
+                                    <Trash2 size={19} className="text-rose-500" />
                                 </div>
-
                                 <div className="min-w-0 flex-1">
                                     <h2 className="text-sm font-bold text-[var(--text)] sm:text-base">
-                                        {t(
-                                            'credit.table.delete.title',
-                                            {
-                                                defaultValue:
-                                                    isEnglish
-                                                        ? 'Delete Customer Account'
-                                                        : 'حذف حساب مشتری',
-                                            }
-                                        )}
+                                        {t('credit.table.delete.title', {
+                                            defaultValue: isEnglish
+                                                ? 'Delete Customer Account'
+                                                : 'حذف حساب مشتری',
+                                        })}
                                     </h2>
-
                                     <p className="mt-1 text-[11px] leading-5 text-[var(--text-muted)]">
-                                        {t(
-                                            'credit.table.delete.description',
-                                            {
-                                                defaultValue:
-                                                    isEnglish
-                                                        ? 'This account is fully settled.'
-                                                        : 'این حساب به‌طور کامل تسویه شده است.',
-                                            }
-                                        )}
+                                        {t('credit.table.delete.description', {
+                                            defaultValue: isEnglish
+                                                ? 'This account is fully settled.'
+                                                : 'این حساب به‌طور کامل تسویه شده است.',
+                                        })}
                                     </p>
                                 </div>
                             </div>
@@ -1072,35 +879,22 @@ function Credit() {
                             <div className="rounded-2xl border border-rose-500/10 bg-rose-500/5 p-4">
                                 <div className="flex items-center gap-2 text-[10px] font-medium text-rose-500">
                                     <Trash2 size={13} />
-
                                     <span>
-                                        {t(
-                                            'credit.table.delete.confirm',
-                                            {
-                                                defaultValue:
-                                                    isEnglish
-                                                        ? 'Delete Account'
-                                                        : 'حذف حساب',
-                                            }
-                                        )}
+                                        {t('credit.table.delete.confirm', {
+                                            defaultValue: isEnglish
+                                                ? 'Delete Account'
+                                                : 'حذف حساب',
+                                        })}
                                     </span>
                                 </div>
-
                                 <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
-                                    {t(
-                                        'credit.table.deleteConfirm',
-                                        {
-                                            customer:
-                                                getDeleteName(),
-
-                                            defaultValue:
-                                                isEnglish
-                                                    ? `Are you sure you want to delete “${getDeleteName()}”?`
-                                                    : `آیا مطمئن هستید که حساب «${getDeleteName()}» حذف شود؟`,
-                                        }
-                                    )}
+                                    {t('credit.table.deleteConfirm', {
+                                        customer: getDeleteName(),
+                                        defaultValue: isEnglish
+                                            ? `Are you sure you want to delete "${getDeleteName()}"?`
+                                            : `آیا مطمئن هستید که حساب «${getDeleteName()}» حذف شود؟`,
+                                    })}
                                 </p>
-
                                 <p className="mt-2 text-[10px] leading-5 text-[var(--text-muted)]">
                                     {isEnglish
                                         ? 'The credit account and payment records will be removed. Sales history will be preserved.'
@@ -1116,17 +910,10 @@ function Credit() {
                                 disabled={deleting}
                                 className="ui-button-secondary min-h-10 w-full rounded-xl px-4 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                             >
-                                {t(
-                                    'credit.table.delete.cancel',
-                                    {
-                                        defaultValue:
-                                            isEnglish
-                                                ? 'Cancel'
-                                                : 'انصراف',
-                                    }
-                                )}
+                                {t('credit.table.delete.cancel', {
+                                    defaultValue: isEnglish ? 'Cancel' : 'انصراف',
+                                })}
                             </button>
-
                             <button
                                 type="button"
                                 onClick={confirmDelete}
@@ -1138,21 +925,16 @@ function Credit() {
                                 ) : (
                                     <Trash2 size={15} />
                                 )}
-
                                 <span>
                                     {deleting
                                         ? isEnglish
                                             ? 'Deleting...'
                                             : 'در حال حذف...'
-                                        : t(
-                                              'credit.table.delete.confirm',
-                                              {
-                                                  defaultValue:
-                                                      isEnglish
-                                                          ? 'Delete Account'
-                                                          : 'حذف حساب',
-                                              }
-                                          )}
+                                        : t('credit.table.delete.confirm', {
+                                            defaultValue: isEnglish
+                                                ? 'Delete Account'
+                                                : 'حذف حساب',
+                                        })}
                                 </span>
                             </button>
                         </div>

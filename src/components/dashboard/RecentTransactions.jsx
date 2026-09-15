@@ -109,9 +109,10 @@ function RecentTransactions({ sales = [], loading = false }) {
                     </p>
                 </div>
 
+                {/* ✅ FIXED: → /reports (combined transactions) */}
                 <button
                     type="button"
-                    onClick={() => navigate('/sales')}
+                    onClick={() => navigate('/reports')}
                     className="self-start shrink-0 rounded-lg border border-transparent px-2 py-1.5 text-xs font-medium text-[var(--accent-600)] transition-all duration-200 hover:border-[var(--accent-border)] hover:bg-[var(--accent-soft)] sm:self-auto"
                 >
                     {t('dashboard.recentTransactions.viewAll')}

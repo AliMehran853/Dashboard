@@ -1,59 +1,98 @@
 import { TrendingUp, ShoppingCart, CreditCard, Wallet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useCountUp } from '../../hooks/useCountUp';
+
+// =========================================================
+// Helpers
+// =========================================================
 
 const toEnglishNumbers = (value) =>
     String(value ?? '')
         .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
         .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
 
-const formatNumber = (value, language) => {
-    const num = Number(toEnglishNumbers(value)) || 0;
+// =========================================================
+// AnimatedNumber
+// =========================================================
+
+function AnimatedNumber({ value, language, className, dir }) {
+    const animated = useCountUp(Number(toEnglishNumbers(value)) || 0, {
+        duration: 900,
+    });
+
     const isEnglish = String(language || '').toLowerCase().startsWith('en');
-    return new Intl.NumberFormat(isEnglish ? 'en-US' : 'fa-IR').format(num);
-};
+    const formatted = new Intl.NumberFormat(
+        isEnglish ? 'en-US' : 'fa-IR'
+    ).format(animated);
+
+    return (
+        <span dir={dir} className={className}>
+            {formatted}
+        </span>
+    );
+}
+
+// =========================================================
+// ReportsStats
+// =========================================================
 
 function ReportsStats({ statistics = {} }) {
     const { t, i18n } = useTranslation();
     const language = i18n.language || 'fa';
     const isEnglish = String(language).toLowerCase().startsWith('en');
 
-    const totalSales = Number(toEnglishNumbers(statistics.totalSales ?? statistics.totalTransactions ?? 0)) || 0;
+    const totalSales =
+        Number(toEnglishNumbers(statistics.totalSales ?? statistics.totalTransactions ?? 0)) || 0;
     const totalRevenue = Number(toEnglishNumbers(statistics.totalRevenue ?? 0)) || 0;
     const cashSales = Number(toEnglishNumbers(statistics.cashSales ?? 0)) || 0;
     const creditSales = Number(toEnglishNumbers(statistics.creditSales ?? 0)) || 0;
 
-    const currency = t('common.currency', { defaultValue: isEnglish ? 'AF' : 'افغانی' });
+    const currency = t('common.currency', {
+        defaultValue: isEnglish ? 'AF' : 'افغانی',
+    });
 
     const stats = [
         {
             id: 'total-sales',
             icon: ShoppingCart,
-            title: t('reports.stats.totalSales', { defaultValue: isEnglish ? 'Total Sales' : 'مجموع فروش' }),
-            value: formatNumber(totalSales, language),
+            title: t('reports.stats.totalSales', {
+                defaultValue: isEnglish ? 'Total Sales' : 'مجموع فروش',
+            }),
+            value: totalSales,
+            unit: null,
             iconClass: 'text-emerald-500 dark:text-emerald-400',
             iconBg: 'border-emerald-500/10 bg-emerald-500/10',
         },
         {
             id: 'total-revenue',
             icon: TrendingUp,
-            title: t('reports.stats.totalRevenue', { defaultValue: isEnglish ? 'Total Revenue' : 'مجموع درآمد' }),
-            value: `${formatNumber(totalRevenue, language)} ${currency}`,
+            title: t('reports.stats.totalRevenue', {
+                defaultValue: isEnglish ? 'Total Revenue' : 'مجموع درآمد',
+            }),
+            value: totalRevenue,
+            unit: currency,
             iconClass: 'text-sky-500 dark:text-sky-400',
             iconBg: 'border-sky-500/10 bg-sky-500/10',
         },
         {
             id: 'cash-sales',
             icon: Wallet,
-            title: t('reports.stats.cashSales', { defaultValue: isEnglish ? 'Cash Sales' : 'فروش نقدی' }),
-            value: `${formatNumber(cashSales, language)} ${currency}`,
+            title: t('reports.stats.cashSales', {
+                defaultValue: isEnglish ? 'Cash Sales' : 'فروش نقدی',
+            }),
+            value: cashSales,
+            unit: currency,
             iconClass: 'text-amber-500 dark:text-amber-400',
             iconBg: 'border-amber-500/10 bg-amber-500/10',
         },
         {
             id: 'credit-sales',
             icon: CreditCard,
-            title: t('reports.stats.creditSales', { defaultValue: isEnglish ? 'Credit Sales' : 'فروش نسیه' }),
-            value: `${formatNumber(creditSales, language)} ${currency}`,
+            title: t('reports.stats.creditSales', {
+                defaultValue: isEnglish ? 'Credit Sales' : 'فروش نسیه',
+            }),
+            value: creditSales,
+            unit: currency,
             iconClass: 'text-violet-500 dark:text-violet-400',
             iconBg: 'border-violet-500/10 bg-violet-500/10',
         },
@@ -61,7 +100,6 @@ function ReportsStats({ statistics = {} }) {
 
     return (
         <section dir={isEnglish ? 'ltr' : 'rtl'} className="space-y-4">
-            {/* Section header (from i18n) */}
             <header className="flex items-center gap-3">
                 <span
                     aria-hidden="true"
@@ -70,37 +108,55 @@ function ReportsStats({ statistics = {} }) {
                 <div className="min-w-0">
                     <h2 className="truncate text-sm font-bold text-[var(--text)] sm:text-base lg:text-lg">
                         {t('reports.stats.sectionTitle', {
-                            defaultValue: isEnglish ? 'Report Overview' : 'خلاصه گزارش',
+                            defaultValue: isEnglish
+                                ? 'Report Overview'
+                                : 'خلاصه گزارش',
                         })}
                     </h2>
                     <p className="mt-0.5 truncate text-[10px] text-[var(--text-muted)] sm:text-xs">
                         {t('reports.stats.sectionDescription', {
-                            defaultValue: isEnglish ? 'Key figures from the selected report' : 'اعداد کلیدی گزارش انتخاب‌شده',
+                            defaultValue: isEnglish
+                                ? 'Key figures from the selected report'
+                                : 'اعداد کلیدی گزارش انتخاب‌شده',
                         })}
                     </p>
                 </div>
             </header>
 
-            {/* Stats grid */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
                 {stats.map((stat) => {
                     const Icon = stat.icon;
                     return (
-                        <article key={stat.id} className="group ui-card-tint ui-card-tint--lift p-4 sm:p-5">
+                        <article
+                            key={stat.id}
+                            className="group ui-card-tint ui-card-tint--lift p-4 sm:p-5"
+                        >
                             <div className="ui-layer flex min-w-0 items-start justify-between gap-4">
                                 <div className="min-w-0 flex-1">
                                     <p className="truncate text-[11px] font-medium leading-5 text-[var(--text-muted)]">
                                         {stat.title}
                                     </p>
-                                    <p
+                                    <div
                                         dir={isEnglish ? 'ltr' : 'rtl'}
-                                        className="mt-2 truncate number-font text-xl font-bold tracking-tight text-[var(--text-primary)] sm:text-2xl"
+                                        className="mt-2 flex min-w-0 items-baseline gap-1.5"
                                     >
-                                        {stat.value}
-                                    </p>
+                                        <p className="truncate number-font text-xl font-bold tracking-tight text-[var(--text-primary)] sm:text-2xl">
+                                            <AnimatedNumber
+                                                value={stat.value}
+                                                language={language}
+                                            />
+                                        </p>
+                                        {stat.unit ? (
+                                            <span className="shrink-0 text-[10px] font-medium text-[var(--text-muted)] sm:text-xs">
+                                                {stat.unit}
+                                            </span>
+                                        ) : null}
+                                    </div>
                                 </div>
 
-                                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 sm:h-11 sm:w-11 ${stat.iconBg}`}>
+                                <div
+                                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 sm:h-11 sm:w-11 ${stat.iconBg}`}
+                                >
                                     <Icon
                                         size={19}
                                         strokeWidth={2}

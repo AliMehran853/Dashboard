@@ -56,7 +56,7 @@ const enTranslate = {
 
     navigation: {
       dashboard: "Dashboard",
-      sales: "Today's Sales",
+      sales: "Cash Sales",
       creditSales: "Credit Sales",
       products: "Products",
       reports: "Reports",
@@ -195,20 +195,17 @@ const enTranslate = {
     // =====================================================
 
     products: {
-      // New nested shape (used by Products page header)
       page: {
         title: "Products",
         description: "Manage products and inventory",
         addProduct: "Add Product",
       },
 
-      // Section header above the four stat cards
       statsSection: {
         title: "Product Summary",
         description: "Current status of products and inventory",
       },
 
-      // Legacy flat keys (kept for backward compatibility)
       pageTitle: "Products",
       pageDescription: "Manage products and inventory",
       addProduct: "Add Product",
@@ -449,8 +446,8 @@ const enTranslate = {
     // =====================================================
 
     sales: {
-      pageTitle: "Sales",
-      pageDescription: "Manage and record store sales",
+      pageTitle: "Cash Sales",
+      pageDescription: "Manage and record cash sales",
       addSale: "New Sale",
 
       paymentTypes: {
@@ -472,6 +469,12 @@ const enTranslate = {
         creditSales: {
           title: "Credit Sales",
           description: "Customer debt",
+        },
+
+        pendingCredit: {
+          title: "Pending Credit Debt",
+          description: "{{count}} unpaid customer",
+          cta: "View credit page",
         },
 
         items: {
@@ -965,6 +968,14 @@ const enTranslate = {
       empty: "No information is available to display.",
 
       filters: {
+        title: "Report Filters",
+        description: "Search and filter report data",
+
+        activeFilters: "Active filters:",
+        periodLabel: "Period:",
+        paymentLabel: "Payment:",
+        categoryLabel: "Category:",
+
         searchPlaceholder: "Search reports...",
 
         period: {
@@ -1375,14 +1386,29 @@ const enTranslate = {
             description: "Calm and professional",
           },
 
+          indigo: {
+            name: "Indigo",
+            description: "Deep and focused",
+          },
+
           violet: {
             name: "Violet",
             description: "Modern and luxurious",
           },
 
+          rose: {
+            name: "Rose",
+            description: "Subtle and distinctive",
+          },
+
+          red: {
+            name: "Red",
+            description: "Bold and energetic",
+          },
+
           amber: {
             name: "Amber",
-            description: "Warm and energetic",
+            description: "Warm and glowing",
           },
 
           cyan: {
@@ -1390,9 +1416,9 @@ const enTranslate = {
             description: "Fresh and technological",
           },
 
-          rose: {
-            name: "Rose",
-            description: "Subtle and distinctive",
+          teal: {
+            name: "Teal",
+            description: "Serene and balanced",
           },
         },
       },

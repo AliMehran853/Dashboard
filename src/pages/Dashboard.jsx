@@ -8,6 +8,39 @@ import ThirtyDaySalesChart from '../components/dashboard/ThirtyDaySalesChart';
 import MonthlySalesChart from '../components/dashboard/MonthlySalesChart';
 import QuickActions from '../components/dashboard/QuickActions';
 import RecentTransactions from '../components/dashboard/RecentTransactions';
+import { useCountUp } from '../hooks/useCountUp';
+
+// =========================================================
+// AnimatedNumber
+//   Small wrapper that animates a numeric value using the
+//   useCountUp hook, then formats it with the correct
+//   locale (fa-IR / en-US).
+// =========================================================
+
+function AnimatedNumber({ value, language, className, dir, decimals = 0 }) {
+    const animated = useCountUp(Number(value) || 0, {
+        duration: 900,
+        decimals,
+    });
+
+    const isEnglish = String(language || '')
+        .toLowerCase()
+        .startsWith('en');
+
+    const formatted = new Intl.NumberFormat(
+        isEnglish ? 'en-US' : 'fa-IR',
+        {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
+        }
+    ).format(animated);
+
+    return (
+        <span dir={dir} className={className}>
+            {formatted}
+        </span>
+    );
+}
 
 // =========================================================
 // Helpers
@@ -85,31 +118,24 @@ const TONES = {
     accent: {
         iconBg:
             'bg-[var(--accent-soft)] border-[var(--accent-border)]',
-
         iconText:
             'text-[var(--accent-500)]',
     },
-
     warning: {
         iconBg:
             'bg-amber-500/10 border-amber-500/15 dark:border-amber-400/15',
-
         iconText:
             'text-amber-500 dark:text-amber-400',
     },
-
     violet: {
         iconBg:
             'bg-violet-500/10 border-violet-500/15 dark:border-violet-400/15',
-
         iconText:
             'text-violet-500 dark:text-violet-400',
     },
-
     cyan: {
         iconBg:
             'bg-cyan-500/10 border-cyan-500/15 dark:border-cyan-400/15',
-
         iconText:
             'text-cyan-500 dark:text-cyan-400',
     },
@@ -131,8 +157,10 @@ const DB_EVENTS = [
 function Dashboard() {
     const { t, i18n } = useTranslation();
 
+    const language = i18n.language || 'fa';
+
     const isEnglish =
-        String(i18n.language || 'fa')
+        String(language)
             .toLowerCase()
             .startsWith('en');
 
@@ -300,20 +328,11 @@ function Dashboard() {
                 );
 
         return {
-            todayTotal:
-                total,
-
-            todayCredit:
-                credit,
-
-            todayCash:
-                cash,
-
-            todayTransactions:
-                today.length,
-
+            todayTotal: total,
+            todayCredit: credit,
+            todayCash: cash,
+            todayTransactions: today.length,
             productsCount,
-
             shoppingCount,
         };
     }, [
@@ -330,33 +349,22 @@ function Dashboard() {
         () => [
             {
                 id: 'today-sales',
-
                 tone: 'accent',
-
                 icon: ShoppingCart,
-
-                title:
-                    t(
-                        'dashboard.stats.todaySales.title'
-                    ),
-
-                value:
-                    dashboardData.todayTotal,
-
-                unit:
-                    t(
-                        'dashboard.stats.todaySales.unit'
-                    ),
-
-                description:
-                    t(
-                        'dashboard.stats.todaySales.transactionCount',
-                        {
-                            count:
-                                dashboardData.todayTransactions,
-                        }
-                    ),
-
+                title: t(
+                    'dashboard.stats.todaySales.title'
+                ),
+                value: dashboardData.todayTotal,
+                unit: t(
+                    'dashboard.stats.todaySales.unit'
+                ),
+                description: t(
+                    'dashboard.stats.todaySales.transactionCount',
+                    {
+                        count:
+                            dashboardData.todayTransactions,
+                    }
+                ),
                 change:
                     dashboardData.todayTransactions > 0
                         ? t(
@@ -366,32 +374,20 @@ function Dashboard() {
                             'dashboard.stats.todaySales.noSales'
                         ),
             },
-
             {
                 id: 'credit-sales',
-
                 tone: 'warning',
-
                 icon: CreditCard,
-
-                title:
-                    t(
-                        'dashboard.stats.creditSales.title'
-                    ),
-
-                value:
-                    dashboardData.todayCredit,
-
-                unit:
-                    t(
-                        'dashboard.stats.creditSales.unit'
-                    ),
-
-                description:
-                    t(
-                        'dashboard.stats.creditSales.description'
-                    ),
-
+                title: t(
+                    'dashboard.stats.creditSales.title'
+                ),
+                value: dashboardData.todayCredit,
+                unit: t(
+                    'dashboard.stats.creditSales.unit'
+                ),
+                description: t(
+                    'dashboard.stats.creditSales.description'
+                ),
                 change:
                     dashboardData.todayCredit > 0
                         ? t(
@@ -401,32 +397,20 @@ function Dashboard() {
                             'dashboard.stats.creditSales.none'
                         ),
             },
-
             {
                 id: 'products',
-
                 tone: 'violet',
-
                 icon: Package,
-
-                title:
-                    t(
-                        'dashboard.stats.products.title'
-                    ),
-
-                value:
-                    dashboardData.productsCount,
-
-                unit:
-                    t(
-                        'dashboard.stats.products.unit'
-                    ),
-
-                description:
-                    t(
-                        'dashboard.stats.products.description'
-                    ),
-
+                title: t(
+                    'dashboard.stats.products.title'
+                ),
+                value: dashboardData.productsCount,
+                unit: t(
+                    'dashboard.stats.products.unit'
+                ),
+                description: t(
+                    'dashboard.stats.products.description'
+                ),
                 change:
                     dashboardData.productsCount > 0
                         ? t(
@@ -436,32 +420,20 @@ function Dashboard() {
                             'dashboard.stats.products.empty'
                         ),
             },
-
             {
                 id: 'shopping-list',
-
                 tone: 'cyan',
-
                 icon: ShoppingBasket,
-
-                title:
-                    t(
-                        'dashboard.stats.shoppingList.title'
-                    ),
-
-                value:
-                    dashboardData.shoppingCount,
-
-                unit:
-                    t(
-                        'dashboard.stats.shoppingList.unit'
-                    ),
-
-                description:
-                    t(
-                        'dashboard.stats.shoppingList.description'
-                    ),
-
+                title: t(
+                    'dashboard.stats.shoppingList.title'
+                ),
+                value: dashboardData.shoppingCount,
+                unit: t(
+                    'dashboard.stats.shoppingList.unit'
+                ),
+                description: t(
+                    'dashboard.stats.shoppingList.description'
+                ),
                 change:
                     dashboardData.shoppingCount > 0
                         ? t(
@@ -472,18 +444,8 @@ function Dashboard() {
                         ),
             },
         ],
-        [
-            t,
-            dashboardData,
-        ]
+        [t, dashboardData]
     );
-
-    const formatNumber = (v) =>
-        Number(v || 0).toLocaleString(
-            isEnglish
-                ? 'en-US'
-                : 'fa-IR'
-        );
 
     // =====================================================
     // Render
@@ -506,33 +468,8 @@ function Dashboard() {
 
             <section className="ui-card relative overflow-hidden rounded-2xl p-4 sm:p-5 md:p-6">
                 <div className="relative">
-                    <div className="flex items-center gap-2">
-                        <span
-                            className="
-                                h-2
-                                w-2
-                                rounded-full
-                                bg-[var(--accent-500)]
-                                shadow-[0_0_12px_var(--accent-glow)]
-                            "
-                        />
-
-                        <span
-                            className="
-                                text-[10px]
-                                font-medium
-                                uppercase
-                                tracking-[0.12em]
-                                text-[var(--accent-600)]
-                            "
-                        >
-                            Taqwa
-                        </span>
-                    </div>
-
                     <h1
                         className="
-                            mt-2
                             text-xl
                             font-semibold
                             tracking-[-0.02em]
@@ -554,9 +491,7 @@ function Dashboard() {
                             sm:text-sm
                         "
                     >
-                        {t(
-                            'common.dashboardSubtitle'
-                        )}
+                        {t('common.dashboardSubtitle')}
                     </p>
                 </div>
             </section>
@@ -586,8 +521,6 @@ function Dashboard() {
             {/* ================= Stats ================= */}
 
             <section className="space-y-4">
-                {/* Section header */}
-
                 <header className="flex items-center gap-3">
                     <span
                         aria-hidden="true"
@@ -646,8 +579,6 @@ function Dashboard() {
                     </div>
                 </header>
 
-                {/* Stats grid */}
-
                 <div
                     className="
                         grid
@@ -660,13 +591,8 @@ function Dashboard() {
                     "
                 >
                     {stats.map((stat) => {
-                        const Icon =
-                            stat.icon;
-
-                        const tone =
-                            TONES[
-                                stat.tone
-                            ];
+                        const Icon = stat.icon;
+                        const tone = TONES[stat.tone];
 
                         return (
                             <article
@@ -690,8 +616,6 @@ function Dashboard() {
                                     hover:shadow-[var(--shadow-card-hover)]
                                 "
                             >
-                                {/* Top row */}
-
                                 <div
                                     className="
                                         relative
@@ -720,9 +644,7 @@ function Dashboard() {
                                         <Icon
                                             size={20}
                                             strokeWidth={1.9}
-                                            className={
-                                                tone.iconText
-                                            }
+                                            className={tone.iconText}
                                         />
                                     </div>
 
@@ -740,13 +662,9 @@ function Dashboard() {
                                             sm:text-[10px]
                                         "
                                     >
-                                        {t(
-                                            'common.today'
-                                        )}
+                                        {t('common.today')}
                                     </span>
                                 </div>
-
-                                {/* Content */}
 
                                 <div
                                     className="
@@ -800,9 +718,10 @@ function Dashboard() {
                                                         text-[var(--text)]
                                                     "
                                                 >
-                                                    {formatNumber(
-                                                        stat.value
-                                                    )}
+                                                    <AnimatedNumber
+                                                        value={stat.value}
+                                                        language={language}
+                                                    />
                                                 </h3>
 
                                                 <span

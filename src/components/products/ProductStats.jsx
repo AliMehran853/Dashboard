@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Package, Layers3, AlertTriangle, Wallet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getProducts, getCategories } from '../../database/db';
+import { useCountUp } from '../../hooks/useCountUp';
 
 // =========================================================
 // Helpers
@@ -13,9 +14,34 @@ const toEnglishNumbers = (value) =>
         .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
 
 const formatNumber = (number, language) => {
-    const locale = String(language || '').toLowerCase().startsWith('en') ? 'en-US' : 'fa-IR';
-    return new Intl.NumberFormat(locale).format(Number(toEnglishNumbers(number)) || 0);
+    const locale = String(language || '').toLowerCase().startsWith('en')
+        ? 'en-US'
+        : 'fa-IR';
+    return new Intl.NumberFormat(locale).format(
+        Number(toEnglishNumbers(number)) || 0
+    );
 };
+
+// =========================================================
+// AnimatedNumber
+// =========================================================
+
+function AnimatedNumber({ value, language, className, dir }) {
+    const animated = useCountUp(Number(toEnglishNumbers(value)) || 0, {
+        duration: 900,
+    });
+
+    const isEnglish = String(language || '').toLowerCase().startsWith('en');
+    const formatted = new Intl.NumberFormat(
+        isEnglish ? 'en-US' : 'fa-IR'
+    ).format(animated);
+
+    return (
+        <span dir={dir} className={className}>
+            {formatted}
+        </span>
+    );
+}
 
 // =========================================================
 // Product Stats
@@ -29,10 +55,6 @@ function ProductStats({ refreshKey = 0 }) {
     const [products, setProducts] = useState([]);
     const [categoriesCount, setCategoriesCount] = useState(0);
     const [loading, setLoading] = useState(true);
-
-    // =====================================================
-    // Load
-    // =====================================================
 
     useEffect(() => {
         let mounted = true;
@@ -49,10 +71,11 @@ function ProductStats({ refreshKey = 0 }) {
                 if (!mounted) return;
 
                 setProducts(Array.isArray(productsData) ? productsData : []);
-                setCategoriesCount(Array.isArray(categoriesData) ? categoriesData.length : 0);
+                setCategoriesCount(
+                    Array.isArray(categoriesData) ? categoriesData.length : 0
+                );
             } catch (err) {
                 console.error('Failed to load product statistics:', err);
-
                 if (mounted) {
                     setProducts([]);
                     setCategoriesCount(0);
@@ -62,12 +85,10 @@ function ProductStats({ refreshKey = 0 }) {
             }
         })();
 
-        return () => { mounted = false; };
+        return () => {
+            mounted = false;
+        };
     }, [refreshKey]);
-
-    // =====================================================
-    // Derived Stats
-    // =====================================================
 
     const { lowStockCount, outOfStockCount, inventoryValue } = useMemo(() => {
         let low = 0;
@@ -77,22 +98,31 @@ function ProductStats({ refreshKey = 0 }) {
         for (const product of products) {
             const stock = Number(toEnglishNumbers(product.stock)) || 0;
             const minStock = Number(toEnglishNumbers(product.minStock)) || 0;
-            const buyPrice = Number(toEnglishNumbers(product.buyPrice)) || 0;
+            const avgCost = Number(toEnglishNumbers(product.avgCost)) || 0;
 
             if (stock === 0) out += 1;
             else if (stock <= minStock) low += 1;
 
-            value += stock * buyPrice;
+            const totalValue = Number(product.totalValue);
+            if (Number.isFinite(totalValue) && totalValue > 0) {
+                value += totalValue;
+            } else {
+                value += stock * avgCost;
+            }
         }
 
-        return { lowStockCount: low, outOfStockCount: out, inventoryValue: value };
+        return {
+            lowStockCount: low,
+            outOfStockCount: out,
+            inventoryValue: value,
+        };
     }, [products]);
 
     const stats = [
         {
             id: 'products',
             title: t('productStats.products.title'),
-            value: loading ? '...' : formatNumber(products.length, language),
+            value: products.length,
             description: t('productStats.products.description'),
             icon: Package,
             iconClass: 'text-emerald-500 dark:text-emerald-400',
@@ -101,7 +131,7 @@ function ProductStats({ refreshKey = 0 }) {
         {
             id: 'categories',
             title: t('productStats.categories.title'),
-            value: loading ? '...' : formatNumber(categoriesCount, language),
+            value: categoriesCount,
             description: t('productStats.categories.description'),
             icon: Layers3,
             iconClass: 'text-cyan-500 dark:text-cyan-400',
@@ -110,14 +140,14 @@ function ProductStats({ refreshKey = 0 }) {
         {
             id: 'low-stock',
             title: t('productStats.lowStock.title'),
-            value: loading ? '...' : formatNumber(lowStockCount, language),
+            value: lowStockCount,
             description: loading
                 ? t('productStats.lowStock.checking')
                 : outOfStockCount > 0
-                    ? t('productStats.lowStock.outOfStock', {
-                        count: formatNumber(outOfStockCount, language),
-                    })
-                    : t('productStats.lowStock.supply'),
+                ? t('productStats.lowStock.outOfStock', {
+                      count: formatNumber(outOfStockCount, language),
+                  })
+                : t('productStats.lowStock.supply'),
             icon: AlertTriangle,
             iconClass: 'text-amber-500 dark:text-amber-400',
             iconBg: 'border-amber-500/10 bg-amber-500/10',
@@ -125,7 +155,7 @@ function ProductStats({ refreshKey = 0 }) {
         {
             id: 'inventory-value',
             title: t('productStats.inventoryValue.title'),
-            value: loading ? '...' : formatNumber(inventoryValue, language),
+            value: inventoryValue,
             description: t('productStats.inventoryValue.description'),
             icon: Wallet,
             iconClass: 'text-violet-500 dark:text-violet-400',
@@ -133,13 +163,8 @@ function ProductStats({ refreshKey = 0 }) {
         },
     ];
 
-    // =====================================================
-    // Render
-    // =====================================================
-
     return (
         <section>
-            {/* ================= Section Header ================= */}
             <header className="mb-4 flex items-center gap-3">
                 <span
                     aria-hidden="true"
@@ -156,7 +181,6 @@ function ProductStats({ refreshKey = 0 }) {
                 </div>
             </header>
 
-            {/* ================= Stats Grid ================= */}
             <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
                 {stats.map((stat) => {
                     const Icon = stat.icon;
@@ -167,7 +191,10 @@ function ProductStats({ refreshKey = 0 }) {
                             className="group ui-card-tint ui-card-tint--lift p-4 sm:p-5"
                         >
                             <div aria-hidden="true" className="ui-tint" />
-                            <div aria-hidden="true" className="ui-orb -end-10 -top-10 h-28 w-28" />
+                            <div
+                                aria-hidden="true"
+                                className="ui-orb -end-10 -top-10 h-28 w-28"
+                            />
 
                             <div className="ui-layer flex items-start justify-between gap-4">
                                 <div className="min-w-0">
@@ -179,7 +206,14 @@ function ProductStats({ refreshKey = 0 }) {
                                         dir={isEnglish ? 'ltr' : 'rtl'}
                                         className="mt-2 truncate number-font text-xl font-bold tracking-tight text-[var(--text-primary)] sm:text-2xl"
                                     >
-                                        {stat.value}
+                                        {loading ? (
+                                            '...'
+                                        ) : (
+                                            <AnimatedNumber
+                                                value={stat.value}
+                                                language={language}
+                                            />
+                                        )}
                                     </p>
 
                                     <p className="mt-2 min-h-[2rem] text-[10px] leading-5 text-[var(--text-muted)]">

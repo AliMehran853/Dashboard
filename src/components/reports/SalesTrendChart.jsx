@@ -26,7 +26,6 @@ function SalesTrendChart({ data = [] }) {
     );
     const [jalaliMonthStyle, setJalaliMonthStyle] = useState(() => getJalaliMonthStyle());
 
-    // Theme observer
     useEffect(() => {
         if (typeof document === 'undefined') return undefined;
         const root = document.documentElement;
@@ -37,7 +36,6 @@ function SalesTrendChart({ data = [] }) {
         return () => observer.disconnect();
     }, []);
 
-    // Jalali month style listener
     useEffect(() => {
         if (typeof window === 'undefined') return undefined;
         const onStyle = (e) => setJalaliMonthStyle(e?.detail || getJalaliMonthStyle());
@@ -102,6 +100,8 @@ function SalesTrendChart({ data = [] }) {
                 background: 'transparent',
                 toolbar: { show: false },
                 zoom: { enabled: false },
+                selection: { enabled: false },
+                brush: { enabled: false },
                 fontFamily: isEnglish ? 'Space Grotesk, sans-serif' : 'Vazirmatn, sans-serif',
                 animations: { enabled: false },
                 redrawOnWindowResize: true,
@@ -172,7 +172,9 @@ function SalesTrendChart({ data = [] }) {
                 enabled: true,
                 theme: theme.tooltip,
                 shared: false,
-                intersect: false,
+                intersect: true,
+                followCursor: false,
+                fixed: { enabled: false },
                 x: {
                     formatter: (_v, { dataPointIndex }) => {
                         const item = chartData[dataPointIndex];

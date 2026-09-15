@@ -56,7 +56,7 @@ const faTranslate = {
 
     navigation: {
       dashboard: "داشبورد",
-      sales: "فروش امروز",
+      sales: "فروش نقدی",
       creditSales: "فروش نسیه",
       products: "محصولات",
       reports: "گزارشات",
@@ -195,20 +195,17 @@ const faTranslate = {
     // =====================================================
 
     products: {
-      // ساختار جدید تودرتو (استفاده در هدر صفحه محصولات)
       page: {
         title: "محصولات",
         description: "مدیریت محصولات و موجودی انبار",
         addProduct: "افزودن محصول",
       },
 
-      // هدر بخش بالای چهار کارت آماری
       statsSection: {
         title: "خلاصه محصولات",
         description: "وضعیت فعلی محصولات و موجودی انبار",
       },
 
-      // کلیدهای قدیمی (برای سازگاری با عقب نگه داشته شدند)
       pageTitle: "محصولات",
       pageDescription: "مدیریت محصولات و موجودی انبار",
       addProduct: "افزودن محصول",
@@ -448,8 +445,8 @@ const faTranslate = {
     // =====================================================
 
     sales: {
-      pageTitle: "فروش‌ها",
-      pageDescription: "مدیریت و ثبت فروش‌های فروشگاه",
+      pageTitle: "فروش نقدی",
+      pageDescription: "مدیریت و ثبت فروش‌های نقدی فروشگاه",
       addSale: "ثبت فروش جدید",
 
       paymentTypes: {
@@ -471,6 +468,12 @@ const faTranslate = {
         creditSales: {
           title: "فروش نسیه",
           description: "بدهی مشتریان",
+        },
+
+        pendingCredit: {
+          title: "بدهی معوق نسیه",
+          description: "{{count}} مشتری بدهکار",
+          cta: "مشاهده صفحه نسیه",
         },
 
         items: {
@@ -960,6 +963,14 @@ const faTranslate = {
       empty: "اطلاعاتی برای نمایش وجود ندارد.",
 
       filters: {
+        title: "فیلترهای گزارش",
+        description: "جستجو و فیلتر اطلاعات گزارش",
+
+        activeFilters: "فیلترهای فعال:",
+        periodLabel: "بازه:",
+        paymentLabel: "پرداخت:",
+        categoryLabel: "دسته:",
+
         searchPlaceholder: "جستجو در گزارش...",
 
         period: {
@@ -1368,14 +1379,29 @@ const faTranslate = {
             description: "آرام و حرفه‌ای",
           },
 
+          indigo: {
+            name: "نیلی",
+            description: "عمیق و متمرکز",
+          },
+
           violet: {
             name: "بنفش",
             description: "مدرن و لوکس",
           },
 
+          rose: {
+            name: "رز",
+            description: "ظریف و متفاوت",
+          },
+
+          red: {
+            name: "قرمز",
+            description: "پرشور و پرانرژی",
+          },
+
           amber: {
             name: "کهربایی",
-            description: "گرم و پرانرژی",
+            description: "گرم و درخشان",
           },
 
           cyan: {
@@ -1383,9 +1409,9 @@ const faTranslate = {
             description: "تکنولوژیک و تازه",
           },
 
-          rose: {
-            name: "رز",
-            description: "ظریف و متفاوت",
+          teal: {
+            name: "سبزآبی",
+            description: "متین و متعادل",
           },
         },
       },

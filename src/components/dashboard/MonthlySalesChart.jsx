@@ -4,7 +4,6 @@ import { CalendarRange, TrendingUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { dateToJalali, getJalaliMonthName, getJalaliMonthStyle } from '../../utils/date/jalali';
 
-// ---------- helpers ----------
 const getSaleAmount = (sale) => {
     if (!sale) return 0;
     const direct = Number(sale.totalAmount ?? sale.total ?? sale.amount ?? sale.finalAmount ?? sale.payableAmount ?? sale.grandTotal);
@@ -26,12 +25,10 @@ const getCssVar = (name, fallback) => {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 };
 
-// ---------- component ----------
 function MonthlySalesChart({ sales = [], loading = false }) {
     const { t, i18n } = useTranslation();
     const chartScrollRef = useRef(null);
 
-    // theme
     const [isDark, setIsDark] = useState(() =>
         typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
     );
@@ -45,7 +42,6 @@ function MonthlySalesChart({ sales = [], loading = false }) {
         return () => observer.disconnect();
     }, []);
 
-    // jalali month style
     const [jalaliMonthStyle, setJalaliMonthStyle] = useState(getJalaliMonthStyle);
 
     useEffect(() => {
@@ -61,7 +57,6 @@ function MonthlySalesChart({ sales = [], loading = false }) {
 
     const isEnglish = String(i18n.language || '').toLowerCase().startsWith('en');
 
-    // chart data
     const chartData = useMemo(() => {
         const months = [];
         const today = new Date();
@@ -110,7 +105,6 @@ function MonthlySalesChart({ sales = [], loading = false }) {
         [i18n.language, jalaliMonthStyle, chartData]
     );
 
-    // scroll to latest on EN mobile
     useEffect(() => {
         if (!isEnglish) return undefined;
         const el = chartScrollRef.current;
@@ -121,7 +115,6 @@ function MonthlySalesChart({ sales = [], loading = false }) {
         return () => { cancelAnimationFrame(f1); cancelAnimationFrame(f2); };
     }, [isEnglish, chartSignature]);
 
-    // theme tokens (memoized)
     const tokens = useMemo(() => ({
         accent: getCssVar('--accent-500', '#10b981'),
         text: getCssVar('--text-muted', '#64748b'),
@@ -135,8 +128,11 @@ function MonthlySalesChart({ sales = [], loading = false }) {
         chart: {
             type: 'area', background: 'transparent', fontFamily: 'inherit',
             foreColor: tokens.text, parentHeightOffset: 0,
-            animations: { enabled: false }, redrawOnWindowResize: true,
-            toolbar: { show: false }, zoom: { enabled: false }, selection: { enabled: false },
+            animations: { enabled: false }, redrawOnWindowResize: true, redrawOnParentResize: true,
+            toolbar: { show: false },
+            zoom: { enabled: false },
+            selection: { enabled: false },
+            brush: { enabled: false },
         },
         colors: [tokens.accent],
         dataLabels: { enabled: false },
@@ -178,7 +174,10 @@ function MonthlySalesChart({ sales = [], loading = false }) {
         },
         tooltip: {
             enabled: true, theme: isDark ? 'dark' : 'light',
-            shared: false, intersect: false, followCursor: false,
+            shared: false,
+            intersect: true,
+            followCursor: false,
+            fixed: { enabled: false },
             x: { show: true },
             y: { formatter: (value) => `${formatNumber(value)} ${t('common.currency')}` },
         },
@@ -225,7 +224,6 @@ function MonthlySalesChart({ sales = [], loading = false }) {
 
     return (
         <section dir={i18n.dir()} className="ui-card w-full min-w-0 overflow-hidden p-4 sm:p-5 lg:p-6">
-            {/* header */}
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                     <div className="flex items-center gap-2.5">
@@ -254,8 +252,11 @@ function MonthlySalesChart({ sales = [], loading = false }) {
                 </div>
             </div>
 
-            {/* chart */}
-            <div ref={chartScrollRef} className="w-full min-w-0 overflow-x-auto overflow-y-hidden overscroll-x-contain touch-pan-x pb-2 sm:overflow-x-hidden sm:pb-0 scrollbar-thin">
+            {/* ✅ FIX: touch-pan-x حذف و chart-hscroll جایگزین */}
+            <div
+                ref={chartScrollRef}
+                className="chart-hscroll w-full min-w-0 overflow-x-auto overflow-y-hidden pb-2 sm:overflow-x-hidden sm:pb-0 scrollbar-thin"
+            >
                 <div className="h-[320px] w-[1120px] sm:h-[350px] sm:w-full lg:h-[380px] xl:h-[400px]">
                     {loading ? (
                         <div className="flex h-full w-full items-center justify-center">
