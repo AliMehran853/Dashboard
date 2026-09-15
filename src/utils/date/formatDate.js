@@ -21,31 +21,75 @@ export function formatEnglishDate(
     options = {},
   } = {}
 ) {
-  const date = normalizeDate(dateInput);
+  const date = normalizeDate(
+    dateInput
+  );
 
   if (!date) {
     return '';
   }
 
-  return new Intl.DateTimeFormat(locale, options).format(date);
+  return new Intl.DateTimeFormat(
+    locale,
+    options
+  ).format(date);
 }
 
 // ----------------------------------------------------
 // Gregorian numeric date
 // ----------------------------------------------------
 
-export function formatEnglishNumericDate(dateInput) {
-  const date = normalizeDate(dateInput);
+export function formatEnglishNumericDate(
+  dateInput
+) {
+  const date = normalizeDate(
+    dateInput
+  );
 
   if (!date) {
     return '';
   }
 
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const year =
+    date.getFullYear();
+
+  const month = String(
+    date.getMonth() + 1
+  ).padStart(2, '0');
+
+  const day = String(
+    date.getDate()
+  ).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
+}
+
+// ----------------------------------------------------
+// 12-hour time
+// ----------------------------------------------------
+
+export function formatTime12Hour(
+  dateInput,
+  {
+    locale = 'en-US',
+  } = {}
+) {
+  const date = normalizeDate(
+    dateInput
+  );
+
+  if (!date) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat(
+    locale,
+    {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }
+  ).format(date);
 }
 
 // ----------------------------------------------------
@@ -61,15 +105,23 @@ export function formatDate(
     separator = ' ',
   } = {}
 ) {
-  if (calendar === 'gregorian' || calendar === 'english') {
-    return formatEnglishDate(dateInput);
+  if (
+    calendar === 'gregorian' ||
+    calendar === 'english'
+  ) {
+    return formatEnglishDate(
+      dateInput
+    );
   }
 
-  return formatJalaliDate(dateInput, {
-    monthStyle,
-    withMonthName,
-    separator,
-  });
+  return formatJalaliDate(
+    dateInput,
+    {
+      monthStyle,
+      withMonthName,
+      separator,
+    }
+  );
 }
 
 // ----------------------------------------------------
@@ -80,34 +132,57 @@ export function formatJalali(
   dateInput,
   options = {}
 ) {
-  return formatJalaliDate(dateInput, options);
+  return formatJalaliDate(
+    dateInput,
+    options
+  );
 }
 
 export function formatJalaliDateWithMonth(
   dateInput,
   monthStyle = null
 ) {
-  return formatJalaliDate(dateInput, {
-    monthStyle,
-    withMonthName: true,
-  });
+  return formatJalaliDate(
+    dateInput,
+    {
+      monthStyle,
+      withMonthName: true,
+    }
+  );
 }
 
 export function formatJalaliNumeric(
   dateInput,
   separator = '/'
 ) {
-  const jalaliDate = dateToJalali(dateInput);
+  const jalaliDate =
+    dateToJalali(
+      dateInput
+    );
 
   if (!jalaliDate) {
     return '';
   }
 
   return [
-    String(jalaliDate.year),
-    String(jalaliDate.month).padStart(2, '0'),
-    String(jalaliDate.day).padStart(2, '0'),
-  ].join(separator);
+    String(
+      jalaliDate.year
+    ),
+    String(
+      jalaliDate.month
+    ).padStart(
+      2,
+      '0'
+    ),
+    String(
+      jalaliDate.day
+    ).padStart(
+      2,
+      '0'
+    ),
+  ].join(
+    separator
+  );
 }
 
 // ----------------------------------------------------
@@ -137,13 +212,21 @@ export function getJalaliMonthLabel(
     includeYear = false,
   } = {}
 ) {
-  const monthName = getJalaliMonthName(month, monthStyle);
+  const monthName =
+    getJalaliMonthName(
+      month,
+      monthStyle
+    );
 
   if (!monthName) {
     return '';
   }
 
-  if (includeYear && year !== null && year !== undefined) {
+  if (
+    includeYear &&
+    year !== null &&
+    year !== undefined
+  ) {
     return `${monthName} ${year}`;
   }
 
@@ -159,7 +242,13 @@ export function safeFormatDate(
   fallback = '—',
   options = {}
 ) {
-  const result = formatDate(dateInput, options);
+  const result =
+    formatDate(
+      dateInput,
+      options
+    );
 
-  return result || fallback;
+  return (
+    result || fallback
+  );
 }

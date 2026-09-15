@@ -126,6 +126,23 @@ const selectClass = `
 `;
 
 // =========================================================
+// FieldLabel — ارتفاع ثابت برای هم‌ترازی همه inputها
+// =========================================================
+
+function FieldLabel({ children, className = '' }) {
+    return (
+        <label
+            className={`
+                mb-2 flex min-h-[2rem] items-start text-[11px] leading-snug
+                text-[var(--text-muted)] ${className}
+            `}
+        >
+            <span className="min-w-0 flex-1">{children}</span>
+        </label>
+    );
+}
+
+// =========================================================
 // Product Form
 // =========================================================
 
@@ -151,7 +168,6 @@ function ProductForm({ product = null, onClose, onSubmit }) {
 
     const [priceInputMode, setPriceInputMode] = useState('unit');
 
-    // ═══ Load ═══
     useEffect(() => {
         let mounted = true;
         (async () => {
@@ -174,7 +190,6 @@ function ProductForm({ product = null, onClose, onSubmit }) {
         return () => { mounted = false; };
     }, []);
 
-    // ═══ Fill on edit ═══
     useEffect(() => {
         if (!product) {
             setForm(initialForm);
@@ -221,7 +236,6 @@ function ProductForm({ product = null, onClose, onSubmit }) {
         setDbError('');
     }, [product]);
 
-    // ═══ Escape + Ctrl/Cmd + Enter ═══
     useEffect(() => {
         const onKey = (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -238,7 +252,6 @@ function ProductForm({ product = null, onClose, onSubmit }) {
         return () => window.removeEventListener('keydown', onKey);
     }, [onClose, saving, loading]);
 
-    // ═══ Purchase calc ═══
     const purchaseCalc = useMemo(() => {
         const qty = toNum(form.purchaseQuantity);
         const factor = toNum(form.purchaseFactor) || 1;
@@ -253,7 +266,6 @@ function ProductForm({ product = null, onClose, onSubmit }) {
         ? Number(product?.avgCost) || 0
         : purchaseCalc.costPerBase;
 
-    // ═══ Merged units ═══
     const allUnits = useMemo(() => {
         const map = new Map();
         for (const u of units) if (u?.name) map.set(u.name, u);
@@ -274,7 +286,6 @@ function ProductForm({ product = null, onClose, onSubmit }) {
         );
     }, [units, form.baseUnit, form.purchaseUnit, subUnit, form.saleOptions]);
 
-    // ═══ Sync sub-unit → form ═══
     useEffect(() => {
         if (isEditing) return;
         if (!subUnitEnabled) return;
@@ -300,7 +311,6 @@ function ProductForm({ product = null, onClose, onSubmit }) {
         });
     }, [subUnitEnabled, subUnit, subUnitQty, isEditing]);
 
-    // ═══ Price input display (per-unit or total) ═══
     const displayedPrice = useMemo(() => {
         if (priceInputMode === 'unit') {
             return form.purchasePrice;
@@ -311,7 +321,6 @@ function ProductForm({ product = null, onClose, onSubmit }) {
         return String(roundTo(unitPrice * qty, 4));
     }, [priceInputMode, form.purchasePrice, form.purchaseQuantity]);
 
-    // ═══ Handlers ═══
     const handleChange = (event) => {
         const { name, value } = event.target;
         const numeric = ['minStock', 'purchaseQuantity', 'purchaseFactor'];
@@ -595,8 +604,8 @@ function ProductForm({ product = null, onClose, onSubmit }) {
         !form.purchaseUnit || !form.baseUnit || form.purchaseUnit === form.baseUnit;
 
     const purchaseGridClass = isSameUnit
-        ? 'grid-cols-1 sm:grid-cols-3'
-        : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
+        ? 'grid-cols-1 min-[480px]:grid-cols-3'
+        : 'grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4';
 
     const subUnitQtyNum = toNum(subUnitQty);
     const purchaseQtyNum = toNum(form.purchaseQuantity);
@@ -628,7 +637,7 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                     sm:max-h-[92vh]
                 "
             >
-                {/* ───────── Header ───────── */}
+                {/* Header */}
                 <div className="relative flex shrink-0 items-center justify-between gap-4 border-b border-[var(--border-subtle)] px-4 py-3.5 sm:px-5 sm:py-4">
                     <div className="flex min-w-0 items-center gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)] sm:h-11 sm:w-11">
@@ -660,7 +669,7 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                     </button>
                 </div>
 
-                {/* ───────── Body ───────── */}
+                {/* Body */}
                 <div
                     className="
                         main-scrollbar min-h-0 flex-1 overflow-y-auto
@@ -677,9 +686,9 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                             </div>
                         )}
 
-                        {/* ══════════ Basic Info ══════════ */}
+                        {/* Basic Info */}
                         <SectionHeader icon={Hash} title={t('products.form.sections.basic')} />
-                        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
                             <div className="md:col-span-2">
                                 <FieldLabel>{t('products.form.fields.name')}</FieldLabel>
                                 <input
@@ -694,7 +703,7 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                                 <FieldError>{errors.name}</FieldError>
                             </div>
 
-                            <div>
+                            <div className="min-w-0">
                                 <FieldLabel>{t('products.form.fields.category')}</FieldLabel>
                                 <CategorySelect
                                     value={form.category}
@@ -713,7 +722,7 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                                 <FieldError>{errors.category}</FieldError>
                             </div>
 
-                            <div>
+                            <div className="min-w-0">
                                 <FieldLabel>
                                     {isEnglish ? 'Base Unit' : 'واحد پایه'}
                                     <span className="ms-1 text-[9px] text-[var(--text-soft)]">
@@ -755,16 +764,16 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                             </div>
                         </div>
 
-                        {/* ══════════ Initial Purchase ══════════ */}
+                        {/* Initial Purchase */}
                         {!isEditing && (
                             <>
                                 <SectionHeader
                                     icon={ShoppingCart}
                                     title={isEnglish ? 'Initial Purchase' : 'خرید اولیه'}
                                 />
-                                <div className={`mb-3 grid gap-4 ${purchaseGridClass}`}>
+                                <div className={`mb-3 grid gap-4 ${purchaseGridClass} items-start`}>
                                     {/* Quantity */}
-                                    <div>
+                                    <div className="flex min-w-0 flex-col">
                                         <FieldLabel>{isEnglish ? 'Quantity' : 'تعداد'}</FieldLabel>
                                         <input
                                             type="text"
@@ -781,7 +790,7 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                                     </div>
 
                                     {/* Purchase Unit */}
-                                    <div>
+                                    <div className="flex min-w-0 flex-col">
                                         <FieldLabel>{isEnglish ? 'Unit' : 'واحد خرید'}</FieldLabel>
                                         <UnitSelect
                                             value={form.purchaseUnit}
@@ -800,9 +809,9 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                                         />
                                     </div>
 
-                                    {/* Factor (only when unit ≠ base) */}
+                                    {/* Factor */}
                                     {!isSameUnit && (
-                                        <div>
+                                        <div className="flex min-w-0 flex-col">
                                             <FieldLabel>
                                                 {isEnglish ? 'Each =' : 'هر یک ='}
                                                 {form.baseUnit && (
@@ -826,14 +835,8 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                                         </div>
                                     )}
 
-                                    {/* ═════════════════════════════════════════════
-                                        ✅ FIX: هم‌ترازی کارت قیمت با بقیه
-                                        دکمه toggle از بالای input منتقل شد به
-                                        داخل خود input (absolute). اینطور
-                                        FieldLabel مثل بقیه کارت‌ها یک ارتفاع
-                                        یکسان دارد و input هم‌تراز می‌شود.
-                                    ═════════════════════════════════════════════ */}
-                                    <div className="min-w-0">
+                                    {/* Price with toggle inside */}
+                                    <div className="flex min-w-0 flex-col">
                                         <FieldLabel>
                                             {priceInputMode === 'unit'
                                                 ? (isEnglish
@@ -854,7 +857,7 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                                                 onChange={(e) => handlePriceInput(e.target.value)}
                                                 disabled={saving}
                                                 placeholder="0"
-                                                className={`${fieldClass(Boolean(errors.purchasePrice))} pe-20 text-center number-font`}
+                                                className={`${fieldClass(Boolean(errors.purchasePrice))} pe-16 text-center number-font`}
                                             />
 
                                             <button
@@ -1135,7 +1138,7 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                             </>
                         )}
 
-                        {/* ══════════ Sale Options ══════════ */}
+                        {/* Sale Options */}
                         <div className="mb-4 flex items-center justify-between gap-3">
                             <SectionHeader
                                 icon={TrendingUp}
@@ -1180,12 +1183,12 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                             </div>
                         )}
 
-                        {/* ══════════ Inventory ══════════ */}
+                        {/* Inventory */}
                         <SectionHeader
                             icon={Warehouse}
                             title={t('products.form.sections.inventory')}
                         />
-                        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
                             {isEditing && (
                                 <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-3">
                                     <p className="text-[10px] text-[var(--text-muted)]">
@@ -1205,19 +1208,21 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                                 </div>
                             )}
 
-                            <div className={isEditing ? '' : 'md:col-span-2'}>
-                                <label className="mb-2 flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]">
-                                    <span>{t('products.form.fields.minStock')}</span>
-                                    {form.baseUnit && (
-                                        <span className="text-[9px] text-[var(--text-soft)]">
-                                            ({form.baseUnit})
-                                        </span>
-                                    )}
-                                    <AlertTriangle
-                                        size={12}
-                                        className="text-amber-500 dark:text-amber-400"
-                                    />
-                                </label>
+                            <div className={isEditing ? 'min-w-0' : 'md:col-span-2'}>
+                                <FieldLabel>
+                                    <span className="inline-flex items-center gap-1.5">
+                                        {t('products.form.fields.minStock')}
+                                        {form.baseUnit && (
+                                            <span className="text-[9px] text-[var(--text-soft)]">
+                                                ({form.baseUnit})
+                                            </span>
+                                        )}
+                                        <AlertTriangle
+                                            size={12}
+                                            className="text-amber-500 dark:text-amber-400"
+                                        />
+                                    </span>
+                                </FieldLabel>
                                 <input
                                     type="text"
                                     inputMode="decimal"
@@ -1235,7 +1240,7 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                             </div>
                         </div>
 
-                        {/* ══════════ Description ══════════ */}
+                        {/* Description */}
                         <SectionHeader
                             icon={FileText}
                             title={t('products.form.sections.description')}
@@ -1254,7 +1259,7 @@ function ProductForm({ product = null, onClose, onSubmit }) {
                             />
                         </div>
 
-                        {/* ══════════ Footer ══════════ */}
+                        {/* Footer */}
                         <div className="flex flex-col-reverse gap-3 border-t border-[var(--border-subtle)] pt-4 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden text-[10px] text-[var(--text-soft)] sm:block">
                                 {isEnglish
@@ -1692,6 +1697,7 @@ function UnitSelect({
 
 // =========================================================
 // Sale Option Row
+//   ✅ FIX: هم‌ترازی کامل با label ثابت h-6
 // =========================================================
 
 function SaleOptionRow({
@@ -1869,14 +1875,23 @@ function SaleOptionRow({
         return `1 ${baseUnit} = ${roundTo(1 / factor, 6)} ${option.unit}`;
     })();
 
+    /* ✅ FIX: Layout ثابت
+       - label row: h-6 (24px) — همه یکسان
+       - items-end روی گرید — input‌ها روی یک خط
+       - grid-cols-1 در موبایل‌های باریک */
     const gridCols = isSameUnit
-        ? 'grid-cols-2 lg:grid-cols-3'
-        : 'grid-cols-2 lg:grid-cols-4';
+        ? 'grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-3'
+        : 'grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-4';
+
+    // کلاس مشترک برای همه labelها
+    const labelRowClass =
+        'mb-1.5 flex h-6 min-w-0 items-center text-[10px] leading-none text-[var(--text-muted)]';
 
     return (
         <div
             className={`relative rounded-xl border p-3 transition-colors duration-200 ${tone.bg}`}
         >
+            {/* Header: index + default + actions */}
             <div className="mb-3 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                     <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] px-1.5 text-[10px] font-medium text-[var(--text-muted)]">
@@ -1912,10 +1927,14 @@ function SaleOptionRow({
                 </div>
             </div>
 
-            <div className={`grid gap-3 ${gridCols}`}>
-                <div className="min-w-0">
-                    <label className="mb-1.5 block text-[10px] text-[var(--text-muted)]">
-                        {isEnglish ? 'Sale Unit' : 'واحد فروش'}
+            {/* Grid — items-end ensures inputs align at bottom */}
+            <div className={`grid ${gridCols} items-end gap-3`}>
+                {/* ─── Sale Unit ─── */}
+                <div className="flex min-w-0 flex-col">
+                    <label className={labelRowClass}>
+                        <span className="truncate">
+                            {isEnglish ? 'Sale Unit' : 'واحد فروش'}
+                        </span>
                     </label>
                     <div className="relative">
                         <select
@@ -1938,17 +1957,21 @@ function SaleOptionRow({
                     </div>
                 </div>
 
+                {/* ─── Ratio (only when unit ≠ base) ─── */}
                 {!isSameUnit && (
-                    <div className="min-w-0">
-                        <div className="mb-1.5 flex items-center justify-between gap-1">
-                            <label className="truncate text-[10px] text-[var(--text-muted)]">
-                                {ratioLabel}
-                            </label>
+                    <div className="flex min-w-0 flex-col">
+                        <div className={`${labelRowClass} justify-between gap-1`}>
+                            <span className="truncate">{ratioLabel}</span>
                             <button
                                 type="button"
                                 onClick={toggleRatioMode}
                                 disabled={saving}
-                                className="shrink-0 rounded-md border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--text-muted)] transition-colors duration-200 hover:border-[var(--accent-border)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-600)] disabled:cursor-not-allowed disabled:opacity-40 dark:hover:text-[var(--accent-300)]"
+                                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] text-[9px] font-medium text-[var(--text-muted)] transition-colors duration-200 hover:border-[var(--accent-border)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent-600)] disabled:cursor-not-allowed disabled:opacity-40 dark:hover:text-[var(--accent-300)]"
+                                title={
+                                    isEnglish
+                                        ? 'Switch ratio direction'
+                                        : 'تغییر جهت نسبت'
+                                }
                             >
                                 ⇄
                             </button>
@@ -1966,9 +1989,10 @@ function SaleOptionRow({
                     </div>
                 )}
 
-                <div className="min-w-0">
-                    <label className="mb-1.5 block truncate text-[10px] text-[var(--text-muted)]">
-                        {priceLabel}
+                {/* ─── Price ─── */}
+                <div className="flex min-w-0 flex-col">
+                    <label className={labelRowClass}>
+                        <span className="truncate">{priceLabel}</span>
                     </label>
                     <input
                         type="text"
@@ -1982,10 +2006,13 @@ function SaleOptionRow({
                     />
                 </div>
 
-                <div className="min-w-0">
-                    <label className="mb-1.5 block text-[10px] text-[var(--text-muted)]">
-                        {isEnglish ? 'Margin %' : 'درصد سود'}
-                        <span className="ms-1 text-[8px] text-[var(--text-soft)]">
+                {/* ─── Margin % ─── */}
+                <div className="flex min-w-0 flex-col">
+                    <label className={labelRowClass}>
+                        <span className="truncate">
+                            {isEnglish ? 'Margin %' : 'درصد سود'}
+                        </span>
+                        <span className="ms-1 shrink-0 text-[8px] opacity-70">
                             ({isEnglish ? 'auto' : 'خودکار'})
                         </span>
                     </label>
@@ -2004,6 +2031,7 @@ function SaleOptionRow({
                 </div>
             </div>
 
+            {/* Cost / Profit / Ratio Hints */}
             {avgCost > 0 && (
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[var(--border-subtle)] pt-2 text-[10px]">
                     <span className="flex items-center gap-1 text-[var(--text-muted)]">
@@ -2097,14 +2125,6 @@ function SectionHeader({ icon: Icon, title, noMargin = false }) {
                 {title}
             </h3>
         </div>
-    );
-}
-
-function FieldLabel({ children }) {
-    return (
-        <label className="mb-2 block text-[11px] text-[var(--text-muted)]">
-            {children}
-        </label>
     );
 }
 

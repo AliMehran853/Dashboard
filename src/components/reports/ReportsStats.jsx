@@ -47,17 +47,13 @@ function ReportsStats({ statistics = {} }) {
     const cashSales = Number(toEnglishNumbers(statistics.cashSales ?? 0)) || 0;
     const creditSales = Number(toEnglishNumbers(statistics.creditSales ?? 0)) || 0;
 
-    const currency = t('common.currency', {
-        defaultValue: isEnglish ? 'AF' : 'افغانی',
-    });
+    const currency = t('common.currency');
 
     const stats = [
         {
             id: 'total-sales',
             icon: ShoppingCart,
-            title: t('reports.stats.totalSales', {
-                defaultValue: isEnglish ? 'Total Sales' : 'مجموع فروش',
-            }),
+            title: t('reports.stats.totalSales'),
             value: totalSales,
             unit: null,
             iconClass: 'text-emerald-500 dark:text-emerald-400',
@@ -66,9 +62,7 @@ function ReportsStats({ statistics = {} }) {
         {
             id: 'total-revenue',
             icon: TrendingUp,
-            title: t('reports.stats.totalRevenue', {
-                defaultValue: isEnglish ? 'Total Revenue' : 'مجموع درآمد',
-            }),
+            title: t('reports.stats.totalRevenue'),
             value: totalRevenue,
             unit: currency,
             iconClass: 'text-sky-500 dark:text-sky-400',
@@ -77,9 +71,7 @@ function ReportsStats({ statistics = {} }) {
         {
             id: 'cash-sales',
             icon: Wallet,
-            title: t('reports.stats.cashSales', {
-                defaultValue: isEnglish ? 'Cash Sales' : 'فروش نقدی',
-            }),
+            title: t('reports.stats.cashSales'),
             value: cashSales,
             unit: currency,
             iconClass: 'text-amber-500 dark:text-amber-400',
@@ -88,9 +80,7 @@ function ReportsStats({ statistics = {} }) {
         {
             id: 'credit-sales',
             icon: CreditCard,
-            title: t('reports.stats.creditSales', {
-                defaultValue: isEnglish ? 'Credit Sales' : 'فروش نسیه',
-            }),
+            title: t('reports.stats.creditSales'),
             value: creditSales,
             unit: currency,
             iconClass: 'text-violet-500 dark:text-violet-400',
@@ -107,18 +97,10 @@ function ReportsStats({ statistics = {} }) {
                 />
                 <div className="min-w-0">
                     <h2 className="truncate text-sm font-bold text-[var(--text)] sm:text-base lg:text-lg">
-                        {t('reports.stats.sectionTitle', {
-                            defaultValue: isEnglish
-                                ? 'Report Overview'
-                                : 'خلاصه گزارش',
-                        })}
+                        {t('reports.stats.sectionTitle')}
                     </h2>
                     <p className="mt-0.5 truncate text-[10px] text-[var(--text-muted)] sm:text-xs">
-                        {t('reports.stats.sectionDescription', {
-                            defaultValue: isEnglish
-                                ? 'Key figures from the selected report'
-                                : 'اعداد کلیدی گزارش انتخاب‌شده',
-                        })}
+                        {t('reports.stats.sectionDescription')}
                     </p>
                 </div>
             </header>

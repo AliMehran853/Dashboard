@@ -18,33 +18,39 @@ function ReportsSummary({ summary = {} }) {
     const isEnglish = String(language).toLowerCase().startsWith('en');
     const direction = isEnglish ? 'ltr' : 'rtl';
 
-    const { bestCategory = '-', bestCategorySales = 0, averageSale = 0, totalItems = 0 } = summary;
-    const currency = t('common.currency', { defaultValue: isEnglish ? 'AF' : 'افغانی' });
+    const {
+        bestCategory = '-',
+        bestCategorySales = 0,
+        averageSale = 0,
+        totalItems = 0,
+    } = summary;
+
+    const currency = t('common.currency');
 
     const cards = [
         {
             id: 'best-category',
             icon: TrendingUp,
-            label: t('reports.summary.bestCategory', { defaultValue: isEnglish ? 'Best Category' : 'بهترین دسته‌بندی' }),
+            label: t('reports.summary.bestCategory'),
             value: bestCategory,
         },
         {
             id: 'average-sale',
             icon: Wallet,
-            label: t('reports.summary.averageSale', { defaultValue: isEnglish ? 'Average Sale' : 'میانگین فروش' }),
+            label: t('reports.summary.averageSale'),
             value: `${formatNumber(averageSale, language)} ${currency}`,
         },
         {
             id: 'total-items',
             icon: BarChart3,
-            label: t('reports.summary.totalItems', { defaultValue: isEnglish ? 'Total Items' : 'مجموع اقلام' }),
-            value: `${formatNumber(totalItems, language)} ${t('reports.summary.itemUnit', { defaultValue: isEnglish ? 'items' : 'قلم' })}`,
+            label: t('reports.summary.totalItems'),
+            value: `${formatNumber(totalItems, language)} ${t('reports.summary.itemUnit')}`,
         },
         {
             id: 'best-category-sales',
             icon: CreditCard,
             highlight: true,
-            label: t('reports.summary.bestCategorySales', { defaultValue: isEnglish ? 'Best Category Sales' : 'فروش بهترین دسته‌بندی' }),
+            label: t('reports.summary.bestCategorySales'),
             value: `${formatNumber(bestCategorySales, language)} ${currency}`,
         },
     ];
@@ -58,10 +64,10 @@ function ReportsSummary({ summary = {} }) {
                 </div>
                 <div className="min-w-0">
                     <h2 className="truncate text-sm font-semibold text-[var(--text-primary)]">
-                        {t('reports.summary.title', { defaultValue: isEnglish ? 'Report Summary' : 'خلاصه گزارش' })}
+                        {t('reports.summary.title')}
                     </h2>
                     <p className="mt-1 text-[10px] leading-5 text-[var(--text-muted)]">
-                        {t('reports.summary.description', { defaultValue: isEnglish ? 'Key insights from the selected report' : 'مهم‌ترین اطلاعات گزارش انتخاب‌شده' })}
+                        {t('reports.summary.description')}
                     </p>
                 </div>
             </div>
@@ -82,7 +88,11 @@ function ReportsSummary({ summary = {} }) {
                                 >
                                     <Icon
                                         size={14}
-                                        className={card.highlight ? 'text-[var(--accent-500)]' : 'text-[var(--text-muted)]'}
+                                        className={
+                                            card.highlight
+                                                ? 'text-[var(--accent-500)]'
+                                                : 'text-[var(--text-muted)]'
+                                        }
                                     />
                                 </div>
                                 <span className="min-w-0 truncate text-[10px] font-medium text-[var(--text-muted)]">
@@ -93,7 +103,9 @@ function ReportsSummary({ summary = {} }) {
                             <p
                                 dir={direction}
                                 className={`ui-layer mt-2 truncate number-font text-base font-bold ${
-                                    card.highlight ? 'text-[var(--accent-500)]' : 'text-[var(--text-primary)]'
+                                    card.highlight
+                                        ? 'text-[var(--accent-500)]'
+                                        : 'text-[var(--text-primary)]'
                                 }`}
                             >
                                 {card.value}

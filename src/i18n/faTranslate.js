@@ -48,6 +48,14 @@ const faTranslate = {
       outgoing: "خروج",
 
       currency: "AF",
+
+      copy: "کپی",
+      copied: "کپی شد",
+      cancel: "انصراف",
+      confirm: "تأیید",
+      back: "بازگشت",
+      next: "بعدی",
+      close: "بستن",
     },
 
     // =====================================================
@@ -951,6 +959,17 @@ const faTranslate = {
       actions: {
         export: "خروجی گزارش",
         exporting: "در حال آماده‌سازی...",
+
+        exportMenuHint: "فرمت مناسب برای گزارش فعلی را انتخاب کنید.",
+
+        exportExcel: "اکسل",
+        exportExcelDesc: "فایل قابل ویرایش با جزئیات کامل فروش",
+
+        exportPdfColor: "PDF رنگی",
+        exportPdfColorDesc: "گزارش حرفه‌ای با نمودار و طراحی رنگی",
+
+        exportPdfMono: "PDF سیاه و سفید",
+        exportPdfMonoDesc: "مناسب چاپ لیزری و پرینترهای اقتصادی",
       },
 
       loading: "در حال دریافت گزارش...",
@@ -994,6 +1013,9 @@ const faTranslate = {
       },
 
       stats: {
+        sectionTitle: "خلاصه گزارش",
+        sectionDescription: "اعداد کلیدی گزارش انتخاب‌شده",
+
         totalSales: "تعداد فروش",
         totalRevenue: "مجموع فروش",
         cashSales: "فروش نقدی",
@@ -1034,6 +1056,42 @@ const faTranslate = {
           unknown: "نامشخص",
 
           total: "مجموع",
+        },
+      },
+
+      export: {
+        title: "گزارش فروش",
+        salesTitle: "جزئیات فروش",
+        page: "صفحه {{current}} از {{total}}",
+        generatedBy: "تهیه‌شده توسط سیستم مدیریت فروشگاه",
+        printedAt: "چاپ: {{date}}",
+
+        labels: {
+          manager: "مدیر",
+          period: "بازه",
+          payment: "پرداخت",
+          category: "دسته‌بندی",
+          search: "جستجو",
+          totalSales: "مبلغ کل فروش",
+          transactions: "تعداد تراکنش",
+          items: "کالاهای فروخته‌شده",
+          average: "میانگین فروش",
+          cash: "فروش نقدی",
+          credit: "فروش نسیه",
+          bestCategory: "بهترین دسته",
+          date: "تاریخ",
+          time: "ساعت",
+          product: "محصول",
+          quantity: "تعداد",
+          amount: "مبلغ",
+          paymentType: "پرداخت",
+          customer: "مشتری",
+          noData: "فروشی ثبت نشده است",
+        },
+
+        charts: {
+          paymentOverview: "خلاصه پرداخت",
+          topCategories: "دسته‌های پرفروش",
         },
       },
     },
@@ -1310,27 +1368,54 @@ const faTranslate = {
           password: {
             label: "رمز عبور",
             placeholder: "رمز عبور جدید",
-            hint: "برای تغییر رمز، رمز جدید را وارد کنید.",
+            hint: "برای تغییر رمز، رمز جدید را وارد کنید. حداقل ۶ کاراکتر.",
           },
         },
 
         activeAccount: "حساب فعال",
 
+        securitySection: {
+          title: "سؤالات امنیتی",
+          description:
+            "این سؤالات برای بازیابی اطلاعات ورود در صورت فراموشی استفاده می‌شوند.",
+          hint:
+            "برای تغییر، ۳ سؤال جدید انتخاب کنید و به همه پاسخ دهید. در غیر این صورت، خالی بگذارید.",
+          currentTitle: "سؤالات فعلی",
+          changeTitle: "تغییر سؤالات",
+          changeToggle: "می‌خواهم سؤالات را تغییر دهم",
+          cancelChange: "انصراف از تغییر",
+          leaveEmpty: "برای تغییر سؤالات، ۳ سؤال جدید انتخاب کنید",
+        },
+
+        credentialsNote:
+          "این اطلاعات فقط روی همین دستگاه ذخیره می‌شود. اگر آن‌ها را فراموش کنید، فقط از طریق سؤالات امنیتی می‌توانید بازیابی کنید.",
+
         messages: {
           success: "اطلاعات حساب با موفقیت ذخیره شد.",
+          successWithCredentials:
+            "ذخیره شد. دفعه بعد با ایمیل و رمز عبور جدید وارد شوید.",
+          successWithSecurity:
+            "اطلاعات و سؤالات امنیتی با موفقیت ذخیره شد.",
         },
 
         errors: {
           load: "دریافت اطلاعات حساب با مشکل مواجه شد.",
           nameRequired: "نام مدیر را وارد کنید.",
           emailRequired: "ایمیل را وارد کنید.",
+          emailInvalid: "فرمت ایمیل صحیح نیست.",
+          emailTypo: "ایمیل احتمالاً اشتباه است. منظورتان «{{suggestion}}» بود؟",
+          emailTypoSuggest: "آیا منظورتان «{{suggestion}}» بود؟",
           passwordRequired: "رمز عبور را وارد کنید.",
+          passwordMin: "رمز عبور باید حداقل {{count}} کاراکتر باشد.",
           save: "ذخیره اطلاعات حساب با مشکل مواجه شد.",
+          securityRequired: "لطفاً به همه سؤالات امنیتی پاسخ دهید.",
+          securityDuplicate: "سؤالات امنیتی نباید تکراری باشند.",
         },
 
         actions: {
           save: "ذخیره تغییرات",
           saving: "در حال ذخیره...",
+          fixTypo: "استفاده از این ایمیل",
         },
       },
 
@@ -1523,10 +1608,24 @@ const faTranslate = {
     },
 
     // =====================================================
+    // Security Questions
+    // =====================================================
+
+    securityQuestions: {
+      firstSchool: "نام اولین مدرسه من چه بود؟",
+      firstPet: "نام اولین حیوان خانگی من چه بود؟",
+      birthCity: "شهر تولد من کجاست؟",
+      firstTeacher: "نام اولین معلم من چه بود؟",
+      childhoodFriend: "نام بهترین دوست دوران کودکی من چه بود؟",
+    },
+
+    // =====================================================
     // Login
     // =====================================================
 
     login: {
+      loading: "در حال آماده‌سازی...",
+
       brand: {
         title: "مدیریت فروشگاه",
         description: "برای ادامه وارد حساب مدیر شوید",
@@ -1564,6 +1663,131 @@ const faTranslate = {
         passwordRequired: "لطفاً رمز عبور خود را وارد کنید.",
         invalidCredentials: "ایمیل یا رمز عبور صحیح نیست.",
         failed: "ورود به سیستم انجام نشد.",
+      },
+
+      // ─────────── Setup (اولین بار) ───────────
+      setup: {
+        brand: {
+          title: "به فروشگاه خود خوش آمدید",
+          description: "برای شروع، حساب مدیر فروشگاه خود را بسازید",
+        },
+
+        form: {
+          title: "ایجاد حساب مدیر",
+          description: "ایمیل، رمز عبور و سؤالات امنیتی را تعیین کنید",
+        },
+
+        sections: {
+          credentials: "اطلاعات ورود",
+          credentialsHint: "با این اطلاعات وارد سیستم می‌شوید",
+          security: "سؤالات امنیتی",
+          securityHint:
+            "اگر رمز عبور را فراموش کنید، با پاسخ به این سؤالات بازیابی می‌شود. ۳ سؤال از ۵ سؤال انتخاب کنید.",
+        },
+
+        fields: {
+          email: {
+            label: "ایمیل",
+            placeholder: "example@email.com",
+          },
+          password: {
+            label: "رمز عبور",
+            placeholder: "حداقل {{count}} کاراکتر",
+          },
+          confirmPassword: {
+            label: "تکرار رمز عبور",
+            placeholder: "رمز عبور را دوباره وارد کنید",
+          },
+          questionN: "سؤال {{n}}",
+          questionPlaceholder: "یک سؤال انتخاب کنید",
+          answer: "پاسخ",
+          answerPlaceholder: "پاسخ خود را وارد کنید",
+          emailSuggestion: "آیا منظورتان «{{suggestion}}» بود؟",
+          useSuggestion: "استفاده از این ایمیل",
+        },
+
+        actions: {
+          create: "ساخت حساب و شروع",
+          creating: "در حال ساخت...",
+        },
+
+        errors: {
+          emailRequired: "لطفاً ایمیل خود را وارد کنید.",
+          emailInvalid: "فرمت ایمیل صحیح نیست.",
+          passwordRequired: "لطفاً رمز عبور را وارد کنید.",
+          passwordMin: "رمز عبور باید حداقل {{count}} کاراکتر باشد.",
+          passwordMismatch: "رمز عبور و تکرار آن یکسان نیستند.",
+          saveFailed: "ذخیره اطلاعات حساب انجام نشد.",
+          questionsRequired: "لطفاً به همه سؤالات امنیتی پاسخ دهید.",
+          questionsDuplicate: "سؤالات امنیتی نباید تکراری باشند.",
+          answerMin: "پاسخ هر سؤال باید حداقل {{count}} کاراکتر باشد.",
+        },
+
+        security:
+          "این اطلاعات فقط روی همین دستگاه ذخیره می‌شود. آن را در جای امنی نگه دارید.",
+      },
+
+      // ─────────── بازیابی رمز عبور ───────────
+      forgotPassword: {
+        title: "بازیابی اطلاعات ورود",
+        subtitle: "پاسخ سؤالات امنیتی خود را وارد کنید",
+
+        step: "مرحله {{current}} از {{total}}",
+
+        stepEmail: {
+          title: "ایمیل خود را وارد کنید",
+          description:
+            "ایمیلی که هنگام ثبت‌نام استفاده کردید را وارد کنید",
+          emailLabel: "ایمیل",
+          emailPlaceholder: "example@email.com",
+          submit: "بررسی ایمیل",
+          checking: "در حال بررسی...",
+        },
+
+        stepQuestions: {
+          title: "به سؤالات امنیتی پاسخ دهید",
+          description:
+            "پاسخ‌ها به حروف بزرگ/کوچک و فاصله‌ها حساس نیستند",
+          answerLabel: "پاسخ",
+          answerPlaceholder: "پاسخ خود را وارد کنید",
+          submit: "تأیید پاسخ‌ها",
+          verifying: "در حال بررسی...",
+          back: "بازگشت",
+        },
+
+        stepResult: {
+          title: "اطلاعات حساب شما",
+          description: "این اطلاعات را در جای امنی ذخیره کنید",
+
+          emailLabel: "ایمیل",
+          passwordLabel: "رمز عبور",
+          copy: "کپی",
+          copied: "کپی شد",
+          warning:
+            "پس از بستن این پنجره، دیگر نمی‌توانید این اطلاعات را ببینید.",
+          close: "بستن",
+        },
+
+        fallback: {
+          title: "پاسخ سؤالات را فراموش کرده‌اید؟",
+          description:
+            "اگر پاسخ سؤالات را هم فراموش کرده‌اید، باید حساب را بازنشانی کنید. تمام اطلاعات فروشگاه (محصولات، فروش‌ها) حفظ می‌شود ولی اطلاعات ورود پاک می‌شود.",
+          button: "بازنشانی حساب",
+          confirm:
+            "آیا مطمئن هستید؟ حساب کاربری حذف می‌شود و باید دوباره ثبت‌نام کنید. اطلاعات فروشگاه حفظ می‌شود.",
+          confirmButton: "بله، حساب را بازنشانی کن",
+          cancel: "انصراف",
+        },
+
+        errors: {
+          emailRequired: "ایمیل را وارد کنید.",
+          emailNotFound: "ایمیلی با این مشخصات پیدا نشد.",
+          noSecurityQuestions:
+            "این حساب سؤال امنیتی ندارد. باید بازنشانی کنید.",
+          answersRequired: "همه پاسخ‌ها الزامی است.",
+          answersIncorrect: "پاسخ یک یا چند سؤال صحیح نیست.",
+          resetFailed: "بازنشانی حساب انجام نشد.",
+        },
       },
 
       security: "این بخش فقط برای مدیر فروشگاه است",

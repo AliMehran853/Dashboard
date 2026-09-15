@@ -11,6 +11,7 @@ import ProductDetails from '../components/products/ProductDetails';
 import {
     getProducts,
     getCategories,
+    getProduct,
     addProduct,
     updateProduct,
     deleteProduct,
@@ -182,8 +183,19 @@ function Products() {
         setStockStatus('all');
     };
 
-    const handlePurchaseComplete = () => {
+    const handlePurchaseComplete = async () => {
+        // Refresh the list
         setRefreshKey((key) => key + 1);
+
+        // Refresh the currently viewed product to show updated data
+        if (viewingProduct?.id) {
+            try {
+                const fresh = await getProduct(viewingProduct.id);
+                if (fresh) setViewingProduct(fresh);
+            } catch (err) {
+                console.error('Failed to refresh product:', err);
+            }
+        }
     };
 
     // =====================================================
