@@ -26,31 +26,23 @@ import {
 
 const COLORS = {
     ink: rgb(15, 23, 42),
-
     inkSoft: rgb(30, 41, 59),
-
     muted: rgb(100, 116, 139),
-
     line: rgb(226, 232, 240),
 
     surface: rgb(248, 250, 252),
-
     surfaceStrong: rgb(241, 245, 249),
 
     white: rgb(255, 255, 255),
 
     accent: rgb(16, 185, 129),
-
     accentDark: rgb(5, 150, 105),
-
     accentSoft: rgb(236, 253, 245),
 
     blue: rgb(37, 99, 235),
-
     blueSoft: rgb(239, 246, 255),
 
     amber: rgb(245, 158, 11),
-
     amberSoft: rgb(255, 247, 237),
 };
 
@@ -64,11 +56,21 @@ const PAGE_TOP = 11;
 
 const PAGE_BOTTOM = 18;
 
-const TABLE_HEADER_HEIGHT = 9;
+const TABLE_HEADER_HEIGHT = 11.5;
 
-const TABLE_ROW_HEIGHT = 11;
+const TABLE_MIN_ROW_HEIGHT = 13.5;
 
-const TABLE_SECTION_GAP = 6;
+const TABLE_CELL_PADDING_X = 2;
+
+const TABLE_TEXT_SIZE_FA = 7.2;
+
+const TABLE_TEXT_SIZE_EN = 7.5;
+
+const TABLE_LINE_HEIGHT = 4.5;
+
+const TABLE_TOP_PADDING = 4;
+
+const TABLE_BOTTOM_PADDING = 3;
 
 /* ==========================================================================
    HELPERS
@@ -85,6 +87,191 @@ const isRTL = (model) =>
 
 const getContentBottom = (doc) =>
     getPageHeight(doc) - PAGE_BOTTOM;
+
+/* ==========================================================================
+   TEXT WRAPPING HELPERS
+   ========================================================================== */
+
+const getProcessedText = (
+    doc,
+    value,
+    rtl
+) => {
+    const text =
+        String(
+            value ?? ''
+        );
+
+    if (
+        rtl &&
+        typeof doc.processArabic ===
+            'function'
+    ) {
+        return doc.processArabic(
+            text
+        );
+    }
+
+    return text;
+};
+
+const getWrappedLines = (
+    doc,
+    value,
+    width,
+    {
+        size,
+        rtl,
+        bold = false,
+    } = {}
+) => {
+    const text =
+        String(
+            value ?? ''
+        ).trim();
+
+    if (!text) {
+        return ['-'];
+    }
+
+    doc.setFont(
+        'Vazirmatn',
+        bold
+            ? 'bold'
+            : 'normal'
+    );
+
+    doc.setFontSize(
+        size
+    );
+
+    const processed =
+        getProcessedText(
+            doc,
+            text,
+            rtl
+        );
+
+    const lines =
+        doc.splitTextToSize(
+            processed,
+            Math.max(
+                width,
+                1
+            )
+        );
+
+    return (
+        Array.isArray(lines) &&
+        lines.length
+    )
+        ? lines
+        : ['-'];
+};
+
+const drawWrappedCellText = (
+    doc,
+    value,
+    {
+        left,
+        top,
+        width,
+        height,
+        rtl,
+        align,
+        size,
+        color,
+        bold = false,
+        lineHeight =
+            TABLE_LINE_HEIGHT,
+    }
+) => {
+    const contentWidth =
+        width -
+        TABLE_CELL_PADDING_X * 2;
+
+    const lines =
+        getWrappedLines(
+            doc,
+            value,
+            contentWidth,
+            {
+                size,
+                rtl,
+                bold,
+            }
+        );
+
+    doc.setTextColor(
+        ...color
+    );
+
+    doc.setFont(
+        'Vazirmatn',
+        bold
+            ? 'bold'
+            : 'normal'
+    );
+
+    doc.setFontSize(
+        size
+    );
+
+    /*
+     * Vertically center a wrapped block in the cell.
+     */
+    const totalHeight =
+        (
+            lines.length - 1
+        ) *
+            lineHeight +
+        size * 0.35;
+
+    const startY =
+        top +
+        Math.max(
+            TABLE_TOP_PADDING,
+            (
+                height -
+                totalHeight
+            ) / 2 +
+                size * 0.35
+        );
+
+    const textX =
+        rtl
+            ? left +
+              width -
+              TABLE_CELL_PADDING_X
+            : left +
+              TABLE_CELL_PADDING_X;
+
+    lines.forEach(
+        (
+            line,
+            index
+        ) => {
+            doc.text(
+                line,
+                textX,
+                startY +
+                    index *
+                        lineHeight,
+                {
+                    align:
+                        align ||
+                        (
+                            rtl
+                                ? 'right'
+                                : 'left'
+                        ),
+                }
+            );
+        }
+    );
+
+    return lines;
+};
 
 /* ==========================================================================
    ANALYTICS CONTINUATION PAGE
@@ -106,7 +293,7 @@ const startAnalyticsPage = (
         PAGE_TOP;
 
     const height =
-        16;
+        19;
 
     doc.setFillColor(
         ...COLORS.surface
@@ -152,7 +339,7 @@ const startAnalyticsPage = (
         rtl
             ? width - MARGIN - 5
             : MARGIN + 5,
-        top + 7,
+        top + 8,
         {
             rtl,
 
@@ -163,7 +350,7 @@ const startAnalyticsPage = (
 
             bold: true,
 
-            size: 8.5,
+            size: 9.8,
 
             color:
                 COLORS.ink,
@@ -176,7 +363,7 @@ const startAnalyticsPage = (
         rtl
             ? width - MARGIN - 5
             : MARGIN + 5,
-        top + 12,
+        top + 14.5,
         {
             rtl,
 
@@ -185,7 +372,7 @@ const startAnalyticsPage = (
                     ? 'right'
                     : 'left',
 
-            size: 6.2,
+            size: 7.3,
 
             color:
                 COLORS.muted,
@@ -200,7 +387,7 @@ const startAnalyticsPage = (
     return (
         top +
         height +
-        TABLE_SECTION_GAP
+        6
     );
 };
 
@@ -236,7 +423,7 @@ const startReportTablePage = (
         MARGIN,
         PAGE_TOP,
         width - MARGIN * 2,
-        16,
+        19,
         3,
         3,
         'FD'
@@ -252,7 +439,7 @@ const startReportTablePage = (
             : MARGIN,
         PAGE_TOP,
         1.5,
-        16,
+        19,
         0.7,
         0.7,
         'F'
@@ -264,7 +451,7 @@ const startReportTablePage = (
         rtl
             ? width - MARGIN - 5
             : MARGIN + 5,
-        PAGE_TOP + 7,
+        PAGE_TOP + 8,
         {
             rtl,
 
@@ -275,7 +462,7 @@ const startReportTablePage = (
 
             bold: true,
 
-            size: 8.5,
+            size: 9.8,
 
             color:
                 COLORS.ink,
@@ -288,7 +475,7 @@ const startReportTablePage = (
         rtl
             ? width - MARGIN - 5
             : MARGIN + 5,
-        PAGE_TOP + 12,
+        PAGE_TOP + 14.5,
         {
             rtl,
 
@@ -297,7 +484,7 @@ const startReportTablePage = (
                     ? 'right'
                     : 'left',
 
-            size: 6.2,
+            size: 7.3,
 
             color:
                 COLORS.muted,
@@ -311,8 +498,8 @@ const startReportTablePage = (
 
     return (
         PAGE_TOP +
-        16 +
-        TABLE_SECTION_GAP
+        19 +
+        6
     );
 };
 
@@ -332,7 +519,7 @@ const drawHeader = (
         isRTL(model);
 
     const headerHeight =
-        31;
+        37;
 
     doc.setFillColor(
         ...COLORS.ink
@@ -370,7 +557,7 @@ const drawHeader = (
         rtl
             ? width - MARGIN - 8
             : MARGIN + 8,
-        y + 10,
+        y + 11.5,
         {
             rtl,
 
@@ -381,7 +568,7 @@ const drawHeader = (
 
             bold: true,
 
-            size: 15.5,
+            size: 20,
 
             color:
                 COLORS.white,
@@ -394,7 +581,7 @@ const drawHeader = (
         rtl
             ? width - MARGIN - 8
             : MARGIN + 8,
-        y + 18,
+        y + 21,
         {
             rtl,
 
@@ -403,13 +590,14 @@ const drawHeader = (
                     ? 'right'
                     : 'left',
 
-            size: 7.2,
+            size: 9,
 
-            color: rgb(
-                226,
-                232,
-                240
-            ),
+            color:
+                rgb(
+                    226,
+                    232,
+                    240
+                ),
         }
     );
 
@@ -431,13 +619,13 @@ const drawHeader = (
                         MARGIN + 8,
 
                     y:
-                        y + 10,
+                        y + 12,
 
                     width:
-                        49,
+                        52,
 
                     size:
-                        5.2,
+                        8,
 
                     color:
                         rgb(
@@ -460,13 +648,13 @@ const drawHeader = (
                         MARGIN + 8,
 
                     y:
-                        y + 17,
+                        y + 21,
 
                     width:
-                        49,
+                        52,
 
                     size:
-                        5.1,
+                        7.5,
 
                     color:
                         rgb(
@@ -484,7 +672,7 @@ const drawHeader = (
             rtl
                 ? MARGIN + 8
                 : width - MARGIN - 8,
-            y + 24,
+            y + 28,
             {
                 rtl: false,
 
@@ -494,7 +682,7 @@ const drawHeader = (
                         : 'right',
 
                 size:
-                    6.7,
+                    8,
 
                 color:
                     rgb(
@@ -509,7 +697,7 @@ const drawHeader = (
     return (
         y +
         headerHeight +
-        7
+        8
     );
 };
 
@@ -546,14 +734,14 @@ const drawSectionTitle = (
 
             bold: true,
 
-            size: 9.5,
+            size: 10.8,
 
             color:
                 COLORS.ink,
         }
     );
 
-    return y + 7;
+    return y + 8;
 };
 
 /* ==========================================================================
@@ -570,16 +758,6 @@ const drawKpis = (
 
     const rtl =
         isRTL(model);
-
-    /*
-     * سه کارت بالایی:
-     *
-     * 1. میانگین فروش
-     * 2. کالاهای فروخته‌شده
-     * 3. تعداد تراکنش
-     *
-     * کل فروش در Summary پایین قرار دارد.
-     */
 
     const kpis = [
         {
@@ -646,7 +824,7 @@ const drawKpis = (
         ) / 3;
 
     const cardH =
-        27;
+        30;
 
     kpis.forEach(
         (
@@ -660,10 +838,6 @@ const drawKpis = (
                         cardW +
                         gap
                     );
-
-            /*
-             * Card
-             */
 
             doc.setFillColor(
                 ...COLORS.white
@@ -687,10 +861,6 @@ const drawKpis = (
                 'FD'
             );
 
-            /*
-             * Accent bar
-             */
-
             doc.setFillColor(
                 ...card.accent
             );
@@ -699,19 +869,15 @@ const drawKpis = (
                 rtl
                     ? left +
                       cardW -
-                      1.5
+                      1.6
                     : left,
                 y,
-                1.5,
+                1.6,
                 cardH,
-                0.75,
-                0.75,
+                0.8,
+                0.8,
                 'F'
             );
-
-            /*
-             * Soft value area
-             */
 
             doc.setFillColor(
                 ...card.background
@@ -721,7 +887,7 @@ const drawKpis = (
                 left + 3,
                 y + 5.5,
                 cardW - 6,
-                8,
+                9,
                 2,
                 2,
                 'F'
@@ -734,15 +900,11 @@ const drawKpis = (
                       5
                     : left + 5;
 
-            /*
-             * Label
-             */
-
             drawText(
                 doc,
                 card.label,
                 textX,
-                y + 10.5,
+                y + 11,
                 {
                     rtl,
 
@@ -753,7 +915,8 @@ const drawKpis = (
 
                     bold: true,
 
-                    size: 6.4,
+                    size:
+                        7.2,
 
                     color:
                         COLORS.muted,
@@ -763,15 +926,11 @@ const drawKpis = (
                 }
             );
 
-            /*
-             * Value
-             */
-
             drawText(
                 doc,
                 card.value,
                 textX,
-                y + 21.5,
+                y + 23.5,
                 {
                     rtl,
 
@@ -782,7 +941,8 @@ const drawKpis = (
 
                     bold: true,
 
-                    size: 9,
+                    size:
+                        10.5,
 
                     color:
                         card.accent,
@@ -794,7 +954,7 @@ const drawKpis = (
         }
     );
 
-    return y + cardH + 5;
+    return y + cardH + 6;
 };
 
 /* ==========================================================================
@@ -869,7 +1029,7 @@ const drawFilterSummary = (
     }
 
     const height =
-        21;
+        23;
 
     doc.setFillColor(
         ...COLORS.surface
@@ -924,7 +1084,7 @@ const drawFilterSummary = (
                 doc,
                 item.label,
                 textX,
-                y + 7,
+                y + 7.5,
                 {
                     rtl,
 
@@ -933,7 +1093,8 @@ const drawFilterSummary = (
                             ? 'right'
                             : 'left',
 
-                    size: 6.1,
+                    size:
+                        6.9,
 
                     color:
                         COLORS.muted,
@@ -947,7 +1108,7 @@ const drawFilterSummary = (
                 doc,
                 item.value,
                 textX,
-                y + 14,
+                y + 16,
                 {
                     rtl,
 
@@ -958,7 +1119,8 @@ const drawFilterSummary = (
 
                     bold: true,
 
-                    size: 6.9,
+                    size:
+                        7.7,
 
                     color:
                         COLORS.ink,
@@ -970,7 +1132,7 @@ const drawFilterSummary = (
         }
     );
 
-    return y + 28;
+    return y + 30;
 };
 
 /* ==========================================================================
@@ -987,15 +1149,6 @@ const drawSummary = (
 
     const rtl =
         isRTL(model);
-
-    /*
-     * چهار کارت پایین:
-     *
-     * 1. فروش نقدی
-     * 2. فروش نسیه
-     * 3. کل فروش
-     * 4. بهترین دسته
-     */
 
     const items = [
         {
@@ -1079,7 +1232,7 @@ const drawSummary = (
         ) / 4;
 
     const boxH =
-        27;
+        30;
 
     items.forEach(
         (
@@ -1093,10 +1246,6 @@ const drawSummary = (
                         boxW +
                         gap
                     );
-
-            /*
-             * Main card
-             */
 
             doc.setFillColor(
                 ...COLORS.white
@@ -1120,10 +1269,6 @@ const drawSummary = (
                 'FD'
             );
 
-            /*
-             * Accent bar
-             */
-
             doc.setFillColor(
                 ...item.accent
             );
@@ -1132,15 +1277,11 @@ const drawSummary = (
                 left + 3,
                 y + 2.5,
                 boxW - 6,
-                1.6,
-                0.8,
-                0.8,
+                1.8,
+                0.9,
+                0.9,
                 'F'
             );
-
-            /*
-             * Soft value area
-             */
 
             doc.setFillColor(
                 ...item.background
@@ -1148,9 +1289,9 @@ const drawSummary = (
 
             doc.roundedRect(
                 left + 3,
-                y + 5.5,
+                y + 6,
                 boxW - 6,
-                8,
+                9,
                 2,
                 2,
                 'F'
@@ -1163,15 +1304,11 @@ const drawSummary = (
                       5
                     : left + 5;
 
-            /*
-             * Label
-             */
-
             drawText(
                 doc,
                 item.label,
                 textX,
-                y + 10.5,
+                y + 11.5,
                 {
                     rtl,
 
@@ -1182,7 +1319,8 @@ const drawSummary = (
 
                     bold: true,
 
-                    size: 6.2,
+                    size:
+                        6.9,
 
                     color:
                         COLORS.muted,
@@ -1192,15 +1330,11 @@ const drawSummary = (
                 }
             );
 
-            /*
-             * Value
-             */
-
             drawText(
                 doc,
                 item.value,
                 textX,
-                y + 21.5,
+                y + 23.5,
                 {
                     rtl,
 
@@ -1211,7 +1345,8 @@ const drawSummary = (
 
                     bold: true,
 
-                    size: 8.4,
+                    size:
+                        9.5,
 
                     color:
                         item.accent,
@@ -1223,7 +1358,7 @@ const drawSummary = (
         }
     );
 
-    return y + boxH + 5;
+    return y + boxH + 6;
 };
 
 /* ==========================================================================
@@ -1241,7 +1376,7 @@ const getColumns = (
             model.labels.product,
 
         width:
-            29,
+            32,
     },
 
     {
@@ -1252,7 +1387,7 @@ const getColumns = (
             model.labels.category,
 
         width:
-            25,
+            22,
     },
 
     {
@@ -1263,7 +1398,7 @@ const getColumns = (
             model.labels.quantity,
 
         width:
-            17,
+            14,
     },
 
     {
@@ -1274,7 +1409,7 @@ const getColumns = (
             model.labels.amount,
 
         width:
-            27,
+            24,
     },
 
     {
@@ -1285,7 +1420,7 @@ const getColumns = (
             model.labels.paymentType,
 
         width:
-            23,
+            20,
     },
 
     {
@@ -1301,13 +1436,24 @@ const getColumns = (
 
     {
         key:
+            'customerPhone',
+
+        label:
+            model.labels.phone,
+
+        width:
+            22,
+    },
+
+    {
+        key:
             'date',
 
         label:
             model.labels.date,
 
         width:
-            31,
+            27,
     },
 ];
 
@@ -1360,9 +1506,9 @@ const getSaleCellValue = (
                 '-'
             );
 
-        case 'date':
+        case 'customerPhone':
             return (
-                sale.date ||
+                sale.customerPhone ||
                 '-'
             );
 
@@ -1424,7 +1570,7 @@ const drawTableHeader = (
                 rtl
                     ? x - 2
                     : x + 2,
-                y + 5.8,
+                y + 7.7,
                 {
                     rtl,
 
@@ -1436,7 +1582,7 @@ const drawTableHeader = (
                     bold: true,
 
                     size:
-                        5.8,
+                        7.6,
 
                     color:
                         COLORS.white,
@@ -1470,7 +1616,8 @@ const drawTableDate = (
     sale,
     left,
     columnWidth,
-    y
+    y,
+    rowHeight
 ) => {
     const rtl =
         isRTL(model);
@@ -1488,13 +1635,16 @@ const drawTableDate = (
                     left + 2,
 
                 y:
-                    y + 4,
+                    y + Math.min(
+                        5,
+                        rowHeight / 2
+                    ),
 
                 width:
                     columnWidth - 4,
 
                 size:
-                    5.1,
+                    6.6,
 
                 color:
                     COLORS.ink,
@@ -1509,13 +1659,17 @@ const drawTableDate = (
                     left + 2,
 
                 y:
-                    y + 8.1,
+                    y +
+                    Math.min(
+                        10.6,
+                        rowHeight - 3
+                    ),
 
                 width:
                     columnWidth - 4,
 
                 size:
-                    4.9,
+                    6.2,
 
                 color:
                     COLORS.muted,
@@ -1525,15 +1679,23 @@ const drawTableDate = (
         return;
     }
 
+    const value =
+        sale.time
+            ? `${sale.date} ${sale.time}`
+            : sale.date;
+
     drawText(
         doc,
-        sale.date || '-',
+        value || '-',
         rtl
             ? left +
               columnWidth -
               2
             : left + 2,
-        y + 4.2,
+        y +
+            rowHeight /
+                2 +
+            2,
         {
             rtl,
 
@@ -1543,7 +1705,7 @@ const drawTableDate = (
                     : 'left',
 
             size:
-                5.6,
+                6.6,
 
             color:
                 COLORS.ink,
@@ -1552,35 +1714,108 @@ const drawTableDate = (
                 columnWidth - 4,
         }
     );
+};
 
-    if (
-        sale.time
-    ) {
-        drawText(
-            doc,
-            sale.time,
-            rtl
-                ? left +
-                  columnWidth -
-                  2
-                : left + 2,
-            y + 8.1,
-            {
-                rtl: false,
+/* ==========================================================================
+   TABLE ROW LAYOUT
+   ========================================================================== */
 
-                align:
-                    rtl
-                        ? 'right'
-                        : 'left',
+const getTableRowLayout = (
+    doc,
+    model,
+    columns,
+    sale
+) => {
+    const rtl =
+        isRTL(model);
 
-                size:
-                    5,
+    const fontSize =
+        model.language === 'fa'
+            ? TABLE_TEXT_SIZE_FA
+            : TABLE_TEXT_SIZE_EN;
 
-                color:
-                    COLORS.muted,
+    const cells =
+        columns.map(
+            (column) => {
+                if (
+                    column.key ===
+                    'date'
+                ) {
+                    return {
+                        key:
+                            column.key,
+
+                        lines:
+                            2,
+                    };
+                }
+
+                const value =
+                    getSaleCellValue(
+                        sale,
+                        column,
+                        model
+                    );
+
+                const lines =
+                    getWrappedLines(
+                        doc,
+                        value || '-',
+                        column.width -
+                            TABLE_CELL_PADDING_X * 2,
+                        {
+                            size:
+                                fontSize,
+
+                            rtl,
+
+                            bold:
+                                false,
+                        }
+                    );
+
+                return {
+                    key:
+                        column.key,
+
+                    value:
+                        value || '-',
+
+                    lines:
+                        lines.length,
+                };
             }
         );
-    }
+
+    const maxLines =
+        Math.max(
+            ...cells.map(
+                (cell) =>
+                    cell.lines
+            ),
+            2
+        );
+
+    const calculatedHeight =
+        TABLE_TOP_PADDING +
+        TABLE_BOTTOM_PADDING +
+        (
+            maxLines - 1
+        ) *
+            TABLE_LINE_HEIGHT +
+        fontSize;
+
+    const rowHeight =
+        Math.max(
+            TABLE_MIN_ROW_HEIGHT,
+            calculatedHeight
+        );
+
+    return {
+        rowHeight,
+        fontSize,
+        cells,
+    };
 };
 
 /* ==========================================================================
@@ -1605,6 +1840,14 @@ const drawTableRow = (
         index % 2 === 0
             ? COLORS.white
             : COLORS.surfaceStrong;
+
+    const layout =
+        getTableRowLayout(
+            doc,
+            model,
+            columns,
+            sale
+        );
 
     let x =
         rtl
@@ -1637,7 +1880,7 @@ const drawTableRow = (
                 left,
                 y,
                 column.width,
-                TABLE_ROW_HEIGHT,
+                layout.rowHeight,
                 'FD'
             );
 
@@ -1651,7 +1894,8 @@ const drawTableRow = (
                     sale,
                     left,
                     column.width,
-                    y
+                    y,
+                    layout.rowHeight
                 );
             } else {
                 const value =
@@ -1661,16 +1905,21 @@ const drawTableRow = (
                         model
                     );
 
-                drawText(
+                drawWrappedCellText(
                     doc,
                     value || '-',
-                    rtl
-                        ? left +
-                          column.width -
-                          2
-                        : left + 2,
-                    y + 6.1,
                     {
+                        left,
+
+                        top:
+                            y,
+
+                        width:
+                            column.width,
+
+                        height:
+                            layout.rowHeight,
+
                         rtl,
 
                         align:
@@ -1679,16 +1928,10 @@ const drawTableRow = (
                                 : 'left',
 
                         size:
-                            model.language ===
-                            'fa'
-                                ? 5.35
-                                : 5.9,
+                            layout.fontSize,
 
                         color:
                             COLORS.ink,
-
-                        maxWidth:
-                            column.width - 4,
                     }
                 );
             }
@@ -1701,10 +1944,14 @@ const drawTableRow = (
         }
     );
 
-    return (
-        y +
-        TABLE_ROW_HEIGHT
-    );
+    return {
+        y:
+            y +
+            layout.rowHeight,
+
+        height:
+            layout.rowHeight,
+    };
 };
 
 /* ==========================================================================
@@ -1734,9 +1981,20 @@ const drawTablePage = (
         index < sales.length;
         index += 1
     ) {
+        const preview =
+            getTableRowLayout(
+                doc,
+                model,
+                columns,
+                sales[index]
+            );
+
+        /*
+         * Check the actual row height before drawing.
+         */
         if (
             y +
-                TABLE_ROW_HEIGHT >
+                preview.rowHeight >
             getContentBottom(doc)
         ) {
             y =
@@ -1754,7 +2012,7 @@ const drawTablePage = (
                 );
         }
 
-        y =
+        const result =
             drawTableRow(
                 doc,
                 model,
@@ -1763,6 +2021,9 @@ const drawTablePage = (
                 sales[index],
                 index
             );
+
+        y =
+            result.y;
     }
 
     return y;
@@ -1785,7 +2046,7 @@ const drawEmptyTable = (
         isRTL(model);
 
     const height =
-        18;
+        21;
 
     y =
         drawTableHeader(
@@ -1817,7 +2078,7 @@ const drawEmptyTable = (
         rtl
             ? width - MARGIN - 5
             : MARGIN + 5,
-        y + 11,
+        y + 13,
         {
             rtl,
 
@@ -1829,7 +2090,7 @@ const drawEmptyTable = (
             bold: true,
 
             size:
-                7.5,
+                8.5,
 
             color:
                 COLORS.muted,
@@ -1853,28 +2114,12 @@ const drawOverviewPage = (
     let y =
         PAGE_TOP;
 
-    /*
-     * -------------------------------------------------------------
-     * HEADER
-     * -------------------------------------------------------------
-     */
-
     y =
         drawHeader(
             doc,
             model,
             y
         );
-
-    /*
-     * -------------------------------------------------------------
-     * TOP KPI CARDS
-     *
-     * 1. Average Sale
-     * 2. Items Sold
-     * 3. Transactions
-     * -------------------------------------------------------------
-     */
 
     y =
         drawKpis(
@@ -1883,24 +2128,12 @@ const drawOverviewPage = (
             y
         );
 
-    /*
-     * -------------------------------------------------------------
-     * FILTER SUMMARY
-     * -------------------------------------------------------------
-     */
-
     y =
         drawFilterSummary(
             doc,
             model,
             y
         );
-
-    /*
-     * -------------------------------------------------------------
-     * SALES SUMMARY TITLE
-     * -------------------------------------------------------------
-     */
 
     y =
         drawSectionTitle(
@@ -1911,29 +2144,12 @@ const drawOverviewPage = (
             y
         );
 
-    /*
-     * -------------------------------------------------------------
-     * BOTTOM SUMMARY CARDS
-     *
-     * 1. Cash Sales
-     * 2. Credit Sales
-     * 3. Total Sales
-     * 4. Best Category
-     * -------------------------------------------------------------
-     */
-
     y =
         drawSummary(
             doc,
             model,
             y
         );
-
-    /*
-     * -------------------------------------------------------------
-     * CHARTS
-     * -------------------------------------------------------------
-     */
 
     const hasPaymentChart =
         Boolean(
@@ -1953,23 +2169,18 @@ const drawOverviewPage = (
         hasCharts
     ) {
         const chartTitleSpace =
-            8;
+            9;
 
         const chartHeight =
             64;
 
         const chartBottomGap =
-            9;
+            10;
 
         const requiredSpace =
             chartTitleSpace +
             chartHeight +
             chartBottomGap;
-
-        /*
-         * اگر فضای کافی باقی نمانده باشد،
-         * Analytics به صفحه جدید منتقل می‌شود.
-         */
 
         if (
             y +
@@ -2006,10 +2217,6 @@ const drawOverviewPage = (
                 gap
             ) / 2;
 
-        /*
-         * Payment chart
-         */
-
         if (
             hasPaymentChart
         ) {
@@ -2022,10 +2229,6 @@ const drawOverviewPage = (
                 chartHeight
             );
         }
-
-        /*
-         * Category chart
-         */
 
         if (
             hasCategoryChart
@@ -2065,24 +2268,10 @@ export const renderColorPdf =
                     'rtl',
             });
 
-        /*
-         * -------------------------------------------------------------
-         * PAGE 1 — OVERVIEW
-         * -------------------------------------------------------------
-         */
-
         drawOverviewPage(
             doc,
             model
         );
-
-        /*
-         * -------------------------------------------------------------
-         * SALES TABLE
-         *
-         * جدول فروش همیشه از صفحه جدا شروع می‌شود.
-         * -------------------------------------------------------------
-         */
 
         const columns =
             getColumns(
@@ -2114,10 +2303,6 @@ export const renderColorPdf =
         tableY +=
             2;
 
-        /*
-         * Empty state
-         */
-
         if (
             !sales.length
         ) {
@@ -2128,10 +2313,6 @@ export const renderColorPdf =
                 columns
             );
         } else {
-            /*
-             * Full paginated table
-             */
-
             drawTablePage(
                 doc,
                 model,
@@ -2141,22 +2322,10 @@ export const renderColorPdf =
             );
         }
 
-        /*
-         * -------------------------------------------------------------
-         * PAGE NUMBERS
-         * -------------------------------------------------------------
-         */
-
         addPageNumbers(
             doc,
             model
         );
-
-        /*
-         * -------------------------------------------------------------
-         * SAVE
-         * -------------------------------------------------------------
-         */
 
         const filename =
             `${sanitizeFileName(

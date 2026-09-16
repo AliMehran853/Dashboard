@@ -27,11 +27,8 @@ export const rgb = (
    FONT CACHE
    ========================================================================== */
 
-let regularFontPromise =
-  null;
-
-let semiBoldFontPromise =
-  null;
+let regularFontPromise = null;
+let semiBoldFontPromise = null;
 
 const arrayBufferToBase64 = (
   buffer
@@ -55,8 +52,7 @@ const arrayBufferToBase64 = (
       bytes.subarray(
         i,
         Math.min(
-          i +
-            chunkSize,
+          i + chunkSize,
           bytes.length
         )
       );
@@ -72,56 +68,53 @@ const arrayBufferToBase64 = (
   );
 };
 
-const loadFont =
-  async (
-    url
-  ) => {
-    const response =
-      await fetch(url);
+const loadFont = async (
+  url
+) => {
+  const response =
+    await fetch(url);
 
-    if (
-      !response.ok
-    ) {
-      throw new Error(
-        `Failed to load PDF font: ${url}`
-      );
-    }
-
-    const buffer =
-      await response.arrayBuffer();
-
-    return arrayBufferToBase64(
-      buffer
+  if (
+    !response.ok
+  ) {
+    throw new Error(
+      `Failed to load PDF font: ${url}`
     );
-  };
+  }
 
-const getRegularFont =
-  () => {
-    if (
-      !regularFontPromise
-    ) {
-      regularFontPromise =
-        loadFont(
-          vazirRegularUrl
-        );
-    }
+  const buffer =
+    await response.arrayBuffer();
 
-    return regularFontPromise;
-  };
+  return arrayBufferToBase64(
+    buffer
+  );
+};
 
-const getSemiBoldFont =
-  () => {
-    if (
-      !semiBoldFontPromise
-    ) {
-      semiBoldFontPromise =
-        loadFont(
-          vazirSemiBoldUrl
-        );
-    }
+const getRegularFont = () => {
+  if (
+    !regularFontPromise
+  ) {
+    regularFontPromise =
+      loadFont(
+        vazirRegularUrl
+      );
+  }
 
-    return semiBoldFontPromise;
-  };
+  return regularFontPromise;
+};
+
+const getSemiBoldFont = () => {
+  if (
+    !semiBoldFontPromise
+  ) {
+    semiBoldFontPromise =
+      loadFont(
+        vazirSemiBoldUrl
+      );
+  }
+
+  return semiBoldFontPromise;
+};
 
 /* ============================================================================
    FONT REGISTRATION
@@ -177,11 +170,8 @@ export const createPdf =
     options = {}
   ) => {
     const {
-      orientation =
-        'portrait',
-
+      orientation = 'portrait',
       unit = 'mm',
-
       format = 'a4',
     } = options;
 
@@ -228,8 +218,7 @@ export const savePdf = (
       .toLowerCase()
       .endsWith('.pdf')
   ) {
-    safeFilename +=
-      '.pdf';
+    safeFilename += '.pdf';
   }
 
   doc.save(
@@ -247,12 +236,10 @@ export const getPdfPageSize = (
   doc
 ) => ({
   width:
-    doc.internal.pageSize
-      .getWidth(),
+    doc.internal.pageSize.getWidth(),
 
   height:
-    doc.internal.pageSize
-      .getHeight(),
+    doc.internal.pageSize.getHeight(),
 });
 
 export const getPdfContentWidth = (
@@ -261,9 +248,7 @@ export const getPdfContentWidth = (
   const {
     width,
   } =
-    getPdfPageSize(
-      doc
-    );
+    getPdfPageSize(doc);
 
   return (
     width -
@@ -278,9 +263,7 @@ export const getPdfContentHeight = (
   const {
     height,
   } =
-    getPdfPageSize(
-      doc
-    );
+    getPdfPageSize(doc);
 
   return (
     height -
@@ -316,9 +299,7 @@ export const processPdfText = (
 
   if (
     rtl &&
-    hasArabicProcessor(
-      doc
-    )
+    hasArabicProcessor(doc)
   ) {
     return doc.processArabic(
       value
@@ -337,22 +318,12 @@ const applyTextColor = (
   color
 ) => {
   if (
-    Array.isArray(
-      color
-    )
+    Array.isArray(color)
   ) {
     doc.setTextColor(
-      Number(
-        color[0]
-      ) || 0,
-
-      Number(
-        color[1]
-      ) || 0,
-
-      Number(
-        color[2]
-      ) || 0
+      Number(color[0]) || 0,
+      Number(color[1]) || 0,
+      Number(color[2]) || 0
     );
 
     return;
@@ -372,26 +343,15 @@ const applyTextColor = (
     ) {
       doc.setTextColor(
         parseInt(
-          value.slice(
-            1,
-            3
-          ),
+          value.slice(1, 3),
           16
         ),
-
         parseInt(
-          value.slice(
-            3,
-            5
-          ),
+          value.slice(3, 5),
           16
         ),
-
         parseInt(
-          value.slice(
-            5,
-            7
-          ),
+          value.slice(5, 7),
           16
         )
       );
@@ -410,13 +370,11 @@ const applyTextColor = (
             value[1],
           16
         ),
-
         parseInt(
           value[2] +
             value[2],
           16
         ),
-
         parseInt(
           value[3] +
             value[3],
@@ -445,11 +403,10 @@ export const drawPdfText = (
   x,
   y,
   {
-    size = 10,
+    size = 8.2,
     font = 'normal',
     bold = false,
-    color =
-      PDF_COLORS.text,
+    color = PDF_COLORS.text,
     align = 'left',
     rtl = false,
     maxWidth,
@@ -461,6 +418,10 @@ export const drawPdfText = (
       text,
       rtl
     );
+
+  if (!value) {
+    return;
+  }
 
   const fontStyle =
     bold ||
@@ -475,7 +436,7 @@ export const drawPdfText = (
 
   doc.setFontSize(
     Number(size) ||
-      10
+      8.2
   );
 
   applyTextColor(
@@ -488,17 +449,12 @@ export const drawPdfText = (
   };
 
   if (
-    maxWidth !==
-      undefined &&
+    maxWidth !== undefined &&
     maxWidth !== null &&
-    Number(
-      maxWidth
-    ) > 0
+    Number(maxWidth) > 0
   ) {
     options.maxWidth =
-      Number(
-        maxWidth
-      );
+      Number(maxWidth);
   }
 
   doc.text(
@@ -535,9 +491,8 @@ export const drawRtlDateParts = (
     x,
     y,
     width = 40,
-    size = 5.5,
-    color =
-      PDF_COLORS.text,
+    size = 7.2,
+    color = PDF_COLORS.text,
   } = {}
 ) => {
   const value =
@@ -562,15 +517,10 @@ export const drawRtlDateParts = (
       y,
       {
         rtl: true,
-
         align: 'right',
-
         size,
-
         color,
-
-        maxWidth:
-          width,
+        maxWidth: width,
       }
     );
 
@@ -584,6 +534,25 @@ export const drawRtlDateParts = (
     year,
   ] = match;
 
+  let cursor =
+    x + width;
+
+  /*
+   * DAY
+   */
+  drawText(
+    doc,
+    day,
+    cursor,
+    y,
+    {
+      rtl: false,
+      align: 'right',
+      size,
+      color,
+    }
+  );
+
   doc.setFont(
     'Vazirmatn',
     'normal'
@@ -593,36 +562,19 @@ export const drawRtlDateParts = (
     size
   );
 
-  let cursor =
-    x + width;
-
-  drawText(
-    doc,
-    day,
-    cursor,
-    y,
-    {
-      rtl: false,
-
-      align: 'right',
-
-      size,
-
-      color,
-    }
-  );
-
   cursor -=
     doc.getTextWidth(
       day
-    ) + 1.5;
+    ) +
+    2;
 
+  /*
+   * MONTH
+   */
   const shapedMonth =
-    hasArabicProcessor(
-      doc
-    )
+    hasArabicProcessor(doc)
       ? doc.processArabic(
-          month
+            month
         )
       : month;
 
@@ -642,18 +594,19 @@ export const drawRtlDateParts = (
     y,
     {
       rtl: true,
-
       align: 'right',
-
       size,
-
       color,
     }
   );
 
   cursor -=
-    monthWidth + 1.5;
+    monthWidth +
+    2;
 
+  /*
+   * YEAR
+   */
   drawText(
     doc,
     year,
@@ -661,11 +614,8 @@ export const drawRtlDateParts = (
     y,
     {
       rtl: false,
-
       align: 'right',
-
       size,
-
       color,
     }
   );
@@ -682,9 +632,8 @@ export const drawRtlTimeParts = (
     x,
     y,
     width = 40,
-    size = 5.3,
-    color =
-      PDF_COLORS.text,
+    size = 7,
+    color = PDF_COLORS.text,
   } = {}
 ) => {
   const value =
@@ -697,9 +646,7 @@ export const drawRtlTimeParts = (
   }
 
   const separatorIndex =
-    value.lastIndexOf(
-      ' '
-    );
+    value.lastIndexOf(' ');
 
   if (
     separatorIndex <= 0
@@ -711,11 +658,8 @@ export const drawRtlTimeParts = (
       y,
       {
         rtl: false,
-
         align: 'right',
-
         size,
-
         color,
       }
     );
@@ -741,6 +685,9 @@ export const drawRtlTimeParts = (
   let cursor =
     x + width;
 
+  /*
+   * CLOCK
+   */
   drawText(
     doc,
     clock,
@@ -748,20 +695,30 @@ export const drawRtlTimeParts = (
     y,
     {
       rtl: false,
-
       align: 'right',
-
       size,
-
       color,
     }
+  );
+
+  doc.setFont(
+    'Vazirmatn',
+    'normal'
+  );
+
+  doc.setFontSize(
+    size
   );
 
   cursor -=
     doc.getTextWidth(
       clock
-    ) + 1.5;
+    ) +
+    2;
 
+  /*
+   * MERIDIEM
+   */
   drawText(
     doc,
     meridiem,
@@ -769,11 +726,8 @@ export const drawRtlTimeParts = (
     y,
     {
       rtl: true,
-
       align: 'right',
-
       size,
-
       color,
     }
   );
@@ -790,13 +744,12 @@ export const drawPdfWrappedText =
     x,
     y,
     {
-      size = 10,
+      size = 8.2,
       font = 'normal',
       bold = false,
-      color =
-        PDF_COLORS.text,
+      color = PDF_COLORS.text,
       maxWidth = 50,
-      lineHeight = 5,
+      lineHeight = 4.8,
       rtl = false,
       align = 'left',
     } = {}
@@ -808,17 +761,27 @@ export const drawPdfWrappedText =
         rtl
       );
 
+    if (!value) {
+      return {
+        lines: [],
+        height: 0,
+      };
+    }
+
+    const fontStyle =
+      bold ||
+      font === 'bold'
+        ? 'bold'
+        : 'normal';
+
     doc.setFont(
       'Vazirmatn',
-      bold ||
-        font === 'bold'
-        ? 'bold'
-        : 'normal'
+      fontStyle
     );
 
     doc.setFontSize(
       Number(size) ||
-        10
+        8.2
     );
 
     applyTextColor(
@@ -826,12 +789,22 @@ export const drawPdfWrappedText =
       color
     );
 
+    const safeMaxWidth =
+      Math.max(
+        Number(maxWidth) || 0,
+        1
+      );
+
+    const safeLineHeight =
+      Math.max(
+        Number(lineHeight) || 0,
+        1
+      );
+
     const lines =
       doc.splitTextToSize(
         value,
-        Number(
-          maxWidth
-        ) || 50
+        safeMaxWidth
       );
 
     lines.forEach(
@@ -844,11 +817,7 @@ export const drawPdfWrappedText =
           Number(x),
           Number(y) +
             index *
-              (
-                Number(
-                  lineHeight
-                ) || 5
-              ),
+              safeLineHeight,
           {
             align,
           }
@@ -861,11 +830,7 @@ export const drawPdfWrappedText =
 
       height:
         lines.length *
-        (
-          Number(
-            lineHeight
-          ) || 5
-        ),
+        safeLineHeight,
     };
   };
 
@@ -905,8 +870,7 @@ export const drawDivider = (
         PDF_PAGE.marginLeft,
 
       x2 =
-        doc.internal.pageSize
-          .getWidth() -
+        doc.internal.pageSize.getWidth() -
         PDF_PAGE.marginRight,
 
       color =
@@ -916,9 +880,7 @@ export const drawDivider = (
     } = options;
 
     if (
-      Array.isArray(
-        color
-      )
+      Array.isArray(color)
     ) {
       doc.setDrawColor(
         ...color
@@ -951,9 +913,7 @@ export const drawDivider = (
   ] = args;
 
   if (
-    Array.isArray(
-      color
-    )
+    Array.isArray(color)
   ) {
     doc.setDrawColor(
       ...color
@@ -1010,9 +970,7 @@ export const drawRect = (
     fillColor
   ) {
     if (
-      Array.isArray(
-        fillColor
-      )
+      Array.isArray(fillColor)
     ) {
       doc.setFillColor(
         ...fillColor
@@ -1028,9 +986,7 @@ export const drawRect = (
     strokeColor
   ) {
     if (
-      Array.isArray(
-        strokeColor
-      )
+      Array.isArray(strokeColor)
     ) {
       doc.setDrawColor(
         ...strokeColor
@@ -1131,9 +1087,7 @@ export const drawCard = (
   } = config;
 
   if (
-    Array.isArray(
-      fill
-    )
+    Array.isArray(fill)
   ) {
     doc.setFillColor(
       ...fill
@@ -1145,9 +1099,7 @@ export const drawCard = (
   }
 
   if (
-    Array.isArray(
-      border
-    )
+    Array.isArray(border)
   ) {
     doc.setDrawColor(
       ...border
@@ -1177,11 +1129,9 @@ export const drawCard = (
       doc,
       label,
       rtl
-        ? x +
-          width -
-          4
+        ? x + width - 4
         : x + 4,
-      y + 7,
+      y + 7.4,
       {
         rtl,
 
@@ -1190,7 +1140,8 @@ export const drawCard = (
             ? 'right'
             : 'left',
 
-        size: 7,
+        size:
+          7.6,
 
         color:
           PDF_COLORS.muted,
@@ -1203,11 +1154,9 @@ export const drawCard = (
       doc,
       value,
       rtl
-        ? x +
-          width -
-          4
+        ? x + width - 4
         : x + 4,
-      y + 15,
+      y + 16,
       {
         rtl,
 
@@ -1216,11 +1165,13 @@ export const drawCard = (
             ? 'right'
             : 'left',
 
-        size: 13,
+        size:
+          13.8,
 
         bold: true,
 
-        color: accent,
+        color:
+          accent,
       }
     );
   }
@@ -1246,9 +1197,7 @@ export const drawHeader = (
   const {
     width,
   } =
-    getPdfPageSize(
-      doc
-    );
+    getPdfPageSize(doc);
 
   const x =
     rtl
@@ -1269,7 +1218,8 @@ export const drawHeader = (
           ? 'right'
           : 'left',
 
-      size: 20,
+      size:
+        22,
 
       bold: true,
 
@@ -1293,7 +1243,8 @@ export const drawHeader = (
             ? 'right'
             : 'left',
 
-        size: 9,
+        size:
+          10,
 
         color:
           PDF_COLORS.muted,
@@ -1339,12 +1290,9 @@ const resolveFooterOptions =
       typeof options ===
         'object' &&
       (
-        'direction' in
-          options ||
-        'labels' in
-          options ||
-        'language' in
-          options
+        'direction' in options ||
+        'labels' in options ||
+        'language' in options
       )
     ) {
       return {
@@ -1389,15 +1337,10 @@ export const drawPdfFooter = (
 ) => {
   const {
     rtl = false,
-
     pageNumber = null,
-
     leftText = '',
-
     generatedDate = '',
-
     generatedTime = '',
-
     rightText = '',
   } =
     resolveFooterOptions(
@@ -1408,9 +1351,7 @@ export const drawPdfFooter = (
     width,
     height,
   } =
-    getPdfPageSize(
-      doc
-    );
+    getPdfPageSize(doc);
 
   const y =
     height -
@@ -1462,7 +1403,8 @@ export const drawPdfFooter = (
           width:
             footerWidth,
 
-          size: 5.4,
+          size:
+            6.2,
 
           color:
             PDF_COLORS.muted,
@@ -1481,12 +1423,13 @@ export const drawPdfFooter = (
             footerX,
 
           y:
-            y + 3.5,
+            y + 3.8,
 
           width:
             footerWidth,
 
-          size: 5.1,
+          size:
+            6,
 
           color:
             PDF_COLORS.muted,
@@ -1504,9 +1447,11 @@ export const drawPdfFooter = (
       {
         rtl: false,
 
-        align: 'left',
+        align:
+          'left',
 
-        size: 6.2,
+        size:
+          6.8,
 
         color:
           PDF_COLORS.muted,
@@ -1526,9 +1471,11 @@ export const drawPdfFooter = (
       {
         rtl,
 
-        align: 'right',
+        align:
+          'right',
 
-        size: 6.2,
+        size:
+          6.8,
 
         color:
           PDF_COLORS.muted,
@@ -1542,17 +1489,17 @@ export const drawPdfFooter = (
   ) {
     drawText(
       doc,
-      String(
-        pageNumber
-      ),
+      String(pageNumber),
       width / 2,
       y,
       {
         rtl: false,
 
-        align: 'center',
+        align:
+          'center',
 
-        size: 6.2,
+        size:
+          6.8,
 
         color:
           PDF_COLORS.muted,
@@ -1586,9 +1533,7 @@ export const addPageNumbers = (
       doc,
       {
         ...footerOptions,
-
-        pageNumber:
-          page,
+        pageNumber: page,
       }
     );
   }
@@ -1607,9 +1552,7 @@ export const getRemainingPageSpace =
         PDF_PAGE.marginBottom,
     } = {}
   ) =>
-    getPdfPageSize(
-      doc
-    ).height -
+    getPdfPageSize(doc).height -
     bottom -
     currentY;
 
@@ -1625,4 +1568,4 @@ export const needsNewPdfPage =
       currentY,
       options
     ) <
-    requiredHeight;
+    Number(requiredHeight || 0);

@@ -16,18 +16,212 @@ import {
     sanitizeFileName,
 } from '../formatters';
 
-/* ============================================================================
+/* ==========================================================================
    PAGE
    ========================================================================== */
 
 const MARGIN = 11;
+
 const PAGE_TOP = 11;
+
 const PAGE_BOTTOM = 18;
 
-const TABLE_HEADER_HEIGHT = 8;
-const TABLE_ROW_HEIGHT = 9;
+const TABLE_HEADER_HEIGHT = 11;
 
-/* ============================================================================
+const TABLE_MIN_ROW_HEIGHT = 13;
+
+const TABLE_CELL_PADDING_X = 1.8;
+
+const TABLE_TEXT_SIZE_FA = 7;
+
+const TABLE_TEXT_SIZE_EN = 7.3;
+
+const TABLE_LINE_HEIGHT = 4.3;
+
+const TABLE_TOP_PADDING = 3.8;
+
+const TABLE_BOTTOM_PADDING = 2.8;
+
+/* ==========================================================================
+   TEXT WRAPPING
+   ========================================================================== */
+
+const getProcessedText = (
+    doc,
+    value,
+    rtl
+) => {
+    const text =
+        String(
+            value ?? ''
+        );
+
+    if (
+        rtl &&
+        typeof doc.processArabic ===
+            'function'
+    ) {
+        return doc.processArabic(
+            text
+        );
+    }
+
+    return text;
+};
+
+const getWrappedLines = (
+    doc,
+    value,
+    width,
+    {
+        size,
+        rtl,
+        bold = false,
+    } = {}
+) => {
+    const text =
+        String(
+            value ?? ''
+        ).trim();
+
+    if (!text) {
+        return ['-'];
+    }
+
+    doc.setFont(
+        'Vazirmatn',
+        bold
+            ? 'bold'
+            : 'normal'
+    );
+
+    doc.setFontSize(
+        size
+    );
+
+    const processed =
+        getProcessedText(
+            doc,
+            text,
+            rtl
+        );
+
+    const lines =
+        doc.splitTextToSize(
+            processed,
+            Math.max(
+                width,
+                1
+            )
+        );
+
+    return (
+        Array.isArray(lines) &&
+        lines.length
+    )
+        ? lines
+        : ['-'];
+};
+
+const drawWrappedCellText = (
+    doc,
+    value,
+    {
+        left,
+        top,
+        width,
+        height,
+        rtl,
+        align,
+        size,
+        color,
+        bold = false,
+        lineHeight =
+            TABLE_LINE_HEIGHT,
+    }
+) => {
+    const lines =
+        getWrappedLines(
+            doc,
+            value,
+            width -
+                TABLE_CELL_PADDING_X * 2,
+            {
+                size,
+                rtl,
+                bold,
+            }
+        );
+
+    doc.setFont(
+        'Vazirmatn',
+        bold
+            ? 'bold'
+            : 'normal'
+    );
+
+    doc.setFontSize(
+        size
+    );
+
+    doc.setTextColor(
+        ...color
+    );
+
+    const totalHeight =
+        (
+            lines.length - 1
+        ) *
+            lineHeight +
+        size * 0.35;
+
+    const startY =
+        top +
+        Math.max(
+            TABLE_TOP_PADDING,
+            (
+                height -
+                totalHeight
+            ) / 2 +
+                size * 0.35
+        );
+
+    const textX =
+        rtl
+            ? left +
+              width -
+              TABLE_CELL_PADDING_X
+            : left +
+              TABLE_CELL_PADDING_X;
+
+    lines.forEach(
+        (
+            line,
+            index
+        ) => {
+            doc.text(
+                line,
+                textX,
+                startY +
+                    index *
+                        lineHeight,
+                {
+                    align:
+                        align ||
+                        (
+                            rtl
+                                ? 'right'
+                                : 'left'
+                        ),
+                }
+            );
+        }
+    );
+
+    return lines;
+};
+
+/* ==========================================================================
    COLUMNS
    ========================================================================== */
 
@@ -35,56 +229,155 @@ const getColumns = (
     model
 ) => [
     {
-        key: 'product',
+        key:
+            'product',
+
         label:
             model.labels.product,
-        width: 29,
+
+        width:
+            32,
     },
 
     {
-        key: 'category',
+        key:
+            'category',
+
         label:
             model.labels.category,
-        width: 25,
+
+        width:
+            22,
     },
 
     {
-        key: 'quantity',
+        key:
+            'quantity',
+
         label:
             model.labels.quantity,
-        width: 17,
+
+        width:
+            14,
     },
 
     {
-        key: 'amount',
+        key:
+            'amount',
+
         label:
             model.labels.amount,
-        width: 27,
+
+        width:
+            24,
     },
 
     {
-        key: 'paymentLabel',
+        key:
+            'paymentLabel',
+
         label:
             model.labels.paymentType,
-        width: 23,
+
+        width:
+            20,
     },
 
     {
-        key: 'customer',
+        key:
+            'customer',
+
         label:
             model.labels.customer,
-        width: 27,
+
+        width:
+            27,
     },
 
     {
-        key: 'date',
+        key:
+            'customerPhone',
+
+        label:
+            model.labels.phone,
+
+        width:
+            22,
+    },
+
+    {
+        key:
+            'date',
+
         label:
             model.labels.date,
-        width: 31,
+
+        width:
+            27,
     },
 ];
 
-/* ============================================================================
+/* ==========================================================================
+   CELL VALUE
+   ========================================================================== */
+
+const getCellValue = (
+    sale,
+    column,
+    model
+) => {
+    switch (
+        column.key
+    ) {
+        case 'product':
+            return (
+                sale.product ||
+                '-'
+            );
+
+        case 'category':
+            return (
+                sale.category ||
+                '-'
+            );
+
+        case 'quantity':
+            return formatDecimal(
+                sale.quantity,
+                model.language
+            );
+
+        case 'amount':
+            return formatCurrency(
+                sale.amount,
+                model.language,
+                model.labels.currency
+            );
+
+        case 'paymentLabel':
+            return (
+                sale.paymentLabel ||
+                '-'
+            );
+
+        case 'customer':
+            return (
+                sale.customer ||
+                '-'
+            );
+
+        case 'customerPhone':
+            return (
+                sale.customerPhone ||
+                '-'
+            );
+
+        default:
+            return '-';
+    }
+};
+
+/* ==========================================================================
    HEADER
    ========================================================================== */
 
@@ -105,10 +398,9 @@ const drawHeader = (
         doc,
         model.labels.title,
         rtl
-            ? width -
-              MARGIN
+            ? width - MARGIN
             : MARGIN,
-        y + 4,
+        y + 4.5,
         {
             rtl,
 
@@ -119,7 +411,8 @@ const drawHeader = (
 
             bold: true,
 
-            size: 15,
+            size:
+                17,
 
             color:
                 rgb(
@@ -134,10 +427,9 @@ const drawHeader = (
         doc,
         `${model.labels.period}: ${model.filters.periodLabel}`,
         rtl
-            ? width -
-              MARGIN
+            ? width - MARGIN
             : MARGIN,
-        y + 11,
+        y + 12,
         {
             rtl,
 
@@ -146,7 +438,8 @@ const drawHeader = (
                     ? 'right'
                     : 'left',
 
-            size: 7.5,
+            size:
+                8.5,
 
             color:
                 rgb(
@@ -161,10 +454,9 @@ const drawHeader = (
         doc,
         `${model.labels.payment}: ${model.filters.paymentLabel}`,
         rtl
-            ? width -
-              MARGIN
+            ? width - MARGIN
             : MARGIN,
-        y + 17,
+        y + 19.5,
         {
             rtl,
 
@@ -173,7 +465,8 @@ const drawHeader = (
                     ? 'right'
                     : 'left',
 
-            size: 7.5,
+            size:
+                8.5,
 
             color:
                 rgb(
@@ -187,7 +480,7 @@ const drawHeader = (
     drawDivider(
         doc,
         MARGIN,
-        y + 23,
+        y + 25,
         width -
             MARGIN * 2,
         rgb(
@@ -197,10 +490,10 @@ const drawHeader = (
         )
     );
 
-    return y + 30;
+    return y + 33;
 };
 
-/* ============================================================================
+/* ==========================================================================
    SUMMARY
    ========================================================================== */
 
@@ -221,8 +514,7 @@ const drawSummary = (
         doc,
         model.labels.salesTitle,
         rtl
-            ? width -
-              MARGIN
+            ? width - MARGIN
             : MARGIN,
         y,
         {
@@ -235,7 +527,8 @@ const drawSummary = (
 
             bold: true,
 
-            size: 9,
+            size:
+                10.5,
 
             color:
                 rgb(
@@ -249,6 +542,7 @@ const drawSummary = (
     const rows = [
         [
             model.labels.totalSales,
+
             formatCurrency(
                 model.summary.totalRevenue,
                 model.language,
@@ -258,6 +552,7 @@ const drawSummary = (
 
         [
             model.labels.transactions,
+
             formatNumber(
                 model.summary.totalTransactions,
                 model.language
@@ -266,6 +561,7 @@ const drawSummary = (
 
         [
             model.labels.items,
+
             formatDecimal(
                 model.summary.totalItems,
                 model.language
@@ -274,6 +570,7 @@ const drawSummary = (
 
         [
             model.labels.average,
+
             formatCurrency(
                 model.summary.averageSale,
                 model.language,
@@ -283,6 +580,7 @@ const drawSummary = (
 
         [
             model.labels.cash,
+
             formatCurrency(
                 model.summary.cashSales,
                 model.language,
@@ -292,6 +590,7 @@ const drawSummary = (
 
         [
             model.labels.credit,
+
             formatCurrency(
                 model.summary.creditSales,
                 model.language,
@@ -300,8 +599,11 @@ const drawSummary = (
         ],
     ];
 
-    const top = y + 6;
-    const rowHeight = 8;
+    const top =
+        y + 8;
+
+    const rowHeight =
+        10;
 
     const halfWidth =
         (
@@ -333,9 +635,9 @@ const drawSummary = (
                     rowHeight;
 
             doc.setDrawColor(
-                185,
-                185,
-                185
+                175,
+                175,
+                175
             );
 
             doc.setFillColor(
@@ -356,21 +658,21 @@ const drawSummary = (
                 rtl
                     ? x +
                       halfWidth -
-                      3
-                    : x + 3;
+                      4
+                    : x + 4;
 
             const valueX =
                 rtl
-                    ? x + 3
+                    ? x + 4
                     : x +
                       halfWidth -
-                      3;
+                      4;
 
             drawText(
                 doc,
                 row[0],
                 labelX,
-                rowY + 5.3,
+                rowY + 6.6,
                 {
                     rtl,
 
@@ -379,18 +681,19 @@ const drawSummary = (
                             ? 'right'
                             : 'left',
 
-                    size: 6.8,
+                    size:
+                        7.9,
 
                     color:
                         rgb(
-                            70,
-                            70,
-                            70
+                            65,
+                            65,
+                            65
                         ),
 
                     maxWidth:
                         halfWidth *
-                        0.55,
+                        0.56,
                 }
             );
 
@@ -398,7 +701,7 @@ const drawSummary = (
                 doc,
                 row[1],
                 valueX,
-                rowY + 5.3,
+                rowY + 6.6,
                 {
                     rtl,
 
@@ -409,18 +712,19 @@ const drawSummary = (
 
                     bold: true,
 
-                    size: 6.8,
+                    size:
+                        7.9,
 
                     color:
                         rgb(
-                            30,
-                            30,
-                            30
+                            25,
+                            25,
+                            25
                         ),
 
                     maxWidth:
                         halfWidth *
-                        0.4,
+                        0.41,
                 }
             );
         }
@@ -432,11 +736,11 @@ const drawSummary = (
             rows.length / 2
         ) *
             rowHeight +
-        9
+        10
     );
 };
 
-/* ============================================================================
+/* ==========================================================================
    TABLE HEADER
    ========================================================================== */
 
@@ -456,8 +760,7 @@ const drawTableHeader = (
 
     let x =
         rtl
-            ? width -
-              MARGIN
+            ? width - MARGIN
             : MARGIN;
 
     columns.forEach(
@@ -477,9 +780,9 @@ const drawTableHeader = (
             );
 
             doc.setDrawColor(
-                120,
-                120,
-                120
+                110,
+                110,
+                110
             );
 
             doc.rect(
@@ -496,7 +799,7 @@ const drawTableHeader = (
                 rtl
                     ? x - 2
                     : x + 2,
-                y + 5.3,
+                y + 7.3,
                 {
                     rtl,
 
@@ -507,18 +810,18 @@ const drawTableHeader = (
 
                     bold: true,
 
-                    size: 6,
+                    size:
+                        7.5,
 
                     color:
                         rgb(
-                            35,
-                            35,
-                            35
+                            30,
+                            30,
+                            30
                         ),
 
                     maxWidth:
-                        column.width -
-                        4,
+                        column.width - 4,
                 }
             );
 
@@ -529,9 +832,116 @@ const drawTableHeader = (
                       column.width;
         }
     );
+
+    return (
+        y +
+        TABLE_HEADER_HEIGHT
+    );
 };
 
-/* ============================================================================
+/* ==========================================================================
+   TABLE ROW LAYOUT
+   ========================================================================== */
+
+const getTableRowLayout = (
+    doc,
+    model,
+    columns,
+    sale
+) => {
+    const rtl =
+        model.direction ===
+        'rtl';
+
+    const fontSize =
+        model.language === 'fa'
+            ? TABLE_TEXT_SIZE_FA
+            : TABLE_TEXT_SIZE_EN;
+
+    const cells =
+        columns.map(
+            (column) => {
+                if (
+                    column.key ===
+                    'date'
+                ) {
+                    return {
+                        key:
+                            column.key,
+
+                        lines:
+                            2,
+                    };
+                }
+
+                const value =
+                    getCellValue(
+                        sale,
+                        column,
+                        model
+                    );
+
+                const lines =
+                    getWrappedLines(
+                        doc,
+                        value || '-',
+                        column.width -
+                            TABLE_CELL_PADDING_X * 2,
+                        {
+                            size:
+                                fontSize,
+
+                            rtl,
+
+                            bold:
+                                false,
+                        }
+                    );
+
+                return {
+                    key:
+                        column.key,
+
+                    value:
+                        value || '-',
+
+                    lines:
+                        lines.length,
+                };
+            }
+        );
+
+    const maxLines =
+        Math.max(
+            ...cells.map(
+                (cell) =>
+                    cell.lines
+            ),
+            2
+        );
+
+    const calculatedHeight =
+        TABLE_TOP_PADDING +
+        TABLE_BOTTOM_PADDING +
+        (
+            maxLines - 1
+        ) *
+            TABLE_LINE_HEIGHT +
+        fontSize;
+
+    const rowHeight =
+        Math.max(
+            TABLE_MIN_ROW_HEIGHT,
+            calculatedHeight
+        );
+
+    return {
+        rowHeight,
+        fontSize,
+    };
+};
+
+/* ==========================================================================
    TABLE ROW
    ========================================================================== */
 
@@ -540,7 +950,8 @@ const drawTableRow = (
     model,
     y,
     columns,
-    sale
+    sale,
+    index
 ) => {
     const width =
         doc.internal.pageSize
@@ -550,10 +961,17 @@ const drawTableRow = (
         model.direction ===
         'rtl';
 
+    const rowLayout =
+        getTableRowLayout(
+            doc,
+            model,
+            columns,
+            sale
+        );
+
     let x =
         rtl
-            ? width -
-              MARGIN
+            ? width - MARGIN
             : MARGIN;
 
     columns.forEach(
@@ -573,29 +991,19 @@ const drawTableRow = (
             );
 
             doc.setDrawColor(
-                205,
-                205,
-                205
+                200,
+                200,
+                200
             );
 
             doc.rect(
                 left,
                 y,
                 column.width,
-                TABLE_ROW_HEIGHT,
+                rowLayout.rowHeight,
                 'FD'
             );
 
-            /*
-             * Special RTL date handling.
-             *
-             * Do not send:
-             *
-             *     23 سنبله 1405
-             *     06:57 ب.ظ
-             *
-             * as one mixed RTL string.
-             */
             if (
                 column.key ===
                 'date'
@@ -610,16 +1018,18 @@ const drawTableRow = (
                         sale.date,
                         {
                             x:
-                                left,
+                                left +
+                                1.5,
 
                             y:
-                                y + 3.5,
+                                y + 5,
 
                             width:
                                 column.width -
-                                4,
+                                3,
 
-                            size: 5.4,
+                            size:
+                                6.2,
 
                             color:
                                 rgb(
@@ -635,16 +1045,23 @@ const drawTableRow = (
                         sale.time,
                         {
                             x:
-                                left,
+                                left +
+                                1.5,
 
                             y:
-                                y + 7,
+                                y +
+                                Math.min(
+                                    10.1,
+                                    rowLayout.rowHeight -
+                                        2
+                                ),
 
                             width:
                                 column.width -
-                                4,
+                                3,
 
-                            size: 5.1,
+                            size:
+                                5.9,
 
                             color:
                                 rgb(
@@ -660,15 +1077,21 @@ const drawTableRow = (
                             ? `${sale.date} ${sale.time}`
                             : sale.date;
 
-                    drawText(
+                    drawWrappedCellText(
                         doc,
-                        value ||
-                            '-',
-                        rtl
-                            ? x - 2
-                            : x + 2,
-                        y + 5.5,
+                        value || '-',
                         {
+                            left,
+
+                            top:
+                                y,
+
+                            width:
+                                column.width,
+
+                            height:
+                                rowLayout.rowHeight,
+
                             rtl,
 
                             align:
@@ -677,7 +1100,7 @@ const drawTableRow = (
                                     : 'left',
 
                             size:
-                                6.2,
+                                6.6,
 
                             color:
                                 rgb(
@@ -685,10 +1108,6 @@ const drawTableRow = (
                                     45,
                                     45
                                 ),
-
-                            maxWidth:
-                                column.width -
-                                4,
                         }
                     );
                 }
@@ -702,42 +1121,28 @@ const drawTableRow = (
                 return;
             }
 
-            let value =
-                sale[
-                    column.key
-                ];
+            const value =
+                getCellValue(
+                    sale,
+                    column,
+                    model
+                );
 
-            if (
-                column.key ===
-                'quantity'
-            ) {
-                value =
-                    formatDecimal(
-                        sale.quantity,
-                        model.language
-                    );
-            }
-
-            if (
-                column.key ===
-                'amount'
-            ) {
-                value =
-                    formatCurrency(
-                        sale.amount,
-                        model.language,
-                        model.labels.currency
-                    );
-            }
-
-            drawText(
+            drawWrappedCellText(
                 doc,
                 value || '-',
-                rtl
-                    ? x - 2
-                    : x + 2,
-                y + 5.5,
                 {
+                    left,
+
+                    top:
+                        y,
+
+                    width:
+                        column.width,
+
+                    height:
+                        rowLayout.rowHeight,
+
                     rtl,
 
                     align:
@@ -746,10 +1151,7 @@ const drawTableRow = (
                             : 'left',
 
                     size:
-                        model.language ===
-                        'fa'
-                            ? 5.5
-                            : 6.2,
+                        rowLayout.fontSize,
 
                     color:
                         rgb(
@@ -757,10 +1159,6 @@ const drawTableRow = (
                             45,
                             45
                         ),
-
-                    maxWidth:
-                        column.width -
-                        4,
                 }
             );
 
@@ -772,10 +1170,13 @@ const drawTableRow = (
         }
     );
 
-    return TABLE_ROW_HEIGHT;
+    return (
+        y +
+        rowLayout.rowHeight
+    );
 };
 
-/* ============================================================================
+/* ==========================================================================
    PAGE BREAK
    ========================================================================== */
 
@@ -802,7 +1203,7 @@ const startNewPage = (
     );
 };
 
-/* ============================================================================
+/* ==========================================================================
    RENDER
    ========================================================================== */
 
@@ -847,6 +1248,10 @@ export const renderSimplePdf =
                 model
             );
 
+        /*
+         * EMPTY DATA
+         */
+
         if (
             !Array.isArray(
                 model.sales
@@ -859,10 +1264,9 @@ export const renderSimplePdf =
                 model.labels.noData,
                 model.direction ===
                     'rtl'
-                    ? width -
-                      MARGIN
+                    ? width - MARGIN
                     : MARGIN,
-                y + 10,
+                y + 11,
                 {
                     rtl:
                         model.direction ===
@@ -876,7 +1280,8 @@ export const renderSimplePdf =
 
                     bold: true,
 
-                    size: 9,
+                    size:
+                        9,
                 }
             );
 
@@ -902,10 +1307,14 @@ export const renderSimplePdf =
             };
         }
 
+        /*
+         * FIRST TABLE HEADER
+         */
+
         if (
             y +
                 TABLE_HEADER_HEIGHT +
-                TABLE_ROW_HEIGHT >
+                TABLE_MIN_ROW_HEIGHT >
             height -
                 PAGE_BOTTOM
         ) {
@@ -916,16 +1325,18 @@ export const renderSimplePdf =
                     columns
                 );
         } else {
-            drawTableHeader(
-                doc,
-                model,
-                y,
-                columns
-            );
-
-            y +=
-                TABLE_HEADER_HEIGHT;
+            y =
+                drawTableHeader(
+                    doc,
+                    model,
+                    y,
+                    columns
+                );
         }
+
+        /*
+         * TABLE ROWS
+         */
 
         for (
             let index = 0;
@@ -933,12 +1344,22 @@ export const renderSimplePdf =
             model.sales.length;
             index += 1
         ) {
-            const nextRowBottom =
-                y +
-                TABLE_ROW_HEIGHT;
+            const rowLayout =
+                getTableRowLayout(
+                    doc,
+                    model,
+                    columns,
+                    model.sales[index]
+                );
 
+            /*
+             * Use the REAL calculated row height
+             * before deciding whether to create a
+             * new page.
+             */
             if (
-                nextRowBottom >
+                y +
+                    rowLayout.rowHeight >
                 height -
                     PAGE_BOTTOM
             ) {
@@ -950,29 +1371,29 @@ export const renderSimplePdf =
                     );
             }
 
-            drawTableRow(
-                doc,
-                model,
-                y,
-                columns,
-                model.sales[
+            y =
+                drawTableRow(
+                    doc,
+                    model,
+                    y,
+                    columns,
+                    model.sales[index],
                     index
-                ]
-            );
-
-            y +=
-                TABLE_ROW_HEIGHT;
+                );
         }
 
         /*
-         * Footer now receives model.meta.generatedDate / generatedTime.
-         *
-         * pdfUtils will render them as structured RTL components.
+         * FOOTERS
          */
+
         addPageNumbers(
             doc,
             model
         );
+
+        /*
+         * SAVE
+         */
 
         const filename =
             `${sanitizeFileName(

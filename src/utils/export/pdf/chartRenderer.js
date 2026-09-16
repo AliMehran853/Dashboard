@@ -7,7 +7,7 @@ import {
     COLOR_PDF_THEME,
 } from '../theme';
 
-/* ============================================================================
+/* ==========================================================================
    HELPERS
    ========================================================================== */
 
@@ -66,8 +66,18 @@ const hexToRgb = (
 
 const getNumber = (
     value
-) =>
-    Number(value) || 0;
+) => {
+    const number =
+        Number(
+            value
+        );
+
+    return Number.isFinite(
+        number
+    )
+        ? number
+        : 0;
+};
 
 const clamp = (
     value,
@@ -81,6 +91,10 @@ const clamp = (
             value
         )
     );
+
+/* ==========================================================================
+   CHART TITLES
+   ========================================================================== */
 
 const getChartTitle = (
     model,
@@ -103,6 +117,10 @@ const getChartTitle = (
     );
 };
 
+/* ==========================================================================
+   CARD COLORS
+   ========================================================================== */
+
 const getCardColors = () => ({
     fill:
         hexToRgb(
@@ -115,10 +133,61 @@ const getCardColors = () => ({
         ),
 });
 
+/* ==========================================================================
+   CHART HEADER INDICATOR COLORS
+   ========================================================================== */
+
+/*
+ * IMPORTANT:
+ *
+ * These are intentionally explicit.
+ *
+ * Payment Overview:
+ *      GREEN
+ *
+ * Top Categories:
+ *      BLUE
+ *
+ * This is specifically for the small vertical
+ * indicator on the RIGHT side of the chart header
+ * in Persian / RTL mode.
+ */
+
+const CHART_HEADER_COLORS = {
+    payment:
+        '#10B981',
+
+    category:
+        '#2563EB',
+};
+
+const getChartIndicatorColor = (
+    type
+) => {
+    if (
+        type === 'category'
+    ) {
+        return (
+            CHART_HEADER_COLORS
+                .category
+        );
+    }
+
+    return (
+        CHART_HEADER_COLORS
+            .payment
+    );
+};
+
+/* ==========================================================================
+   CHART HEADER
+   ========================================================================== */
+
 const drawChartHeader = (
     doc,
     model,
     title,
+    type,
     x,
     y,
     width
@@ -128,15 +197,29 @@ const drawChartHeader = (
         'rtl';
 
     /*
-     * Small accent indicator.
+     * Direct fixed color:
+     *
+     * Payment    -> #10B981
+     * Categories -> #2563EB
      */
+    const indicatorColor =
+        getChartIndicatorColor(
+            type
+        );
 
     doc.setFillColor(
         ...hexToRgb(
-            COLOR_PDF_THEME.accent.primary
+            indicatorColor
         )
     );
 
+    /*
+     * In Persian / RTL:
+     * indicator is on the RIGHT.
+     *
+     * In English / LTR:
+     * indicator is on the LEFT.
+     */
     doc.roundedRect(
         rtl
             ? x +
@@ -144,10 +227,10 @@ const drawChartHeader = (
               7
             : x + 4,
         y + 4,
-        1.6,
-        7,
-        0.8,
-        0.8,
+        1.8,
+        7.5,
+        0.9,
+        0.9,
         'F'
     );
 
@@ -173,7 +256,8 @@ const drawChartHeader = (
 
             bold: true,
 
-            size: 8.2,
+            size:
+                8.6,
 
             color:
                 hexToRgb(
@@ -188,7 +272,7 @@ const drawChartHeader = (
     );
 };
 
-/* ============================================================================
+/* ==========================================================================
    PAYMENT OVERVIEW
    ========================================================================== */
 
@@ -207,9 +291,9 @@ export const drawPaymentOverview = (
     const cardColors =
         getCardColors();
 
-    /*
-     * Card
-     */
+    /* ---------------------------------------------------------------------- */
+    /* CARD                                                                    */
+    /* ---------------------------------------------------------------------- */
 
     drawCard(
         doc,
@@ -226,9 +310,9 @@ export const drawPaymentOverview = (
         }
     );
 
-    /*
-     * Header
-     */
+    /* ---------------------------------------------------------------------- */
+    /* HEADER                                                                  */
+    /* ---------------------------------------------------------------------- */
 
     drawChartHeader(
         doc,
@@ -237,10 +321,15 @@ export const drawPaymentOverview = (
             model,
             'payment'
         ),
+        'payment',
         x,
         y,
         width
     );
+
+    /* ---------------------------------------------------------------------- */
+    /* DATA                                                                    */
+    /* ---------------------------------------------------------------------- */
 
     const values =
         Array.isArray(
@@ -260,7 +349,7 @@ export const drawPaymentOverview = (
                   width -
                   7
                 : x + 7,
-            y + 32,
+            y + 35,
             {
                 rtl,
 
@@ -269,7 +358,8 @@ export const drawPaymentOverview = (
                         ? 'right'
                         : 'left',
 
-                size: 7,
+                size:
+                    7.4,
 
                 color:
                     hexToRgb(
@@ -301,18 +391,18 @@ export const drawPaymentOverview = (
         );
 
     /*
-     * We use a clean row:
+     * Payment chart:
      *
-     * label | percentage
-     * full-width progress bar
+     * Cash
+     * Credit
      *
-     * No text is placed over the colored bar.
+     * Extra vertical breathing room.
      */
-
     const rowStartY =
         y + 18;
 
-    const rowGap = 20;
+    const rowGap =
+        24;
 
     const labelX =
         rtl
@@ -334,7 +424,8 @@ export const drawPaymentOverview = (
     const barWidth =
         width - 14;
 
-    const barHeight = 5.2;
+    const barHeight =
+        5.5;
 
     values
         .slice(
@@ -354,9 +445,9 @@ export const drawPaymentOverview = (
                 const ratio =
                     total > 0
                         ? clamp(
-                            value /
-                                total
-                        )
+                              value /
+                                  total
+                          )
                         : 0;
 
                 const rowY =
@@ -364,9 +455,9 @@ export const drawPaymentOverview = (
                     index *
                         rowGap;
 
-                /*
-                 * Label
-                 */
+                /* ---------------------------------------------------------- */
+                /* LABEL                                                        */
+                /* ---------------------------------------------------------- */
 
                 drawText(
                     doc,
@@ -384,7 +475,8 @@ export const drawPaymentOverview = (
 
                         bold: true,
 
-                        size: 6.1,
+                        size:
+                            6.5,
 
                         color:
                             hexToRgb(
@@ -394,19 +486,19 @@ export const drawPaymentOverview = (
                             ),
 
                         maxWidth:
-                            width -
-                            25,
+                            width - 25,
                     }
                 );
 
-                /*
-                 * Percentage
-                 */
+                /* ---------------------------------------------------------- */
+                /* PERCENTAGE                                                   */
+                /* ---------------------------------------------------------- */
 
                 drawText(
                     doc,
                     `${Math.round(
-                        ratio * 100
+                        ratio *
+                            100
                     )}%`,
                     percentageX,
                     rowY + 4,
@@ -420,7 +512,8 @@ export const drawPaymentOverview = (
 
                         bold: true,
 
-                        size: 5.8,
+                        size:
+                            6.2,
 
                         color:
                             hexToRgb(
@@ -431,9 +524,9 @@ export const drawPaymentOverview = (
                     }
                 );
 
-                /*
-                 * Background bar
-                 */
+                /* ---------------------------------------------------------- */
+                /* BACKGROUND BAR                                               */
+                /* ---------------------------------------------------------- */
 
                 doc.setFillColor(
                     ...hexToRgb(
@@ -445,7 +538,7 @@ export const drawPaymentOverview = (
 
                 doc.roundedRect(
                     barX,
-                    rowY + 6,
+                    rowY + 6.5,
                     barWidth,
                     barHeight,
                     2,
@@ -453,9 +546,9 @@ export const drawPaymentOverview = (
                     'F'
                 );
 
-                /*
-                 * Fill bar
-                 */
+                /* ---------------------------------------------------------- */
+                /* FILLED BAR                                                   */
+                /* ---------------------------------------------------------- */
 
                 if (
                     ratio > 0
@@ -492,7 +585,7 @@ export const drawPaymentOverview = (
 
                     doc.roundedRect(
                         fillX,
-                        rowY + 6,
+                        rowY + 6.5,
                         fillWidth,
                         barHeight,
                         2,
@@ -510,7 +603,7 @@ export const drawPaymentOverview = (
     );
 };
 
-/* ============================================================================
+/* ==========================================================================
    TOP CATEGORIES
    ========================================================================== */
 
@@ -529,9 +622,9 @@ export const drawTopCategories = (
     const cardColors =
         getCardColors();
 
-    /*
-     * Card
-     */
+    /* ---------------------------------------------------------------------- */
+    /* CARD                                                                    */
+    /* ---------------------------------------------------------------------- */
 
     drawCard(
         doc,
@@ -548,9 +641,9 @@ export const drawTopCategories = (
         }
     );
 
-    /*
-     * Header
-     */
+    /* ---------------------------------------------------------------------- */
+    /* HEADER                                                                  */
+    /* ---------------------------------------------------------------------- */
 
     drawChartHeader(
         doc,
@@ -559,19 +652,47 @@ export const drawTopCategories = (
             model,
             'category'
         ),
+        'category',
         x,
         y,
         width
     );
 
+    /* ---------------------------------------------------------------------- */
+    /* TOP 4 CATEGORIES                                                        */
+    /* ---------------------------------------------------------------------- */
+
+    /*
+     * Sort by real sales value first,
+     * then keep only the top four.
+     */
     const items =
         Array.isArray(
             model.categorySales
         )
-            ? model.categorySales.slice(
-                0,
-                5
-            )
+            ? [...model.categorySales]
+                  .map(
+                      (item) => ({
+                          ...item,
+
+                          sales:
+                              getNumber(
+                                  item?.sales
+                              ),
+                      })
+                  )
+                  .sort(
+                      (
+                          a,
+                          b
+                      ) =>
+                          b.sales -
+                          a.sales
+                  )
+                  .slice(
+                      0,
+                      4
+                  )
             : [];
 
     if (
@@ -585,7 +706,7 @@ export const drawTopCategories = (
                   width -
                   7
                 : x + 7,
-            y + 32,
+            y + 35,
             {
                 rtl,
 
@@ -594,7 +715,8 @@ export const drawTopCategories = (
                         ? 'right'
                         : 'left',
 
-                size: 7,
+                size:
+                    7.4,
 
                 color:
                     hexToRgb(
@@ -612,6 +734,10 @@ export const drawTopCategories = (
         );
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* MAX VALUE                                                               */
+    /* ---------------------------------------------------------------------- */
+
     const maxValue =
         Math.max(
             ...items.map(
@@ -625,14 +751,18 @@ export const drawTopCategories = (
             1
         );
 
-    /*
-     * Five compact rows.
-     */
+    /* ---------------------------------------------------------------------- */
+    /* ROW LAYOUT                                                              */
+    /* ---------------------------------------------------------------------- */
 
+    /*
+     * Four rows with larger vertical spacing.
+     */
     const rowStartY =
         y + 17;
 
-    const rowGap = 9;
+    const rowGap =
+        11.8;
 
     const labelX =
         rtl
@@ -654,7 +784,12 @@ export const drawTopCategories = (
     const barWidth =
         width - 14;
 
-    const barHeight = 4.6;
+    const barHeight =
+        4.8;
+
+    /* ---------------------------------------------------------------------- */
+    /* DRAW TOP 4                                                              */
+    /* ---------------------------------------------------------------------- */
 
     items.forEach(
         (
@@ -677,16 +812,16 @@ export const drawTopCategories = (
                 index *
                     rowGap;
 
-            /*
-             * Category name
-             */
+            /* -------------------------------------------------------------- */
+            /* CATEGORY NAME                                                    */
+            /* -------------------------------------------------------------- */
 
             drawText(
                 doc,
                 item?.category ||
                     '-',
                 labelX,
-                rowY + 3.3,
+                rowY + 3.4,
                 {
                     rtl,
 
@@ -697,7 +832,8 @@ export const drawTopCategories = (
 
                     bold: true,
 
-                    size: 5.45,
+                    size:
+                        6.1,
 
                     color:
                         hexToRgb(
@@ -707,14 +843,13 @@ export const drawTopCategories = (
                         ),
 
                     maxWidth:
-                        width -
-                        28,
+                        width - 30,
                 }
             );
 
-            /*
-             * Numeric amount
-             */
+            /* -------------------------------------------------------------- */
+            /* SALES VALUE                                                      */
+            /* -------------------------------------------------------------- */
 
             drawText(
                 doc,
@@ -722,7 +857,7 @@ export const drawTopCategories = (
                     value
                 ),
                 valueX,
-                rowY + 3.3,
+                rowY + 3.4,
                 {
                     rtl: false,
 
@@ -733,7 +868,8 @@ export const drawTopCategories = (
 
                     bold: true,
 
-                    size: 5.2,
+                    size:
+                        5.9,
 
                     color:
                         hexToRgb(
@@ -744,9 +880,9 @@ export const drawTopCategories = (
                 }
             );
 
-            /*
-             * Background
-             */
+            /* -------------------------------------------------------------- */
+            /* BACKGROUND BAR                                                   */
+            /* -------------------------------------------------------------- */
 
             doc.setFillColor(
                 ...hexToRgb(
@@ -758,7 +894,7 @@ export const drawTopCategories = (
 
             doc.roundedRect(
                 barX,
-                rowY + 4.6,
+                rowY + 5.2,
                 barWidth,
                 barHeight,
                 2,
@@ -766,9 +902,9 @@ export const drawTopCategories = (
                 'F'
             );
 
-            /*
-             * Progress
-             */
+            /* -------------------------------------------------------------- */
+            /* PROGRESS BAR                                                     */
+            /* -------------------------------------------------------------- */
 
             if (
                 ratio > 0
@@ -780,6 +916,13 @@ export const drawTopCategories = (
                             ratio
                     );
 
+                /*
+                 * Top category:
+                 *      green
+                 *
+                 * Other categories:
+                 *      blue
+                 */
                 const color =
                     index === 0
                         ? COLOR_PDF_THEME
@@ -804,7 +947,7 @@ export const drawTopCategories = (
 
                 doc.roundedRect(
                     fillX,
-                    rowY + 4.6,
+                    rowY + 5.2,
                     fillWidth,
                     barHeight,
                     2,

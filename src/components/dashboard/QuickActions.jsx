@@ -94,14 +94,7 @@ function QuickActions() {
                         <Link
                             key={action.id}
                             to={action.href}
-                            className="
-                                group relative min-w-0 overflow-hidden rounded-2xl
-                                border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5
-                                transition-all duration-300 ease-[var(--ease-out)]
-                                hover:bg-[var(--surface-hover)]
-                                hover:!border-[var(--accent-border-hover)]
-                                hover:shadow-[var(--shadow-card-hover)]
-                            "
+                            className="ui-card group relative min-w-0 p-4 sm:p-5"
                         >
 
                             {/* icon + arrow */}

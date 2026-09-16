@@ -6,10 +6,6 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext(null);
 
-// =========================================================
-// Allowed Accent Colors (۹ پالت)
-// =========================================================
-
 const ALLOWED_ACCENTS = [
     'emerald',
     'blue',
@@ -27,13 +23,11 @@ const ALLOWED_ACCENTS = [
 // =========================================================
 
 export function ThemeProvider({ children }) {
-    // Theme
     const [theme, setThemeState] = useState(() => {
         const savedTheme = localStorage.getItem('app_theme');
         return savedTheme === 'light' ? 'light' : 'dark';
     });
 
-    // Accent
     const [accentColor, setAccentColorState] = useState(() => {
         const savedAccent = localStorage.getItem('app_accent_color');
         return ALLOWED_ACCENTS.includes(savedAccent) ? savedAccent : 'emerald';
@@ -55,7 +49,7 @@ export function ThemeProvider({ children }) {
         localStorage.setItem('app_accent_color', accentColor);
     }, [accentColor]);
 
-    // Setters with validation
+    // Setters
     const setTheme = (newTheme) => {
         if (newTheme !== 'dark' && newTheme !== 'light') return;
         setThemeState(newTheme);
@@ -78,7 +72,11 @@ export function ThemeProvider({ children }) {
         setAccentColor,
     };
 
-    return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+    return (
+        <ThemeContext.Provider value={value}>
+            {children}
+        </ThemeContext.Provider>
+    );
 }
 
 // =========================================================

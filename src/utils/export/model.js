@@ -577,6 +577,14 @@ export const buildExportModel = ({
                 : 'مشتری'
         ),
 
+        phone: translate(
+            t,
+            'reports.export.labels.phone',
+            isEnglish
+                ? 'Phone'
+                : 'شماره تماس'
+        ),
+
         noData: translate(
             t,
             'reports.export.labels.noData',
@@ -772,10 +780,13 @@ export const buildExportModel = ({
 
                     customer,
 
+                    /*
+                     * Explicitly preserved in the export model.
+                     */
                     customerPhone:
                         text(
                             sale.customerPhone
-                        ),
+                        ) || '-',
 
                     note:
                         text(

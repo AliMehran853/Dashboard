@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatJalaliDate, getJalaliMonthStyle } from '../../utils/date/jalali';
 
-// ---------- helpers ----------
 const getSaleAmount = (sale) => {
     if (!sale) return 0;
     const direct = Number(sale.totalAmount ?? sale.total ?? sale.amount ?? sale.finalAmount ?? sale.payableAmount ?? sale.grandTotal);
@@ -33,7 +32,6 @@ const getSaleDescription = (sale, t) => {
     return t('dashboard.recentTransactions.saleDescription');
 };
 
-// ---------- component ----------
 function RecentTransactions({ sales = [], loading = false }) {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
@@ -95,7 +93,6 @@ function RecentTransactions({ sales = [], loading = false }) {
 
     return (
         <section dir={i18n.dir()} className="ui-card w-full min-w-0 overflow-hidden p-0">
-            {/* header */}
             <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
                 <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -109,7 +106,6 @@ function RecentTransactions({ sales = [], loading = false }) {
                     </p>
                 </div>
 
-                {/* ✅ FIXED: → /reports (combined transactions) */}
                 <button
                     type="button"
                     onClick={() => navigate('/reports')}
@@ -119,7 +115,6 @@ function RecentTransactions({ sales = [], loading = false }) {
                 </button>
             </div>
 
-            {/* list */}
             <div className="divide-y divide-[var(--border-subtle)]">
                 {loading ? (
                     <div className="px-5 py-12 text-center text-xs text-[var(--text-muted)]">

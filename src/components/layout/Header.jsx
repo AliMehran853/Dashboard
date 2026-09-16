@@ -60,7 +60,6 @@ const PAGE_MAP = {
   },
 };
 
-// ✅ FIXED: تمام eventهای db.js — قبلاً فقط "credit-updated" (اشتباه) بود
 const DB_EVENTS = [
   "database-updated",
   "products-updated",
@@ -108,12 +107,10 @@ function Header({ onMenuClick }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
-  const [themeAnimating, setThemeAnimating] = useState(false);
 
   const notificationRef = useRef(null);
   const notificationPanelRef = useRef(null);
   const notificationOpenRef = useRef(false);
-  const themeButtonRef = useRef(null);
 
   const isDark = theme === "dark";
 
@@ -303,56 +300,8 @@ function Header({ onMenuClick }) {
   }, [closeNotifications]);
 
   const handleThemeToggle = useCallback(() => {
-    if (themeAnimating) return;
-    const button = themeButtonRef.current;
-    if (!button) {
-      toggleTheme();
-      return;
-    }
-
-    const rect = button.getBoundingClientRect();
-    const originX = rect.left + rect.width / 2;
-    const originY = rect.top + rect.height / 2;
-    const supportsViewTransition =
-      typeof document.startViewTransition === "function";
-
-    setThemeAnimating(true);
-
-    if (supportsViewTransition) {
-      document.documentElement.style.setProperty(
-        "--theme-toggle-x",
-        `${originX}px`,
-      );
-      document.documentElement.style.setProperty(
-        "--theme-toggle-y",
-        `${originY}px`,
-      );
-      const transition = document.startViewTransition(() => {
-        toggleTheme();
-      });
-      transition.finished.finally(() => setThemeAnimating(false));
-    } else {
-      const overlay = document.createElement("div");
-      overlay.className = "theme-transition-overlay";
-      overlay.style.background = isDark ? "#ffffff" : "#0f0f0f";
-      overlay.style.setProperty("--tx", `${originX}px`);
-      overlay.style.setProperty("--ty", `${originY}px`);
-      document.body.appendChild(overlay);
-      requestAnimationFrame(() =>
-        overlay.classList.add("theme-transition-overlay--active"),
-      );
-
-      window.setTimeout(() => {
-        toggleTheme();
-        overlay.classList.remove("theme-transition-overlay--active");
-        overlay.classList.add("theme-transition-overlay--fade-out");
-        window.setTimeout(() => {
-          overlay.remove();
-          setThemeAnimating(false);
-        }, 220);
-      }, 650);
-    }
-  }, [toggleTheme, isDark, themeAnimating]);
+    toggleTheme();
+  }, [toggleTheme]);
 
   const getNotificationText = (item) => {
     if (item.type === "lowStock") {
@@ -498,10 +447,8 @@ function Header({ onMenuClick }) {
 
         <div className="relative flex shrink-0 items-center gap-1.5 sm:gap-2">
           <button
-            ref={themeButtonRef}
             type="button"
             onClick={handleThemeToggle}
-            disabled={themeAnimating}
             aria-label={
               isDark ? t("common.enableLightMode") : t("common.enableDarkMode")
             }

@@ -428,34 +428,34 @@ export const PDF_SPACING =
       20,
 
     headerSubtitleY:
-      26,
+      27,
 
     headerDividerY:
-      31,
+      33,
 
     sectionGap:
-      8,
-
-    sectionTitleGap:
-      7,
-
-    cardGap:
-      4,
-
-    cardHeight:
-      24,
-
-    tableHeaderHeight:
-      8,
-
-    tableRowHeight:
       9,
 
-    chartGap:
+    sectionTitleGap:
       8,
 
+    cardGap:
+      5,
+
+    cardHeight:
+      27,
+
+    tableHeaderHeight:
+      9,
+
+    tableRowHeight:
+      10,
+
+    chartGap:
+      9,
+
     footerGap:
-      6,
+      7,
 
     small:
       3,
@@ -465,6 +465,47 @@ export const PDF_SPACING =
 
     large:
       10,
+
+    /*
+     * Typography reference sizes.
+     * These are shared reference values for renderers.
+     */
+
+    fontSizes:
+      Object.freeze({
+        hero:
+          21.5,
+
+        subtitle:
+          9.8,
+
+        section:
+          9.5,
+
+        cardLabel:
+          7.4,
+
+        cardValue:
+          13.5,
+
+        tableHeader:
+          6.8,
+
+        tableBody:
+          6.5,
+
+        tableSecondary:
+          6.1,
+
+        footer:
+          6.8,
+
+        small:
+          6.2,
+
+        body:
+          8,
+      }),
   });
 
 /* ============================================================================

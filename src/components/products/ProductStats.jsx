@@ -126,7 +126,7 @@ function ProductStats({ refreshKey = 0 }) {
             description: t('productStats.products.description'),
             icon: Package,
             iconClass: 'text-emerald-500 dark:text-emerald-400',
-            iconBg: 'border-emerald-500/10 bg-emerald-500/10',
+            iconBg: 'border-emerald-500/15 bg-emerald-500/10',
         },
         {
             id: 'categories',
@@ -135,7 +135,7 @@ function ProductStats({ refreshKey = 0 }) {
             description: t('productStats.categories.description'),
             icon: Layers3,
             iconClass: 'text-cyan-500 dark:text-cyan-400',
-            iconBg: 'border-cyan-500/10 bg-cyan-500/10',
+            iconBg: 'border-cyan-500/15 bg-cyan-500/10',
         },
         {
             id: 'low-stock',
@@ -150,7 +150,7 @@ function ProductStats({ refreshKey = 0 }) {
                 : t('productStats.lowStock.supply'),
             icon: AlertTriangle,
             iconClass: 'text-amber-500 dark:text-amber-400',
-            iconBg: 'border-amber-500/10 bg-amber-500/10',
+            iconBg: 'border-amber-500/15 bg-amber-500/10',
         },
         {
             id: 'inventory-value',
@@ -159,7 +159,7 @@ function ProductStats({ refreshKey = 0 }) {
             description: t('productStats.inventoryValue.description'),
             icon: Wallet,
             iconClass: 'text-violet-500 dark:text-violet-400',
-            iconBg: 'border-violet-500/10 bg-violet-500/10',
+            iconBg: 'border-violet-500/15 bg-violet-500/10',
         },
     ];
 
@@ -188,51 +188,69 @@ function ProductStats({ refreshKey = 0 }) {
                     return (
                         <article
                             key={stat.id}
-                            className="group ui-card-tint ui-card-tint--lift p-4 sm:p-5"
+                            className="ui-card group flex h-full flex-col p-4 sm:p-5"
                         >
-                            <div aria-hidden="true" className="ui-tint" />
-                            <div
-                                aria-hidden="true"
-                                className="ui-orb -end-10 -top-10 h-28 w-28"
-                            />
-
-                            <div className="ui-layer flex items-start justify-between gap-4">
-                                <div className="min-w-0">
-                                    <p className="truncate text-xs font-medium text-[var(--text-muted)]">
-                                        {stat.title}
-                                    </p>
-
-                                    <p
-                                        dir={isEnglish ? 'ltr' : 'rtl'}
-                                        className="mt-2 truncate number-font text-xl font-bold tracking-tight text-[var(--text-primary)] sm:text-2xl"
-                                    >
-                                        {loading ? (
-                                            '...'
-                                        ) : (
-                                            <AnimatedNumber
-                                                value={stat.value}
-                                                language={language}
-                                            />
-                                        )}
-                                    </p>
-
-                                    <p className="mt-2 min-h-[2rem] text-[10px] leading-5 text-[var(--text-muted)]">
-                                        {stat.description}
-                                    </p>
-                                </div>
+                            {/* ─── Row 1: title + icon ─── */}
+                            <div className="flex items-start justify-between gap-3">
+                                <p className="min-w-0 flex-1 truncate pt-1 text-xs font-medium text-[var(--text-muted)]">
+                                    {stat.title}
+                                </p>
 
                                 <div
-                                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 sm:h-11 sm:w-11 ${stat.iconBg}`}
+                                    className={`
+                                        flex h-10 w-10 shrink-0 items-center justify-center
+                                        rounded-xl border
+                                        transition-transform duration-300 ease-[var(--ease-soft)]
+                                        group-hover:scale-110
+                                        sm:h-11 sm:w-11
+                                        ${stat.iconBg}
+                                    `}
                                 >
                                     <Icon
-                                        size={20}
-                                        className={`transition-transform duration-300 group-hover:scale-110 ${stat.iconClass}`}
+                                        size={19}
+                                        strokeWidth={1.9}
+                                        className={stat.iconClass}
                                     />
                                 </div>
                             </div>
 
-                            <div className="ui-layer mt-4 h-px overflow-hidden rounded-full bg-[var(--border)]">
-                                <div className="h-full w-8 rounded-full bg-[var(--accent-500)] opacity-60 transition-all duration-500 group-hover:w-16 group-hover:opacity-100" />
+                            {/* ─── Row 2: value ─── */}
+                            <p
+                                dir={isEnglish ? 'ltr' : 'rtl'}
+                                className="
+                                    mt-3 truncate number-font
+                                    text-2xl font-bold tracking-tight
+                                    text-[var(--text-primary)]
+                                    sm:text-3xl
+                                "
+                            >
+                                {loading ? (
+                                    <span className="inline-block h-7 w-20 animate-pulse rounded-lg bg-[var(--surface-muted)] align-middle" />
+                                ) : (
+                                    <AnimatedNumber
+                                        value={stat.value}
+                                        language={language}
+                                    />
+                                )}
+                            </p>
+
+                            {/* ─── Row 3: description ─── */}
+                            <p className="mt-2 min-h-[2rem] text-[10px] leading-5 text-[var(--text-muted)] sm:text-[11px]">
+                                {stat.description}
+                            </p>
+
+                            {/* ─── Row 4: progress line (چسبیده به پایین) ─── */}
+                            <div className="mt-auto pt-4">
+                                <div className="relative h-0.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
+                                    <div
+                                        className="
+                                            absolute inset-y-0 start-0 w-8 rounded-full
+                                            bg-[var(--accent-500)] opacity-60
+                                            transition-all duration-500 ease-[var(--ease-soft)]
+                                            group-hover:w-16 group-hover:opacity-100
+                                        "
+                                    />
+                                </div>
                             </div>
                         </article>
                     );
