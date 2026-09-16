@@ -126,20 +126,20 @@ function ReportsSalesTable({ onViewSale }) {
     };
 
     const paymentFilters = [
-        { value: 'all', label: isEnglish ? 'All' : 'همه', icon: Receipt },
-        { value: 'cash', label: isEnglish ? 'Cash' : 'نقدی', icon: Banknote },
-        { value: 'credit', label: isEnglish ? 'Credit' : 'نسیه', icon: CreditCard },
+        { value: 'all', label: t('reports.table.filters.all'), icon: Receipt },
+        { value: 'cash', label: t('reports.table.filters.cash'), icon: Banknote },
+        { value: 'credit', label: t('reports.table.filters.credit'), icon: CreditCard },
     ];
 
     if (loading) {
         return (
-            <section dir={isEnglish ? 'ltr' : 'rtl'} className="ui-card flex min-h-64 items-center justify-center p-6">
+            <section dir={i18n.dir()} className="ui-card flex min-h-64 items-center justify-center p-6">
                 <div className="flex flex-col items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--accent-border)] bg-[var(--accent-soft)]">
                         <Loader2 size={20} className="animate-spin text-[var(--accent-500)]" />
                     </div>
                     <span className="text-sm text-[var(--text-muted)]">
-                        {t('sales.table.loading', { defaultValue: isEnglish ? 'Loading...' : 'در حال بارگذاری...' })}
+                        {t('reports.loading')}
                     </span>
                 </div>
             </section>
@@ -147,11 +147,8 @@ function ReportsSalesTable({ onViewSale }) {
     }
 
     return (
-        /* ✅ FIX #1: overflow-hidden → overflow-clip
-           overflow-clip گوشه‌ها را می‌بُرد ولی scroll container نمی‌سازد،
-           بنابراین iOS ژست‌های عمودی را بلاک نمی‌کند. */
         <section
-            dir={isEnglish ? 'ltr' : 'rtl'}
+            dir={i18n.dir()}
             className="ui-card w-full min-w-0 overflow-clip p-0"
         >
             {/* Header */}
@@ -163,14 +160,14 @@ function ReportsSalesTable({ onViewSale }) {
                         </div>
                         <div className="min-w-0">
                             <h3 className="truncate text-sm font-semibold text-[var(--text)] sm:text-base">
-                                {isEnglish ? 'All Transactions' : 'همه تراکنش‌ها'}
+                                {t('reports.table.title')}
                             </h3>
                             <div className="mt-1 flex items-center gap-1.5">
                                 <span className="number-font font-mono text-[11px] text-[var(--text-muted)]">
                                     {fmtNumber(filteredSales.length)}
                                 </span>
                                 <span className="text-[11px] text-[var(--text-muted)]">
-                                    {isEnglish ? 'transactions' : 'تراکنش'}
+                                    {t('reports.table.count')}
                                 </span>
                             </div>
                         </div>
@@ -187,7 +184,7 @@ function ReportsSalesTable({ onViewSale }) {
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder={isEnglish ? 'Search transactions...' : 'جستجوی تراکنش‌ها...'}
+                            placeholder={t('reports.table.searchPlaceholder')}
                             style={SEARCH_INPUT_STYLE}
                             className="ui-input h-10 w-full text-xs"
                         />
@@ -224,25 +221,25 @@ function ReportsSalesTable({ onViewSale }) {
                         <Receipt size={20} className="text-[var(--text-muted)]" />
                     </div>
                     <p className="text-xs text-[var(--text-muted)]">
-                        {isEnglish ? 'No transactions found.' : 'هیچ تراکنشی یافت نشد.'}
+                        {t('reports.table.empty')}
                     </p>
                 </div>
             )}
 
-            {/* Desktop table — ✅ FIX #2: اضافه شد `touch-scroll-x` */}
+            {/* Desktop table */}
             {filteredSales.length > 0 && (
                 <div className="touch-scroll-x main-scrollbar hidden overflow-x-auto md:block">
                     <table className="w-full min-w-[1000px] border-collapse">
                         <thead>
                             <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)] text-[11px] text-[var(--text-muted)]">
-                                <Th>{isEnglish ? 'Product' : 'محصول'}</Th>
-                                <Th>{isEnglish ? 'Category' : 'دسته‌بندی'}</Th>
-                                <Th>{isEnglish ? 'Quantity' : 'تعداد'}</Th>
-                                <Th>{isEnglish ? 'Amount' : 'مبلغ'}</Th>
-                                <Th>{isEnglish ? 'Payment' : 'پرداخت'}</Th>
-                                <Th>{isEnglish ? 'Customer' : 'مشتری'}</Th>
-                                <Th>{isEnglish ? 'Date' : 'تاریخ'}</Th>
-                                <Th>{isEnglish ? 'Actions' : 'عملیات'}</Th>
+                                <Th>{t('reports.table.columns.product')}</Th>
+                                <Th>{t('reports.table.columns.category')}</Th>
+                                <Th>{t('reports.table.columns.quantity')}</Th>
+                                <Th>{t('reports.table.columns.amount')}</Th>
+                                <Th>{t('reports.table.columns.payment')}</Th>
+                                <Th>{t('reports.table.columns.customer')}</Th>
+                                <Th>{t('reports.table.columns.date')}</Th>
+                                <Th>{t('reports.table.columns.actions')}</Th>
                             </tr>
                         </thead>
                         <tbody>
@@ -352,7 +349,7 @@ function ReportsSalesTable({ onViewSale }) {
                                                 type="button"
                                                 onClick={() => onViewSale?.(sale)}
                                                 className="ui-icon-button h-9 w-9"
-                                                title={isEnglish ? 'View details' : 'مشاهده جزئیات'}
+                                                title={t('reports.table.viewDetails')}
                                             >
                                                 <Eye size={17} />
                                             </button>
@@ -402,7 +399,7 @@ function ReportsSalesTable({ onViewSale }) {
                                 <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2.5">
                                     <div className="min-w-0">
                                         <p className="text-[10px] text-[var(--text-muted)]">
-                                            {isEnglish ? 'Amount' : 'مبلغ'}
+                                            {t('reports.table.columns.amount')}
                                         </p>
                                         <p dir="ltr" className="number-font mt-1 text-base font-bold text-[var(--accent-500)]">
                                             {fmtMoney(getSaleTotal(sale))}

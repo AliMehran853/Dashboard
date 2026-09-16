@@ -6,21 +6,20 @@ import { useAuth } from '../../context/AuthContext';
 import { MAIN_NAVIGATION, SYSTEM_NAVIGATION } from '../../constants/navigation';
 
 const STORE_SETTINGS_KEY = 'storeSettings';
-const DEFAULT_STORE_NAME = 'فروشگاه من';
 
 const getStoredStoreName = () => {
     try {
         const storedSettings = localStorage.getItem(STORE_SETTINGS_KEY);
-        if (!storedSettings) return DEFAULT_STORE_NAME;
+        if (!storedSettings) return '';
 
         const parsedSettings = JSON.parse(storedSettings);
-        if (!parsedSettings || typeof parsedSettings !== 'object') return DEFAULT_STORE_NAME;
+        if (!parsedSettings || typeof parsedSettings !== 'object') return '';
 
         const storeName = typeof parsedSettings.storeName === 'string' ? parsedSettings.storeName.trim() : '';
-        return storeName || DEFAULT_STORE_NAME;
+        return storeName || '';
     } catch (error) {
         console.error('Sidebar Store Name Read Error:', error);
-        return DEFAULT_STORE_NAME;
+        return '';
     }
 };
 
@@ -47,6 +46,8 @@ function Sidebar({ isOpen = false, onClose = () => {} }) {
             window.removeEventListener('storage', handleStorageChange);
         };
     }, []);
+
+    const displayStoreName = storeName || t('settings.store.defaults.storeName');
 
     const mainNavigation = [
         ...MAIN_NAVIGATION,
@@ -118,6 +119,10 @@ function Sidebar({ isOpen = false, onClose = () => {} }) {
         ? (isEnglish ? ChevronRight : ChevronLeft)
         : (isEnglish ? ChevronLeft : ChevronRight);
 
+    const collapseLabel = isCollapsed
+        ? t('common.expandSidebar')
+        : t('common.collapseSidebar');
+
     return (
         <>
             <button
@@ -162,8 +167,8 @@ function Sidebar({ isOpen = false, onClose = () => {} }) {
                             </div>
 
                             <div className="min-w-0 overflow-hidden">
-                                <h1 className="truncate text-sm font-semibold text-[var(--text)] tracking-[-0.01em]" title={storeName}>
-                                    {storeName}
+                                <h1 className="truncate text-sm font-semibold text-[var(--text)] tracking-[-0.01em]" title={displayStoreName}>
+                                    {displayStoreName}
                                 </h1>
                                 <p className="mt-0.5 truncate text-[11px] font-normal text-[var(--text-muted)]" title={t('common.storeManagement')}>
                                     {t('common.storeManagement')}
@@ -175,8 +180,8 @@ function Sidebar({ isOpen = false, onClose = () => {} }) {
                     <button
                         type="button"
                         onClick={toggleCollapsed}
-                        aria-label={isCollapsed ? (isEnglish ? 'Expand sidebar' : 'باز کردن نوار کناری') : (isEnglish ? 'Collapse sidebar' : 'کوچک کردن نوار کناری')}
-                        title={isCollapsed ? (isEnglish ? 'Expand sidebar' : 'باز کردن نوار کناری') : (isEnglish ? 'Collapse sidebar' : 'کوچک کردن نوار کناری')}
+                        aria-label={collapseLabel}
+                        title={collapseLabel}
                         className={`ui-icon-button absolute !hidden lg:!flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--surface)] shadow-[var(--shadow-md)] z-[70] transition-all duration-300 hover:border-[var(--accent-border-hover)] hover:text-[var(--accent-500)] ${isCollapsed ? 'left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2' : `top-1/2 -translate-y-1/2 ${isEnglish ? 'right-3' : 'left-3'}`}`}
                         style={{ transition: 'transform 300ms var(--ease-out), border-color 220ms var(--ease-out), color 220ms var(--ease-out), background 220ms var(--ease-out), box-shadow 220ms var(--ease-out)' }}
                         onMouseEnter={(event) => {

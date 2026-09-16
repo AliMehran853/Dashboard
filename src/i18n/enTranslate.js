@@ -16,9 +16,7 @@ const enTranslate = {
       system: "System",
 
       shoppingList: "Shopping List",
-
       logout: "Log Out",
-
       notifications: "Notifications",
 
       profile: "My Profile",
@@ -29,15 +27,16 @@ const enTranslate = {
 
       enableLightMode: "Enable light mode",
       enableDarkMode: "Enable dark mode",
-
       lightMode: "Light mode",
       darkMode: "Dark mode",
 
       openMenu: "Open menu",
       closeMenu: "Close menu",
 
-      language: "Language",
+      expandSidebar: "Expand sidebar",
+      collapseSidebar: "Collapse sidebar",
 
+      language: "Language",
       persian: "فارسی",
       english: "English",
 
@@ -48,6 +47,8 @@ const enTranslate = {
       outgoing: "Outgoing",
 
       currency: "AF",
+
+      refresh: "Refresh",
 
       copy: "Copy",
       copied: "Copied",
@@ -77,12 +78,27 @@ const enTranslate = {
     // =====================================================
 
     dashboard: {
+      errors: {
+        load: "Failed to load dashboard data.",
+      },
+
       stats: {
+        sectionTitle: "Dashboard Overview",
+        sectionDescription: "Today's activity and store overview",
+
         todaySales: {
           title: "Today's Sales",
           transactionCount: "{{count}} transactions today",
           active: "Active",
           noSales: "No sales",
+          unit: "AF",
+        },
+
+        cashSales: {
+          title: "Cash Sales",
+          description: "Total cash sales today",
+          recorded: "Recorded",
+          none: "No cash sales",
           unit: "AF",
         },
 
@@ -214,27 +230,58 @@ const enTranslate = {
         description: "Current status of products and inventory",
       },
 
-      pageTitle: "Products",
-      pageDescription: "Manage products and inventory",
-      addProduct: "Add Product",
-
-      error: {
+      errors: {
         load: "Failed to load products.",
         update: "Failed to update product.",
         add: "Failed to add product.",
         delete: "Failed to delete product.",
       },
 
-      deleteModal: {
-        title: "Delete Product",
-        subtitle: "Confirm deletion",
-        question: "Are you sure you want to delete this product?",
-        messageBefore: "Product",
-        messageAfter: "will be permanently removed from the product list.",
-        warning:
-          "This action cannot be undone. Make sure you no longer need this product before deleting it.",
+      stats: {
+        products: {
+          title: "Total Products",
+          description: "Registered products",
+        },
+
+        categories: {
+          title: "Categories",
+          description: "Active categories",
+        },
+
+        lowStock: {
+          title: "Low Stock",
+          checking: "Checking inventory",
+          outOfStock: "{{count}} products out of stock",
+          supply: "Needs restocking",
+        },
+
+        inventoryValue: {
+          title: "Inventory Value",
+          description: "Based on purchase price",
+        },
+      },
+
+      filters: {
+        title: "Product Filters",
+        description: "Search and filter products",
+        clear: "Clear Filters",
+        searchPlaceholder: "Search products...",
+        allCategories: "All Categories",
+        allProducts: "All Products",
+        available: "Available",
+        lowStock: "Low Stock",
+        outOfStock: "Out of Stock",
+        activeFilters: "Active filters:",
+        category: "Category:",
+        status: "Status:",
+      },
+
+      delete: {
+        title: "Delete product",
+        message:
+          'Are you sure you want to delete "{{name}}"? This action cannot be undone.',
         cancel: "Cancel",
-        delete: "Delete Product",
+        confirm: "Delete",
         deleting: "Deleting...",
       },
 
@@ -257,6 +304,13 @@ const enTranslate = {
           minStockInvalid: "Minimum stock is invalid.",
           unitRequired: "Please select the product unit.",
           save: "Failed to save the product. Please try again.",
+
+          noSaleOption: "Add at least one sale option.",
+          saleUnitRequired: "Unit is required.",
+          saleFactorInvalid: "Factor must be greater than zero.",
+          invalidQuantity: "Invalid quantity.",
+          invalidFactor: "Invalid factor.",
+          invalidPrice: "Invalid price.",
         },
 
         sections: {
@@ -289,6 +343,93 @@ const enTranslate = {
           minStockPlaceholder: "e.g. 5",
 
           descriptionPlaceholder: "Optional description about the product...",
+        },
+
+        basicUnit: {
+          label: "Base Unit",
+          hint: "(smallest sellable unit)",
+          selectPlaceholder: "Select unit",
+          locked: "Locked after creation.",
+          autoManaged: "Auto-managed by sub-unit",
+        },
+
+        purchase: {
+          title: "Initial Purchase",
+          quantity: "Quantity",
+          unit: "Unit",
+          eachEquals: "Each =",
+          pricePerUnit: "Price / {{unit}} (AF)",
+          totalPrice: "Total price (AF)",
+          total: "Total:",
+          perUnit: "Per {{unit}}:",
+          note: "Note (optional)",
+          notePlaceholder: "e.g. transport fare included",
+          switchTooltip: "Switch per-unit / total",
+          switchToTotal: "Total",
+          switchToUnit: "Unit",
+        },
+
+        subUnit: {
+          question: "Is there a smaller unit inside each {{unit}}?",
+          example:
+            "For example: 20 pieces inside each carton. This helps you sell by piece without losing money.",
+          enable: "Yes, enable sub-unit",
+          each: "Each",
+          selectUnit: "Select unit",
+          baseUnit: "Base unit",
+          totalStock: "Total stock",
+          costPerUnit: "Cost / unit",
+        },
+
+        purchaseSummary: {
+          costPer: "Cost per",
+          stockInBase: "Stock in base",
+          investment: "Investment",
+        },
+
+        suggestedOption: {
+          title: "Add a suggested sale option",
+          description:
+            "Sell 1 {{unit}} at {{price}} AF ({{margin}}% margin)",
+        },
+
+        saleOptions: {
+          title: "Sale Options",
+          add: "Add",
+          empty: "Add at least one sale option (piece, carton, kg...).",
+        },
+
+        inventoryCurrent: {
+          currentStock: "Current Stock",
+          hint: 'To add stock, use the "New Purchase" button in details view.',
+        },
+
+        footer: {
+          tip: "Tip: Ctrl + Enter to save",
+        },
+
+        inlineAdd: {
+          nameRequired: "Name required.",
+          failed: "Failed to add.",
+          newCategoryName: "New category name",
+          newUnitName: "New unit name",
+        },
+
+        saleRow: {
+          saleUnit: "Sale Unit",
+          ratioMultiply: "1 {{unit}} = ? {{base}}",
+          ratioDivide: "1 {{base}} = ? {{unit}}",
+          switchDirection: "Switch ratio direction",
+          price: "Price / {{unit}} (AF)",
+          margin: "Margin %",
+          auto: "(auto)",
+          cost: "Cost:",
+          profit: "Profit:",
+          loss: "Loss:",
+          ratio: "Ratio:",
+          suggested: "Suggested:",
+          belowCost: "Below cost — you will lose money.",
+          default: "Default",
         },
 
         actions: {
@@ -371,6 +512,38 @@ const enTranslate = {
           inventorySalesValue: "Inventory Sales Value",
         },
 
+        costStock: {
+          title: "Cost & Stock",
+          avgCostPerUnit: "Avg cost / unit",
+          stockValue: "Stock value",
+          addStock: "Add Stock",
+        },
+
+        defaultSale: {
+          title: "Default Sale Option",
+          unit: "Unit",
+          eachEquals: "Each = ",
+          price: "Price",
+          profitPerUnit: "Profit / unit",
+          margin: "Margin",
+          empty: "No sale options defined.",
+        },
+
+        allSaleOptions: {
+          title: "All Sale Options",
+          default: "Default",
+        },
+
+        purchaseTemplates: {
+          title: "Purchase Templates",
+        },
+
+        unitConversions: {
+          title: "Unit Conversions",
+        },
+
+        potentialProfit: "Potential Profit",
+
         stockWarning: {
           outOfStock: {
             title: "This product is out of stock",
@@ -399,11 +572,39 @@ const enTranslate = {
           delete: "Delete",
           close: "Close",
         },
+
+        addStock: {
+          title: "Add Stock",
+          currentStock: "Current stock",
+          avgCost: "Avg cost",
+          quantity: "Quantity",
+          unit: "Unit",
+          eachContains: "Each unit contains",
+          pricePerUnit: "Price per {{unit}} ({{currency}})",
+          note: "Note (optional)",
+          notePlaceholder: "e.g. transport fare included",
+          preview: "Preview",
+          newStock: "New stock",
+          newAvgCost: "New avg cost",
+          totalPaid: "Total paid",
+          costPer: "Cost / {{unit}}:",
+          cancel: "Cancel",
+          adding: "Adding...",
+          submit: "Add Stock",
+
+          errors: {
+            quantity: "Quantity must be greater than zero.",
+            factor: "Factor is invalid.",
+            price: "Price is invalid.",
+            unit: "Unit is required.",
+            submit: "Failed to add stock.",
+          },
+        },
       },
     },
 
     // =====================================================
-    // Product Statistics
+    // Product Statistics & Filters (aliases)
     // =====================================================
 
     productStats: {
@@ -411,28 +612,21 @@ const enTranslate = {
         title: "Total Products",
         description: "Registered products",
       },
-
       categories: {
         title: "Categories",
         description: "Active categories",
       },
-
       lowStock: {
         title: "Low Stock",
         checking: "Checking inventory",
         outOfStock: "{{count}} products out of stock",
         supply: "Needs restocking",
       },
-
       inventoryValue: {
         title: "Inventory Value",
         description: "Based on purchase price",
       },
     },
-
-    // =====================================================
-    // Product Filters
-    // =====================================================
 
     productFilters: {
       title: "Product Filters",
@@ -464,6 +658,9 @@ const enTranslate = {
       },
 
       stats: {
+        sectionTitle: "Today's Cash Sales Summary",
+        sectionDescription: "Today's cash sales overview",
+
         todaySales: {
           title: "Today's Sales",
           description: "{{count}} sales recorded",
@@ -511,11 +708,14 @@ const enTranslate = {
         thisWeek: "This Week",
         cashSales: "Cash Sales",
         creditSales: "Credit Sales",
+        loading: "Loading sales chart...",
+        empty: "No sales to display yet.",
       },
 
       form: {
         title: "New Sale",
         subtitle: "Enter sale information",
+        badge: "Cash",
 
         errors: {
           loadData: "Failed to load information.",
@@ -526,10 +726,40 @@ const enTranslate = {
           creditCustomerRequired:
             "Please enter the customer name for a credit sale.",
           submit: "Failed to record the sale.",
+          noSaleOptions: "This product has no sale options defined.",
+          insufficientStockAvailable:
+            "Insufficient stock. Available: {{count}} {{unit}}",
         },
 
         productSection: {
           title: "Product Information",
+        },
+
+        stock: {
+          available: "Available stock",
+          availableShort: "Available:",
+          avgCostPerUnit: "Avg cost / unit",
+          costPerSaleUnit: "Cost / sale unit",
+          minStock: "Min stock",
+        },
+
+        saleUnit: {
+          label: "Sale Unit",
+          hint: "how this sale is measured",
+        },
+
+        warnings: {
+          noSaleOptions:
+            "This product has no sale options. Go to Products and add at least one.",
+          insufficientStock:
+            "Insufficient stock. You have {{available}} {{unit}} but trying to sell {{requested}} {{unit}}.",
+          belowCost:
+            "Sale price is below cost — you will lose money on this sale.",
+        },
+
+        price: {
+          belowCost: "Below cost ({{cost}} {{currency}})",
+          profit: "Profit: {{profit}} {{currency}} ({{margin}}%)",
         },
 
         fields: {
@@ -555,6 +785,7 @@ const enTranslate = {
         total: {
           title: "Total Sale Amount",
           description: "Quantity × Unit Price",
+          expectedProfit: "Expected profit:",
         },
 
         payment: {
@@ -567,7 +798,9 @@ const enTranslate = {
           title: "Customer Information",
           name: "Customer Name",
           nameRequired: "Customer Name *",
+          namePlaceholder: "Customer name (optional)",
           phone: "07XX XXX XXX",
+          phonePlaceholder: "Phone (optional)",
         },
 
         note: {
@@ -582,8 +815,21 @@ const enTranslate = {
         },
       },
 
+      errors: {
+        noSaleData: "Sale information was not provided.",
+        productNotFound: "Product not found.",
+        customerNotFound: "Customer not found.",
+        invalidId: "Invalid sale ID.",
+        notFound: "Sale not found.",
+        insufficientStock:
+          "Insufficient stock. Current stock: {{current}} {{unit}}",
+        insufficientStockWithFactor:
+          "Insufficient stock. Current stock: {{current}} {{unit}} (this sale equals {{requested}} {{unit}})",
+      },
+
       table: {
         title: "Sales List",
+        cashTitle: "Cash Sales",
         salesCount: "sales",
         loading: "Loading sales...",
         viewDetails: "View details",
@@ -612,6 +858,17 @@ const enTranslate = {
 
         totalAmount: "Total Amount",
         units: "units",
+
+        unitBreakdown: "Unit Breakdown",
+        conversionFactor: "Conversion factor",
+        deductedFromStock: "Deducted from stock",
+
+        profitTitle: "Profit",
+        profitableSale: "Profitable sale",
+        lossMakingSale: "Loss-making sale",
+        costPerUnit:
+          "Cost per unit: {{cost}} {{currency}} • Margin: {{margin}}",
+        totalProfit: "Total profit",
 
         paymentStatus: {
           title: "Payment Status",
@@ -671,6 +928,7 @@ const enTranslate = {
       stats: {
         sectionTitle: "Credit Overview",
         sectionDescription: "Current customer debt status",
+        badge: "All-time",
 
         totalDebt: {
           title: "Total Debt",
@@ -737,6 +995,7 @@ const enTranslate = {
         description: "Customer credit account records",
         accountsCount: "accounts",
         loading: "Loading accounts...",
+        paymentsCount: "payments",
 
         columns: {
           customer: "Customer",
@@ -769,6 +1028,8 @@ const enTranslate = {
           title: "Delete Customer Account",
           description:
             "This account has been fully settled. Are you sure you want to delete it?",
+          warning:
+            "The credit account and payment records will be removed. Sales history will be preserved.",
           cancel: "Cancel",
           confirm: "Delete Account",
         },
@@ -819,6 +1080,8 @@ const enTranslate = {
 
           creditSalesTitle: "Credit Sales",
           creditSalesDescription: "Customer credit sales history",
+          noCreditSales:
+            "No credit sales have been recorded for this customer yet.",
 
           paymentsTitle: "Customer Payments",
           paymentsDescription: "Customer payment history",
@@ -869,13 +1132,27 @@ const enTranslate = {
           card: "Card / Bank Transfer",
         },
 
+        quickFill: {
+          fullAmount: "Full amount",
+          half: "Half",
+        },
+
+        remaining: {
+          willSettle: "Debt will be fully settled",
+          afterPayment: "Remaining after payment",
+        },
+
         errors: {
+          customerRequired: "Customer information is missing.",
           amountRequired: "Please enter the payment amount.",
           amountTooHigh: "The payment amount cannot exceed the remaining debt.",
+          dateRequired: "Please select a payment date.",
+          submit: "Failed to record the payment. Please try again.",
         },
 
         actions: {
           cancel: "Cancel",
+          saving: "Saving...",
           submit: "Record Payment",
         },
       },
@@ -891,6 +1168,11 @@ const enTranslate = {
           productRequired: "Please select the product.",
           quantityRequired: "Quantity must be greater than zero.",
           priceInvalid: "Please enter a valid unit price.",
+          noSaleOptions: "This product has no sale options defined.",
+          insufficientStock:
+            "Insufficient stock. Available: {{count}} {{unit}}",
+          dateRequired: "Sale date is required.",
+          submit: "Failed to record the credit sale. Please try again.",
         },
 
         customer: {
@@ -899,6 +1181,32 @@ const enTranslate = {
           namePlaceholder: "e.g. Ahmad Mohammadi",
           phone: "Phone Number",
           phonePlaceholder: "0700123456",
+        },
+
+        stock: {
+          available: "Available stock",
+          avgCostPerUnit: "Avg cost / unit",
+          costPerSaleUnit: "Cost / sale unit",
+          minStock: "Min stock",
+        },
+
+        saleUnit: {
+          label: "Sale Unit",
+          hint: "how this sale is measured",
+        },
+
+        warnings: {
+          noSaleOptions:
+            "This product has no sale options. Go to Products and add at least one.",
+          insufficientStock:
+            "Insufficient stock. You have {{available}} {{unit}} but trying to sell {{requested}} {{unit}}.",
+          belowCost:
+            "Sale price is below cost — you will lose money on this sale.",
+        },
+
+        price: {
+          belowCost: "Below cost ({{cost}} {{currency}})",
+          profit: "Profit: {{profit}} {{currency}} ({{margin}}%)",
         },
 
         sale: {
@@ -915,37 +1223,55 @@ const enTranslate = {
         total: {
           title: "Total Credit Amount",
           description: "Quantity × Unit Price",
+          expectedProfit: "Expected profit:",
         },
+
+        dates: {
+          title: "Dates",
+          saleDate: "Sale Date",
+          saleDateRequired: "(required)",
+          saleDateHint: "When this sale was recorded",
+          dueDate: "Due Date",
+          dueDateOptional: "(optional)",
+          dueDateHint: "When the customer should pay back",
+          pastDue: "Past due!",
+          set: "Set",
+          clear: "Clear",
+          clearAria: "Clear due date",
+          quickPicks: {
+            week: "1 week",
+            twoWeeks: "2 weeks",
+            month: "1 month",
+          },
+        },
+
+        note: {
+          title: "Note",
+          placeholder: "Optional note about this credit sale...",
+        },
+
+        tip: "Tip: Ctrl + Enter to save",
 
         actions: {
           cancel: "Cancel",
+          saving: "Saving...",
           submit: "Record Credit Sale",
         },
       },
 
       errors: {
         load: "Unable to load credit accounts.",
-
         invalidCustomer: "The selected customer is not valid.",
-
         invalidPayment: "Please enter a valid payment amount.",
-
         paymentExceedsRemaining:
           "The payment amount cannot exceed the remaining debt.",
-
         paymentSave: "Unable to record the payment. Please try again.",
-
         productNotFound: "The selected product could not be found.",
-
         insufficientStock: "Insufficient stock. Available quantity:",
-
         saleSave: "Unable to record the credit sale. Please try again.",
-
         cannotDeleteWithDebt: "This customer still has an outstanding debt.",
-
         cannotDeleteWithHistory:
           "This customer has financial history and cannot be deleted.",
-
         deleteCustomer:
           "Unable to delete the customer account. Please try again.",
       },
@@ -959,6 +1285,15 @@ const enTranslate = {
       page: {
         title: "Reports",
         description: "Review sales performance and store financial status",
+      },
+
+      loading: "Loading report...",
+
+      empty: "No information is available to display.",
+
+      errors: {
+        load: "Failed to load the report.",
+        export: "Failed to create the export file.",
       },
 
       actions: {
@@ -976,15 +1311,6 @@ const enTranslate = {
         exportPdfMono: "PDF (Black & White)",
         exportPdfMonoDesc: "Printer-friendly for laser and budget printers",
       },
-
-      loading: "Loading report...",
-
-      errors: {
-        load: "Failed to load the report.",
-        export: "Failed to create the export file.",
-      },
-
-      empty: "No information is available to display.",
 
       filters: {
         title: "Report Filters",
@@ -1064,6 +1390,31 @@ const enTranslate = {
         },
       },
 
+      table: {
+        title: "All Transactions",
+        count: "transactions",
+        searchPlaceholder: "Search transactions...",
+        empty: "No transactions found.",
+        viewDetails: "View details",
+
+        filters: {
+          all: "All",
+          cash: "Cash",
+          credit: "Credit",
+        },
+
+        columns: {
+          product: "Product",
+          category: "Category",
+          quantity: "Quantity",
+          amount: "Amount",
+          payment: "Payment",
+          customer: "Customer",
+          date: "Date",
+          actions: "Actions",
+        },
+      },
+
       export: {
         title: "Sales Report",
         salesTitle: "Sales Details",
@@ -1131,6 +1482,8 @@ const enTranslate = {
       },
 
       filters: {
+        title: "Shopping List Filters",
+        description: "Filter items by status and priority.",
         searchPlaceholder: "Search shopping items...",
 
         status: {
@@ -1151,6 +1504,8 @@ const enTranslate = {
       },
 
       stats: {
+        sectionTitle: "Shopping List Overview",
+        sectionDescription: "Current shopping list status",
         total: "Total Items",
         pending: "Pending",
         completed: "Completed",
@@ -1275,6 +1630,7 @@ const enTranslate = {
         labels: {
           quantity: "Quantity:",
           priority: "Priority:",
+          note: "Note",
         },
 
         categoryPrefix: "Category:",
@@ -1317,6 +1673,11 @@ const enTranslate = {
       store: {
         title: "Store Information",
         description: "Manage your store's basic information",
+
+        defaults: {
+          storeName: "My Store",
+          ownerName: "Store Manager",
+        },
 
         fields: {
           name: {
@@ -1385,14 +1746,12 @@ const enTranslate = {
           title: "Security Questions",
           description:
             "These questions are used to recover your credentials if you forget them.",
-          hint:
-            "To change them, pick 3 new questions and answer them all. Otherwise leave them empty.",
+          hint: "To change them, pick 3 new questions and answer them all. Otherwise leave them empty.",
           currentTitle: "Current Questions",
           changeTitle: "Change Questions",
           changeToggle: "I want to change my questions",
           cancelChange: "Cancel change",
-          leaveEmpty:
-            "To change questions, pick 3 new ones and answer them",
+          leaveEmpty: "To change questions, pick 3 new ones and answer them",
         },
 
         credentialsNote:
@@ -1466,42 +1825,34 @@ const enTranslate = {
             name: "Emerald",
             description: "Recommended",
           },
-
           blue: {
             name: "Blue",
             description: "Calm and professional",
           },
-
           indigo: {
             name: "Indigo",
             description: "Deep and focused",
           },
-
           violet: {
             name: "Violet",
             description: "Modern and luxurious",
           },
-
           rose: {
             name: "Rose",
             description: "Subtle and distinctive",
           },
-
           red: {
             name: "Red",
             description: "Bold and energetic",
           },
-
           amber: {
             name: "Amber",
             description: "Warm and glowing",
           },
-
           cyan: {
             name: "Cyan",
             description: "Fresh and technological",
           },
-
           teal: {
             name: "Teal",
             description: "Serene and balanced",
@@ -1532,12 +1883,16 @@ const enTranslate = {
           description:
             "Import previously saved information from a Backup file.",
 
+          confirm:
+            "Are you sure? All current data will be replaced with the backup file. This action cannot be undone.",
+
           restoring: "Restoring...",
           button: "Choose Backup File",
         },
 
         fileFormat: {
           label: "Backup Format",
+          value: "JSON — Full Backup",
         },
 
         messages: {
@@ -1574,6 +1929,17 @@ const enTranslate = {
         deleteConfirm:
           'Are you sure you want to delete the category "{{name}}"?',
 
+        deleteModal: {
+          title: "Delete Category",
+          subtitle: "Confirm deletion",
+          message:
+            'Are you sure you want to delete the category "{{name}}"?',
+          warning: "This action cannot be undone.",
+          cancel: "Cancel",
+          confirm: "Delete",
+          deleting: "Deleting...",
+        },
+
         messages: {
           added: "Category added successfully.",
           deleted: "Category deleted successfully.",
@@ -1587,6 +1953,49 @@ const enTranslate = {
         },
       },
 
+      units: {
+        title: "Units",
+        description:
+          "Manage units used in products (piece, box, carton, kg, m², etc.)",
+
+        form: {
+          placeholder: "New unit name",
+          add: "Add",
+        },
+
+        list: {
+          title: "Existing Units",
+          count: "units",
+          empty: "No units yet.",
+        },
+
+        actions: {
+          delete: "Delete unit",
+        },
+
+        deleteModal: {
+          title: "Delete Unit",
+          subtitle: "Confirm deletion",
+          message: 'Are you sure you want to delete the unit "{{name}}"?',
+          warning: "This action cannot be undone.",
+          cancel: "Cancel",
+          confirm: "Delete",
+          deleting: "Deleting...",
+        },
+
+        messages: {
+          added: "Unit added successfully.",
+          deleted: "Unit deleted successfully.",
+        },
+
+        errors: {
+          load: "Failed to load units.",
+          add: "Failed to add unit.",
+          delete: "Failed to delete unit.",
+          nameRequired: "Unit name is required.",
+        },
+      },
+
       notifications: {
         title: "Notifications",
         description: "Manage system notifications",
@@ -1596,17 +2005,14 @@ const enTranslate = {
             title: "Low Stock",
             description: "Notify when product stock becomes low",
           },
-
           newSale: {
             title: "New Sale",
             description: "Show a notification when a new sale is recorded",
           },
-
           credit: {
             title: "Customer Debt",
             description: "Reminders for credit sales",
           },
-
           successfulActions: {
             title: "Successful Actions",
             description: "Show success messages for completed actions",
@@ -1649,12 +2055,10 @@ const enTranslate = {
           label: "Email",
           placeholder: "example@email.com",
         },
-
         password: {
           label: "Password",
           placeholder: "Enter your password",
         },
-
         rememberMe: "Remember me",
       },
 
@@ -1673,8 +2077,10 @@ const enTranslate = {
         failed: "Unable to sign in.",
       },
 
-      // ─────────── Setup ───────────
       setup: {
+        badge: "Setup",
+        stepLabel: "Step {{current}} of {{total}}",
+
         brand: {
           title: "Welcome to your store",
           description: "Create your store manager account to get started",
@@ -1715,6 +2121,8 @@ const enTranslate = {
         },
 
         actions: {
+          next: "Next",
+          back: "Go Back",
           create: "Create Account & Start",
           creating: "Creating...",
         },
@@ -1735,7 +2143,6 @@ const enTranslate = {
           "These credentials are stored on this device only. Keep them safe.",
       },
 
-      // ─────────── Forgot Password ───────────
       forgotPassword: {
         title: "Password Recovery",
         subtitle: "Answer your security questions",
@@ -1744,8 +2151,7 @@ const enTranslate = {
 
         stepEmail: {
           title: "Enter your email",
-          description:
-            "Enter the email you used when creating your account",
+          description: "Enter the email you used when creating your account",
           emailLabel: "Email",
           emailPlaceholder: "example@email.com",
           submit: "Check Email",
@@ -1799,6 +2205,139 @@ const enTranslate = {
       security: "This section is for the store administrator only",
 
       footer: "Shop Manager • Store Management System",
+    },
+
+    // =====================================================
+    // Profile
+    // =====================================================
+
+    profile: {
+      title: "My Profile",
+      subtitle: "Account information and profile photo",
+      closeAria: "Close",
+
+      photo: {
+        sectionTitle: "Store Manager Photo",
+        sectionDescription:
+          "First select an image and then position the face within the frame. The system will smooth edges and compress the image after cropping.",
+        changeTitle: "Change photo",
+        badge: "Profile Photo",
+        maxSize: "Max 5 MB",
+        selectPhoto: "Select Photo",
+        cancelNew: "Cancel New Photo",
+        removePhoto: "Remove Photo",
+        processing: "Processing...",
+        fileSizeLabel: "Final size:",
+        dropzone: {
+          title: "Drop image here",
+          description: "or click to choose from your computer",
+        },
+      },
+
+      account: {
+        title: "Account Information",
+        description: "Actual administrator account information",
+        nameLabel: "Administrator Name",
+        emailLabel: "Email",
+      },
+
+      footer: {
+        hint: "The image is first cropped and then compressed for optimal storage.",
+        cancel: "Cancel",
+        save: "Save Changes",
+        saving: "Saving...",
+      },
+
+      crop: {
+        title: "Adjust Profile Photo",
+        subtitle: "Position the face within the frame",
+        closeAria: "Close crop",
+        dragHint: "Drag the image to center the face",
+        zoomLabel: "Zoom",
+        zoomAria: "Image zoom",
+        cancel: "Cancel",
+        confirm: "Confirm Crop",
+        processing: "Processing...",
+        footerHint:
+          "Adjust the face with touch or mouse, then confirm the crop.",
+      },
+
+      errors: {
+        imageReadFailed: "Unable to read the image.",
+        fileReadFailed: "Failed to read the image file.",
+        preparationFailed: "Failed to prepare the image. Please try again.",
+        invalidCropArea: "Invalid crop area. Please try again.",
+        cropFailed:
+          "Failed to crop and process the image. Please try again.",
+        processFailed: "Image processing failed.",
+        removeFailed: "Failed to remove the photo.",
+        removeAvatarFailed: "Failed to remove the profile photo.",
+        saveFailed: "Failed to save profile information.",
+        saveFailedRetry:
+          "Failed to save profile information. Please try again.",
+      },
+
+      messages: {
+        cropSuccess:
+          "Photo cropped successfully. Click Save Changes to finalize.",
+        removeSuccess: "Profile photo removed successfully.",
+        saveSuccess: "Profile information saved successfully.",
+      },
+    },
+
+    // =====================================================
+    // Database Errors
+    // =====================================================
+
+    db: {
+      units: {
+        nameRequired: "Unit name is required.",
+        invalidId: "Invalid unit ID.",
+        notFound: "Unit not found.",
+        usedAsBase: "This unit is used as a base unit in products.",
+      },
+
+      categories: {
+        nameRequired: "Category name is required.",
+        invalidId: "Invalid category ID.",
+        notFound: "Category not found.",
+        usedByProducts: "This category is used by products.",
+      },
+
+      products: {
+        nameRequired: "Product name is required.",
+        baseUnitRequired: "Base unit is required.",
+        invalidId: "Invalid product ID.",
+        notFound: "Product not found.",
+        hasSales:
+          "This product has sales history and cannot be deleted.",
+      },
+
+      purchases: {
+        quantityInvalid: "Purchase quantity is invalid.",
+        factorInvalid: "Conversion factor is invalid.",
+        priceInvalid: "Purchase price is invalid.",
+      },
+
+      customers: {
+        nameRequired: "Customer name is required.",
+        invalidId: "Invalid customer ID.",
+        notFound: "Customer not found.",
+        hasHistory:
+          "This customer has financial history and cannot be deleted.",
+      },
+
+      shoppingList: {
+        nameRequired: "Shopping item name is required.",
+        invalidId: "Invalid shopping item ID.",
+        notFound: "Shopping item not found.",
+      },
+
+      expenses: {
+        amountNegative: "Expense amount cannot be negative.",
+        invalidId: "Invalid expense ID.",
+        notFound: "Expense not found.",
+      },
     },
   },
 };

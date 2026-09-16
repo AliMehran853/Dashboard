@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CreditCard, Package, ShoppingBasket, ShoppingCart } from 'lucide-react';
+import { CreditCard, Banknote, ShoppingBasket, ShoppingCart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { initializeDatabase, db } from '../database/db';
 import SalesChart from '../components/dashboard/SalesChart';
@@ -82,13 +82,13 @@ const TONES = {
         iconBg: 'bg-[var(--accent-soft)] border-[var(--accent-border)]',
         iconText: 'text-[var(--accent-500)]',
     },
+    success: {
+        iconBg: 'bg-emerald-500/10 border-emerald-500/15 dark:border-emerald-400/15',
+        iconText: 'text-emerald-500 dark:text-emerald-400',
+    },
     warning: {
         iconBg: 'bg-amber-500/10 border-amber-500/15 dark:border-amber-400/15',
         iconText: 'text-amber-500 dark:text-amber-400',
-    },
-    violet: {
-        iconBg: 'bg-violet-500/10 border-violet-500/15 dark:border-violet-400/15',
-        iconText: 'text-violet-500 dark:text-violet-400',
     },
     cyan: {
         iconBg: 'bg-cyan-500/10 border-cyan-500/15 dark:border-cyan-400/15',
@@ -112,7 +112,6 @@ function Dashboard() {
     const isEnglish = String(language).toLowerCase().startsWith('en');
 
     const [sales, setSales] = useState([]);
-    const [productsCount, setProductsCount] = useState(0);
     const [shoppingCount, setShoppingCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -124,14 +123,12 @@ function Dashboard() {
 
             await initializeDatabase();
 
-            const [salesData, productCount, shoppingItems] = await Promise.all([
+            const [salesData, shoppingItems] = await Promise.all([
                 db.sales.orderBy('createdAt').reverse().toArray(),
-                db.products.count(),
                 db.shoppingList.toArray(),
             ]);
 
             setSales(Array.isArray(salesData) ? salesData : []);
-            setProductsCount(Number(productCount) || 0);
             setShoppingCount(
                 Array.isArray(shoppingItems)
                     ? shoppingItems.filter((i) => !i.completed).length
@@ -140,7 +137,6 @@ function Dashboard() {
         } catch (err) {
             console.error('Failed to load dashboard data:', err);
             setSales([]);
-            setProductsCount(0);
             setShoppingCount(0);
             setError(err?.message || t('dashboard.errors.load'));
         } finally {
@@ -183,10 +179,9 @@ function Dashboard() {
             todayCredit: credit,
             todayCash: cash,
             todayTransactions: today.length,
-            productsCount,
             shoppingCount,
         };
-    }, [sales, productsCount, shoppingCount]);
+    }, [sales, shoppingCount]);
 
     const stats = useMemo(
         () => [
@@ -206,6 +201,19 @@ function Dashboard() {
                         : t('dashboard.stats.todaySales.noSales'),
             },
             {
+                id: 'cash-sales',
+                tone: 'success',
+                icon: Banknote,
+                title: t('dashboard.stats.cashSales.title'),
+                value: dashboardData.todayCash,
+                unit: t('dashboard.stats.cashSales.unit'),
+                description: t('dashboard.stats.cashSales.description'),
+                change:
+                    dashboardData.todayCash > 0
+                        ? t('dashboard.stats.cashSales.recorded')
+                        : t('dashboard.stats.cashSales.none'),
+            },
+            {
                 id: 'credit-sales',
                 tone: 'warning',
                 icon: CreditCard,
@@ -217,19 +225,6 @@ function Dashboard() {
                     dashboardData.todayCredit > 0
                         ? t('dashboard.stats.creditSales.recorded')
                         : t('dashboard.stats.creditSales.none'),
-            },
-            {
-                id: 'products',
-                tone: 'violet',
-                icon: Package,
-                title: t('dashboard.stats.products.title'),
-                value: dashboardData.productsCount,
-                unit: t('dashboard.stats.products.unit'),
-                description: t('dashboard.stats.products.description'),
-                change:
-                    dashboardData.productsCount > 0
-                        ? t('dashboard.stats.products.active')
-                        : t('dashboard.stats.products.empty'),
             },
             {
                 id: 'shopping-list',

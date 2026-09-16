@@ -4,37 +4,46 @@ import { initReactI18next } from 'react-i18next';
 import faTranslate from './faTranslate';
 import enTranslate from './enTranslate';
 
-const LANGUAGE_KEY =
-    'app-language';
+// =========================================================
+// Constants
+// =========================================================
+
+const LANGUAGE_KEY = 'app-language';
 
 const resources = {
     fa: faTranslate,
     en: enTranslate,
 };
 
+// =========================================================
+// Initial Language
+// =========================================================
+
 const getInitialLanguage = () => {
-    const savedLanguage =
-        localStorage.getItem(
-            LANGUAGE_KEY
-        );
-
-    return savedLanguage === 'en'
-        ? 'en'
-        : 'fa';
+    try {
+        const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
+        return savedLanguage === 'en' ? 'en' : 'fa';
+    } catch {
+        return 'fa';
+    }
 };
 
-export const updateDocumentLanguage = (
-    language
-) => {
-    const isEnglish =
-        language === 'en';
+// =========================================================
+// Document Language / Direction
+// =========================================================
 
-    document.documentElement.lang =
-        isEnglish ? 'en' : 'fa';
+export const updateDocumentLanguage = (language) => {
+    if (typeof document === 'undefined') return;
 
-    document.documentElement.dir =
-        isEnglish ? 'ltr' : 'rtl';
+    const isEnglish = language === 'en';
+
+    document.documentElement.lang = isEnglish ? 'en' : 'fa';
+    document.documentElement.dir = isEnglish ? 'ltr' : 'rtl';
 };
+
+// =========================================================
+// Initialize i18n
+// =========================================================
 
 i18n
     .use(initReactI18next)
@@ -45,6 +54,8 @@ i18n
 
         fallbackLng: 'fa',
 
+        supportedLngs: ['fa', 'en'],
+
         interpolation: {
             escapeValue: false,
         },
@@ -52,42 +63,37 @@ i18n
         react: {
             useSuspense: false,
         },
+
+        returnNull: false,
     })
     .then(() => {
-        updateDocumentLanguage(
-            i18n.language
-        );
+        updateDocumentLanguage(i18n.language);
     });
 
-export const changeLanguage = async (
-    language
-) => {
-    const nextLanguage =
-        language === 'en'
-            ? 'en'
-            : 'fa';
+// =========================================================
+// Language Change
+// =========================================================
 
-    await i18n.changeLanguage(
-        nextLanguage
-    );
+export const changeLanguage = async (language) => {
+    const nextLanguage = language === 'en' ? 'en' : 'fa';
 
-    localStorage.setItem(
-        LANGUAGE_KEY,
-        nextLanguage
-    );
+    await i18n.changeLanguage(nextLanguage);
 
-    updateDocumentLanguage(
-        nextLanguage
-    );
+    try {
+        localStorage.setItem(LANGUAGE_KEY, nextLanguage);
+    } catch {
+        /* storage may be unavailable */
+    }
+
+    updateDocumentLanguage(nextLanguage);
 };
 
-export const getCurrentLanguage =
-    () => {
-        return i18n.language;
-    };
+// =========================================================
+// Utilities
+// =========================================================
 
-export const isRTL = () => {
-    return i18n.language !== 'en';
-};
+export const getCurrentLanguage = () => i18n.language;
+
+export const isRTL = () => i18n.language !== 'en';
 
 export default i18n;

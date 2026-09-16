@@ -11,43 +11,46 @@ import { useAuth } from '../../context/AuthContext';
 
 const STORE_SETTINGS_KEY = 'storeSettings';
 
-const DEFAULT_STORE_SETTINGS = {
-    storeName: 'فروشگاه من',
-    ownerName: 'مدیر فروشگاه',
+// ✅ defaults به‌صورت تابع — با t() ساخته می‌شوند
+const getDefaultStoreSettings = (t) => ({
+    storeName: t('settings.store.defaults.storeName'),
+    ownerName: t('settings.store.defaults.ownerName'),
     phone: '',
     address: '',
     description: '',
-};
+});
 
-const getStoredStoreSettings = () => {
+const getStoredStoreSettings = (t) => {
+    const defaults = getDefaultStoreSettings(t);
+
     try {
         const stored = localStorage.getItem(STORE_SETTINGS_KEY);
-        if (!stored) return { ...DEFAULT_STORE_SETTINGS };
+        if (!stored) return { ...defaults };
 
         const parsed = JSON.parse(stored);
-        if (!parsed || typeof parsed !== 'object') return { ...DEFAULT_STORE_SETTINGS };
+        if (!parsed || typeof parsed !== 'object') return { ...defaults };
 
         return {
-            ...DEFAULT_STORE_SETTINGS,
+            ...defaults,
             ...parsed,
             storeName:
                 typeof parsed.storeName === 'string'
-                    ? parsed.storeName.trim() || DEFAULT_STORE_SETTINGS.storeName
-                    : DEFAULT_STORE_SETTINGS.storeName,
+                    ? parsed.storeName.trim() || defaults.storeName
+                    : defaults.storeName,
             ownerName:
                 typeof parsed.ownerName === 'string'
-                    ? parsed.ownerName.trim() || DEFAULT_STORE_SETTINGS.ownerName
-                    : DEFAULT_STORE_SETTINGS.ownerName,
-            phone: typeof parsed.phone === 'string' ? parsed.phone : DEFAULT_STORE_SETTINGS.phone,
-            address: typeof parsed.address === 'string' ? parsed.address : DEFAULT_STORE_SETTINGS.address,
+                    ? parsed.ownerName.trim() || defaults.ownerName
+                    : defaults.ownerName,
+            phone: typeof parsed.phone === 'string' ? parsed.phone : defaults.phone,
+            address: typeof parsed.address === 'string' ? parsed.address : defaults.address,
             description:
                 typeof parsed.description === 'string'
                     ? parsed.description
-                    : DEFAULT_STORE_SETTINGS.description,
+                    : defaults.description,
         };
     } catch (error) {
         console.error('Store Settings Read Error:', error);
-        return { ...DEFAULT_STORE_SETTINGS };
+        return { ...defaults };
     }
 };
 
@@ -59,11 +62,12 @@ function StoreSettings() {
     const { t, i18n } = useTranslation();
     const { user, updateAccount } = useAuth();
 
-    const [storeName, setStoreName] = useState(DEFAULT_STORE_SETTINGS.storeName);
-    const [ownerName, setOwnerName] = useState(DEFAULT_STORE_SETTINGS.ownerName);
-    const [phone, setPhone] = useState(DEFAULT_STORE_SETTINGS.phone);
-    const [address, setAddress] = useState(DEFAULT_STORE_SETTINGS.address);
-    const [description, setDescription] = useState(DEFAULT_STORE_SETTINGS.description);
+    // ✅ مقدار اولیه با t()
+    const [storeName, setStoreName] = useState(() => t('settings.store.defaults.storeName'));
+    const [ownerName, setOwnerName] = useState(() => t('settings.store.defaults.ownerName'));
+    const [phone, setPhone] = useState('');
+    const [address, setAddress] = useState('');
+    const [description, setDescription] = useState('');
     const [saved, setSaved] = useState(false);
 
     const direction = i18n.dir();
@@ -71,7 +75,7 @@ function StoreSettings() {
 
     // Initial load
     useEffect(() => {
-        const settings = getStoredStoreSettings();
+        const settings = getStoredStoreSettings(t);
         setStoreName(settings.storeName);
         setPhone(settings.phone);
         setAddress(settings.address);
@@ -82,7 +86,7 @@ function StoreSettings() {
         } else {
             setOwnerName(settings.ownerName);
         }
-    }, [user?.name]);
+    }, [user?.name, t]);
 
     // Sync ownerName from auth user
     useEffect(() => {
@@ -91,7 +95,7 @@ function StoreSettings() {
         if (!cleanName) return;
         setOwnerName(cleanName);
         try {
-            const current = getStoredStoreSettings();
+            const current = getStoredStoreSettings(t);
             if (current.ownerName !== cleanName) {
                 localStorage.setItem(
                     STORE_SETTINGS_KEY,
@@ -101,7 +105,7 @@ function StoreSettings() {
         } catch (error) {
             console.error('Owner Name Storage Sync Error:', error);
         }
-    }, [user?.name]);
+    }, [user?.name, t]);
 
     // External account update
     useEffect(() => {
@@ -113,7 +117,7 @@ function StoreSettings() {
 
             setOwnerName(cleanName);
             try {
-                const current = getStoredStoreSettings();
+                const current = getStoredStoreSettings(t);
                 localStorage.setItem(
                     STORE_SETTINGS_KEY,
                     JSON.stringify({ ...current, ownerName: cleanName })
@@ -124,12 +128,12 @@ function StoreSettings() {
         };
         window.addEventListener('account-updated', handler);
         return () => window.removeEventListener('account-updated', handler);
-    }, []);
+    }, [t]);
 
     // Store settings updated event
     useEffect(() => {
         const handler = () => {
-            const settings = getStoredStoreSettings();
+            const settings = getStoredStoreSettings(t);
             setStoreName(settings.storeName);
             setPhone(settings.phone);
             setAddress(settings.address);
@@ -137,7 +141,7 @@ function StoreSettings() {
         };
         window.addEventListener('store-settings-updated', handler);
         return () => window.removeEventListener('store-settings-updated', handler);
-    }, []);
+    }, [t]);
 
     const handleSubmit = (event) => {
         event.preventDefault();

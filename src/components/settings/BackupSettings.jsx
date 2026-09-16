@@ -288,7 +288,6 @@ function BackupSettings() {
                 t('settings.backup.messages.importSuccess')
             );
 
-            // ✅ FIX: dispatch همه eventهای db.js
             dispatchDatabaseEvents();
 
             setTimeout(
@@ -417,8 +416,9 @@ function BackupSettings() {
                             {t('settings.backup.fileFormat.label')}
                         </p>
 
+                        {/* ✅ متن hardcoded قبلی اینجا بود: "JSON — Full Backup" */}
                         <p className="mt-1 text-[10px] text-[var(--text-muted)]">
-                            JSON — Full Backup
+                            {t('settings.backup.fileFormat.value')}
                         </p>
                     </div>
 

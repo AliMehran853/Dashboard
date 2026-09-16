@@ -16,9 +16,7 @@ const faTranslate = {
       system: "سیستم",
 
       shoppingList: "لیست خرید",
-
       logout: "خروج از حساب",
-
       notifications: "اعلان‌ها",
 
       profile: "پروفایل من",
@@ -29,15 +27,16 @@ const faTranslate = {
 
       enableLightMode: "فعال کردن حالت روشن",
       enableDarkMode: "فعال کردن حالت تاریک",
-
       lightMode: "حالت روشن",
       darkMode: "حالت تاریک",
 
       openMenu: "باز کردن منو",
       closeMenu: "بستن منو",
 
-      language: "زبان",
+      expandSidebar: "باز کردن نوار کناری",
+      collapseSidebar: "کوچک کردن نوار کناری",
 
+      language: "زبان",
       persian: "فارسی",
       english: "English",
 
@@ -48,6 +47,8 @@ const faTranslate = {
       outgoing: "خروج",
 
       currency: "AF",
+
+      refresh: "تازه‌سازی",
 
       copy: "کپی",
       copied: "کپی شد",
@@ -77,12 +78,27 @@ const faTranslate = {
     // =====================================================
 
     dashboard: {
+      errors: {
+        load: "دریافت اطلاعات داشبورد انجام نشد.",
+      },
+
       stats: {
+        sectionTitle: "خلاصه وضعیت داشبورد",
+        sectionDescription: "فعالیت امروز و نمای کلی فروشگاه",
+
         todaySales: {
           title: "فروش امروز",
           transactionCount: "{{count}} معامله امروز",
           active: "فعال",
           noSales: "بدون فروش",
+          unit: "AF",
+        },
+
+        cashSales: {
+          title: "فروش نقدی",
+          description: "مجموع فروش نقدی امروز",
+          recorded: "ثبت شده",
+          none: "بدون فروش نقدی",
           unit: "AF",
         },
 
@@ -214,27 +230,58 @@ const faTranslate = {
         description: "وضعیت فعلی محصولات و موجودی انبار",
       },
 
-      pageTitle: "محصولات",
-      pageDescription: "مدیریت محصولات و موجودی انبار",
-      addProduct: "افزودن محصول",
-
-      error: {
+      errors: {
         load: "دریافت محصولات انجام نشد.",
         update: "ویرایش محصول انجام نشد.",
         add: "افزودن محصول انجام نشد.",
         delete: "حذف محصول انجام نشد.",
       },
 
-      deleteModal: {
+      stats: {
+        products: {
+          title: "تعداد محصولات",
+          description: "محصول ثبت شده",
+        },
+
+        categories: {
+          title: "دسته‌بندی‌ها",
+          description: "دسته‌بندی فعال",
+        },
+
+        lowStock: {
+          title: "موجودی کم",
+          checking: "در حال بررسی موجودی",
+          outOfStock: "{{count}} محصول ناموجود",
+          supply: "نیاز به تأمین",
+        },
+
+        inventoryValue: {
+          title: "ارزش موجودی",
+          description: "بر اساس قیمت خرید",
+        },
+      },
+
+      filters: {
+        title: "فیلتر محصولات",
+        description: "جستجو و فیلتر محصولات",
+        clear: "پاک کردن فیلترها",
+        searchPlaceholder: "جستجوی محصول...",
+        allCategories: "همه دسته‌ها",
+        allProducts: "همه محصولات",
+        available: "موجود",
+        lowStock: "موجودی کم",
+        outOfStock: "ناموجود",
+        activeFilters: "فیلترهای فعال:",
+        category: "دسته:",
+        status: "وضعیت:",
+      },
+
+      delete: {
         title: "حذف محصول",
-        subtitle: "تأیید عملیات حذف",
-        question: "آیا از حذف این محصول مطمئن هستید؟",
-        messageBefore: "محصول",
-        messageAfter: "به‌صورت دائمی از لیست محصولات حذف خواهد شد.",
-        warning:
-          "این عملیات قابل بازگشت نیست. قبل از حذف، مطمئن شوید که دیگر به این محصول نیاز ندارید.",
+        message:
+          "آیا از حذف «{{name}}» مطمئن هستید؟ این عملیات قابل بازگشت نیست.",
         cancel: "انصراف",
-        delete: "حذف محصول",
+        confirm: "حذف",
         deleting: "در حال حذف...",
       },
 
@@ -256,6 +303,13 @@ const faTranslate = {
           minStockInvalid: "حداقل موجودی معتبر نیست.",
           unitRequired: "واحد محصول را انتخاب کنید.",
           save: "ذخیره محصول انجام نشد. لطفاً دوباره تلاش کنید.",
+
+          noSaleOption: "حداقل یک روش فروش اضافه کنید.",
+          saleUnitRequired: "واحد الزامی است.",
+          saleFactorInvalid: "ضریب باید بزرگتر از صفر باشد.",
+          invalidQuantity: "تعداد معتبر نیست.",
+          invalidFactor: "ضریب معتبر نیست.",
+          invalidPrice: "قیمت معتبر نیست.",
         },
 
         sections: {
@@ -288,6 +342,93 @@ const faTranslate = {
           minStockPlaceholder: "مثلاً 5",
 
           descriptionPlaceholder: "توضیحات اختیاری درباره محصول...",
+        },
+
+        basicUnit: {
+          label: "واحد پایه",
+          hint: "(کوچکترین واحد فروش)",
+          selectPlaceholder: "انتخاب واحد",
+          locked: "پس از ایجاد قابل تغییر نیست.",
+          autoManaged: "خودکار از زیرواحد خرید",
+        },
+
+        purchase: {
+          title: "خرید اولیه",
+          quantity: "تعداد",
+          unit: "واحد خرید",
+          eachEquals: "هر یک =",
+          pricePerUnit: "قیمت هر {{unit}} (AF)",
+          totalPrice: "قیمت کل خرید (AF)",
+          total: "جمع کل:",
+          perUnit: "هر {{unit}}:",
+          note: "یادداشت (اختیاری)",
+          notePlaceholder: "مثلاً کرایه موتر شامل است",
+          switchTooltip: "تغییر واحد / کل",
+          switchToTotal: "کل",
+          switchToUnit: "واحد",
+        },
+
+        subUnit: {
+          question: "آیا داخل هر {{unit}}، واحد کوچک‌تری هست؟",
+          example:
+            "مثلاً ۲۰ دانه داخل هر کارتن. اینطوری می‌تونی دانه‌ای بفروشی بدون ضرر.",
+          enable: "بله، فعال کن",
+          each: "هر",
+          selectUnit: "انتخاب واحد",
+          baseUnit: "واحد پایه",
+          totalStock: "موجودی کل",
+          costPerUnit: "قیمت هر واحد",
+        },
+
+        purchaseSummary: {
+          costPer: "قیمت هر",
+          stockInBase: "موجودی پایه",
+          investment: "سرمایه‌گذاری",
+        },
+
+        suggestedOption: {
+          title: "افزودن روش فروش پیشنهادی",
+          description: "فروش ۱ {{unit}} به {{price}} افغانی ({{margin}}٪ سود)",
+        },
+
+        saleOptions: {
+          title: "روش‌های فروش",
+          add: "افزودن",
+          empty: "حداقل یک روش فروش اضافه کنید (دانه، کارتن، کیلو...).",
+        },
+
+        inventoryCurrent: {
+          currentStock: "موجودی فعلی",
+          hint:
+            "برای افزودن موجودی از دکمه «خرید جدید» در جزئیات محصول استفاده کنید.",
+        },
+
+        footer: {
+          tip: "نکته: Ctrl + Enter برای ذخیره",
+        },
+
+        inlineAdd: {
+          nameRequired: "نام الزامی است.",
+          failed: "افزودن انجام نشد.",
+          newCategoryName: "نام دسته‌بندی جدید",
+          newUnitName: "نام واحد جدید",
+        },
+
+        saleRow: {
+          saleUnit: "واحد فروش",
+          ratioMultiply: "۱ {{unit}} = چند {{base}}",
+          ratioDivide: "۱ {{base}} = چند {{unit}}",
+          switchDirection: "تغییر جهت نسبت",
+          price: "قیمت / {{unit}} (AF)",
+          margin: "درصد سود",
+          auto: "(خودکار)",
+          cost: "تمام‌شده:",
+          profit: "سود:",
+          loss: "ضرر:",
+          ratio: "نسبت:",
+          suggested: "پیشنهاد:",
+          belowCost: "زیر قیمت خرید — ضرر می‌کنید.",
+          default: "پیش‌فرض",
         },
 
         actions: {
@@ -370,6 +511,38 @@ const faTranslate = {
           inventorySalesValue: "ارزش فروش موجودی",
         },
 
+        costStock: {
+          title: "قیمت تمام‌شده و موجودی",
+          avgCostPerUnit: "میانگین قیمت هر واحد",
+          stockValue: "ارزش موجودی",
+          addStock: "افزودن موجودی",
+        },
+
+        defaultSale: {
+          title: "روش فروش پیش‌فرض",
+          unit: "واحد",
+          eachEquals: "هر یک = ",
+          price: "قیمت فروش",
+          profitPerUnit: "سود هر واحد",
+          margin: "درصد سود",
+          empty: "هیچ روش فروشی تعریف نشده.",
+        },
+
+        allSaleOptions: {
+          title: "همه روش‌های فروش",
+          default: "پیش‌فرض",
+        },
+
+        purchaseTemplates: {
+          title: "الگوهای خرید",
+        },
+
+        unitConversions: {
+          title: "تبدیل واحدها",
+        },
+
+        potentialProfit: "سود بالقوه",
+
         stockWarning: {
           outOfStock: {
             title: "این محصول ناموجود است",
@@ -398,11 +571,39 @@ const faTranslate = {
           delete: "حذف",
           close: "بستن",
         },
+
+        addStock: {
+          title: "افزودن موجودی",
+          currentStock: "موجودی فعلی",
+          avgCost: "میانگین قیمت",
+          quantity: "تعداد",
+          unit: "واحد خرید",
+          eachContains: "هر یک شامل",
+          pricePerUnit: "قیمت هر {{unit}} ({{currency}})",
+          note: "یادداشت (اختیاری)",
+          notePlaceholder: "مثلاً کرایه موتر شامل است",
+          preview: "پیش‌نمایش",
+          newStock: "موجودی جدید",
+          newAvgCost: "میانگین جدید",
+          totalPaid: "سرمایه‌گذاری",
+          costPer: "قیمت هر {{unit}}:",
+          cancel: "انصراف",
+          adding: "در حال افزودن...",
+          submit: "افزودن موجودی",
+
+          errors: {
+            quantity: "تعداد باید بیشتر از صفر باشد.",
+            factor: "ضریب تبدیل معتبر نیست.",
+            price: "قیمت معتبر نیست.",
+            unit: "واحد خرید الزامی است.",
+            submit: "افزودن موجودی انجام نشد.",
+          },
+        },
       },
     },
 
     // =====================================================
-    // Product Statistics
+    // Product Statistics & Filters (aliases)
     // =====================================================
 
     productStats: {
@@ -410,28 +611,21 @@ const faTranslate = {
         title: "تعداد محصولات",
         description: "محصول ثبت شده",
       },
-
       categories: {
         title: "دسته‌بندی‌ها",
         description: "دسته‌بندی فعال",
       },
-
       lowStock: {
         title: "موجودی کم",
         checking: "در حال بررسی موجودی",
         outOfStock: "{{count}} محصول ناموجود",
         supply: "نیاز به تأمین",
       },
-
       inventoryValue: {
         title: "ارزش موجودی",
         description: "بر اساس قیمت خرید",
       },
     },
-
-    // =====================================================
-    // Product Filters
-    // =====================================================
 
     productFilters: {
       title: "فیلتر محصولات",
@@ -463,6 +657,9 @@ const faTranslate = {
       },
 
       stats: {
+        sectionTitle: "خلاصه فروش نقدی امروز",
+        sectionDescription: "نمای کلی فروش نقدی امروز",
+
         todaySales: {
           title: "فروش امروز",
           description: "{{count}} فروش ثبت شده",
@@ -510,11 +707,14 @@ const faTranslate = {
         thisWeek: "این هفته",
         cashSales: "فروش نقدی",
         creditSales: "فروش نسیه",
+        loading: "در حال دریافت نمودار فروش...",
+        empty: "هنوز فروشی برای نمایش وجود ندارد.",
       },
 
       form: {
         title: "ثبت فروش جدید",
         subtitle: "اطلاعات فروش را وارد کنید",
+        badge: "نقدی",
 
         errors: {
           loadData: "دریافت اطلاعات با مشکل مواجه شد.",
@@ -524,10 +724,39 @@ const faTranslate = {
           priceInvalid: "قیمت فروش معتبر نیست.",
           creditCustomerRequired: "برای فروش نسیه، نام مشتری را وارد کنید.",
           submit: "ثبت فروش با مشکل مواجه شد.",
+          noSaleOptions: "برای این محصول هیچ روش فروشی تعریف نشده است.",
+          insufficientStockAvailable:
+            "موجودی کافی نیست. موجودی فعلی: {{count}} {{unit}}",
         },
 
         productSection: {
           title: "اطلاعات محصول",
+        },
+
+        stock: {
+          available: "موجودی قابل فروش",
+          availableShort: "موجودی:",
+          avgCostPerUnit: "میانگین هزینه هر واحد",
+          costPerSaleUnit: "هزینه هر واحد فروش",
+          minStock: "حداقل موجودی",
+        },
+
+        saleUnit: {
+          label: "واحد فروش",
+          hint: "بر چه اساسی این فروش",
+        },
+
+        warnings: {
+          noSaleOptions:
+            "این محصول هیچ روش فروشی ندارد. از بخش محصولات حداقل یکی اضافه کنید.",
+          insufficientStock:
+            "موجودی کافی نیست. شما {{available}} {{unit}} دارید ولی می‌خواهید {{requested}} {{unit}} بفروشید.",
+          belowCost: "قیمت فروش زیر قیمت خرید است — در این فروش ضرر می‌کنید.",
+        },
+
+        price: {
+          belowCost: "زیر قیمت خرید ({{cost}} {{currency}})",
+          profit: "سود: {{profit}} {{currency}} ({{margin}}٪)",
         },
 
         fields: {
@@ -553,6 +782,7 @@ const faTranslate = {
         total: {
           title: "مبلغ کل فروش",
           description: "تعداد × قیمت واحد",
+          expectedProfit: "سود تخمینی:",
         },
 
         payment: {
@@ -565,7 +795,9 @@ const faTranslate = {
           title: "اطلاعات مشتری",
           name: "نام مشتری",
           nameRequired: "نام مشتری *",
+          namePlaceholder: "نام مشتری (اختیاری)",
           phone: "07XX XXX XXX",
+          phonePlaceholder: "شماره تماس (اختیاری)",
         },
 
         note: {
@@ -580,8 +812,21 @@ const faTranslate = {
         },
       },
 
+      errors: {
+        noSaleData: "اطلاعات فروش ارسال نشده است.",
+        productNotFound: "محصول پیدا نشد.",
+        customerNotFound: "مشتری پیدا نشد.",
+        invalidId: "شناسه فروش معتبر نیست.",
+        notFound: "فروش پیدا نشد.",
+        insufficientStock:
+          "موجودی کافی نیست. موجودی فعلی: {{current}} {{unit}}",
+        insufficientStockWithFactor:
+          "موجودی کافی نیست. موجودی فعلی: {{current}} {{unit}} (این فروش معادل {{requested}} {{unit}} است)",
+      },
+
       table: {
         title: "لیست فروش‌ها",
+        cashTitle: "فروش‌های نقدی",
         salesCount: "فروش",
         loading: "در حال دریافت فروش‌ها...",
         viewDetails: "مشاهده جزئیات",
@@ -609,6 +854,16 @@ const faTranslate = {
 
         totalAmount: "مبلغ کل",
         units: "عدد",
+
+        unitBreakdown: "تفکیک واحد",
+        conversionFactor: "ضریب تبدیل",
+        deductedFromStock: "کسر شده از موجودی",
+
+        profitTitle: "سود و زیان",
+        profitableSale: "فروش سودآور",
+        lossMakingSale: "فروش با ضرر",
+        costPerUnit: "هزینه هر واحد: {{cost}} {{currency}} • حاشیه: {{margin}}",
+        totalProfit: "سود کل",
 
         paymentStatus: {
           title: "وضعیت پرداخت",
@@ -667,6 +922,7 @@ const faTranslate = {
       stats: {
         sectionTitle: "خلاصه حساب‌های نسیه",
         sectionDescription: "وضعیت فعلی بدهی مشتریان",
+        badge: "کل دوره",
 
         totalDebt: {
           title: "کل بدهی",
@@ -733,6 +989,7 @@ const faTranslate = {
         description: "سوابق حساب‌های نسیه مشتریان",
         accountsCount: "حساب",
         loading: "در حال بارگذاری حساب‌ها...",
+        paymentsCount: "پرداخت",
 
         columns: {
           customer: "مشتری",
@@ -765,6 +1022,8 @@ const faTranslate = {
           title: "حذف حساب مشتری",
           description:
             "این حساب به‌طور کامل تسویه شده است. آیا از حذف آن مطمئن هستید؟",
+          warning:
+            "حساب نسیه و سوابق پرداخت حذف می‌شود، اما سابقه فروش حفظ خواهد شد.",
           cancel: "انصراف",
           confirm: "حذف حساب",
         },
@@ -814,6 +1073,7 @@ const faTranslate = {
 
           creditSalesTitle: "فروش‌های نسیه",
           creditSalesDescription: "سوابق فروش‌های نسیه این مشتری",
+          noCreditSales: "هنوز فروش نسیه‌ای برای این مشتری ثبت نشده است.",
 
           paymentsTitle: "پرداخت‌های مشتری",
           paymentsDescription: "سوابق پرداخت‌های انجام‌شده توسط مشتری",
@@ -864,14 +1124,28 @@ const faTranslate = {
           card: "کارت / انتقال بانکی",
         },
 
+        quickFill: {
+          fullAmount: "کل بدهی",
+          half: "نصف",
+        },
+
+        remaining: {
+          willSettle: "بدهی به‌طور کامل تسویه می‌شود",
+          afterPayment: "باقی‌مانده پس از پرداخت",
+        },
+
         errors: {
+          customerRequired: "اطلاعات مشتری موجود نیست.",
           amountRequired: "لطفاً مبلغ پرداختی را وارد کنید.",
           amountTooHigh:
             "مبلغ پرداختی نمی‌تواند بیشتر از بدهی باقی‌مانده باشد.",
+          dateRequired: "لطفاً تاریخ پرداخت را انتخاب کنید.",
+          submit: "ثبت پرداخت انجام نشد. لطفاً دوباره تلاش کنید.",
         },
 
         actions: {
           cancel: "انصراف",
+          saving: "در حال ذخیره...",
           submit: "ثبت پرداخت",
         },
       },
@@ -887,6 +1161,11 @@ const faTranslate = {
           productRequired: "لطفاً محصول را انتخاب کنید.",
           quantityRequired: "تعداد باید بیشتر از صفر باشد.",
           priceInvalid: "لطفاً قیمت واحد معتبر وارد کنید.",
+          noSaleOptions: "برای این محصول هیچ روش فروشی تعریف نشده است.",
+          insufficientStock:
+            "موجودی کافی نیست. موجودی فعلی: {{count}} {{unit}}",
+          dateRequired: "تاریخ فروش الزامی است.",
+          submit: "ثبت فروش نسیه انجام نشد. لطفاً دوباره تلاش کنید.",
         },
 
         customer: {
@@ -895,6 +1174,31 @@ const faTranslate = {
           namePlaceholder: "مثلاً احمد محمدی",
           phone: "شماره تماس",
           phonePlaceholder: "0700123456",
+        },
+
+        stock: {
+          available: "موجودی قابل فروش",
+          avgCostPerUnit: "میانگین هزینه هر واحد",
+          costPerSaleUnit: "هزینه هر واحد فروش",
+          minStock: "حداقل موجودی",
+        },
+
+        saleUnit: {
+          label: "واحد فروش",
+          hint: "بر چه اساسی این فروش",
+        },
+
+        warnings: {
+          noSaleOptions:
+            "این محصول هیچ روش فروشی ندارد. از بخش محصولات حداقل یکی اضافه کنید.",
+          insufficientStock:
+            "موجودی کافی نیست. شما {{available}} {{unit}} دارید ولی می‌خواهید {{requested}} {{unit}} بفروشید.",
+          belowCost: "قیمت فروش زیر قیمت خرید است — در این فروش ضرر می‌کنید.",
+        },
+
+        price: {
+          belowCost: "زیر قیمت خرید ({{cost}} {{currency}})",
+          profit: "سود: {{profit}} {{currency}} ({{margin}}٪)",
         },
 
         sale: {
@@ -911,37 +1215,55 @@ const faTranslate = {
         total: {
           title: "مبلغ کل نسیه",
           description: "تعداد × قیمت هر واحد",
+          expectedProfit: "سود تخمینی:",
         },
+
+        dates: {
+          title: "تاریخ‌ها",
+          saleDate: "تاریخ فروش",
+          saleDateRequired: "(الزامی)",
+          saleDateHint: "کِی این فروش ثبت شده",
+          dueDate: "تاریخ سررسید",
+          dueDateOptional: "(اختیاری)",
+          dueDateHint: "کِی مشتری باید بدهی را بدهد",
+          pastDue: "سررسید گذشته!",
+          set: "تعیین‌شده",
+          clear: "پاک کردن",
+          clearAria: "پاک کردن سررسید",
+          quickPicks: {
+            week: "۱ هفته",
+            twoWeeks: "۲ هفته",
+            month: "۱ ماه",
+          },
+        },
+
+        note: {
+          title: "یادداشت",
+          placeholder: "یادداشت اختیاری درباره این فروش نسیه...",
+        },
+
+        tip: "نکته: Ctrl + Enter برای ذخیره",
 
         actions: {
           cancel: "انصراف",
+          saving: "در حال ذخیره...",
           submit: "ثبت فروش نسیه",
         },
       },
 
       errors: {
         load: "بارگذاری حساب‌های نسیه با مشکل مواجه شد.",
-
         invalidCustomer: "مشتری انتخاب‌شده معتبر نیست.",
-
         invalidPayment: "لطفاً مبلغ پرداختی معتبر وارد کنید.",
-
         paymentExceedsRemaining:
           "مبلغ پرداختی نمی‌تواند بیشتر از بدهی باقی‌مانده باشد.",
-
         paymentSave: "ثبت پرداخت انجام نشد. لطفاً دوباره تلاش کنید.",
-
         productNotFound: "محصول انتخاب‌شده پیدا نشد.",
-
         insufficientStock: "موجودی محصول کافی نیست. موجودی فعلی:",
-
         saleSave: "ثبت فروش نسیه انجام نشد. لطفاً دوباره تلاش کنید.",
-
         cannotDeleteWithDebt: "این مشتری هنوز بدهی باقی‌مانده دارد.",
-
         cannotDeleteWithHistory:
           "این مشتری دارای سابقه مالی است و قابل حذف نیست.",
-
         deleteCustomer: "حذف حساب مشتری انجام نشد. لطفاً دوباره تلاش کنید.",
       },
     },
@@ -954,6 +1276,15 @@ const faTranslate = {
       page: {
         title: "گزارشات",
         description: "بررسی عملکرد فروش و وضعیت مالی فروشگاه",
+      },
+
+      loading: "در حال دریافت گزارش...",
+
+      empty: "اطلاعاتی برای نمایش وجود ندارد.",
+
+      errors: {
+        load: "دریافت گزارش با مشکل مواجه شد.",
+        export: "ایجاد فایل خروجی انجام نشد.",
       },
 
       actions: {
@@ -971,15 +1302,6 @@ const faTranslate = {
         exportPdfMono: "PDF سیاه و سفید",
         exportPdfMonoDesc: "مناسب چاپ لیزری و پرینترهای اقتصادی",
       },
-
-      loading: "در حال دریافت گزارش...",
-
-      errors: {
-        load: "دریافت گزارش با مشکل مواجه شد.",
-        export: "ایجاد فایل خروجی انجام نشد.",
-      },
-
-      empty: "اطلاعاتی برای نمایش وجود ندارد.",
 
       filters: {
         title: "فیلترهای گزارش",
@@ -1059,6 +1381,31 @@ const faTranslate = {
         },
       },
 
+      table: {
+        title: "همه تراکنش‌ها",
+        count: "تراکنش",
+        searchPlaceholder: "جستجوی تراکنش‌ها...",
+        empty: "هیچ تراکنشی یافت نشد.",
+        viewDetails: "مشاهده جزئیات",
+
+        filters: {
+          all: "همه",
+          cash: "نقدی",
+          credit: "نسیه",
+        },
+
+        columns: {
+          product: "محصول",
+          category: "دسته‌بندی",
+          quantity: "تعداد",
+          amount: "مبلغ",
+          payment: "پرداخت",
+          customer: "مشتری",
+          date: "تاریخ",
+          actions: "عملیات",
+        },
+      },
+
       export: {
         title: "گزارش فروش",
         salesTitle: "جزئیات فروش",
@@ -1125,6 +1472,8 @@ const faTranslate = {
       },
 
       filters: {
+        title: "فیلترهای لیست خرید",
+        description: "اقلام را بر اساس وضعیت و اولویت فیلتر کنید.",
         searchPlaceholder: "جستجوی مورد خرید...",
 
         status: {
@@ -1145,6 +1494,8 @@ const faTranslate = {
       },
 
       stats: {
+        sectionTitle: "خلاصه لیست خرید",
+        sectionDescription: "وضعیت فعلی اقلام لیست خرید",
         total: "کل موارد",
         pending: "باقی‌مانده",
         completed: "انجام‌شده",
@@ -1269,6 +1620,7 @@ const faTranslate = {
         labels: {
           quantity: "تعداد:",
           priority: "اولویت:",
+          note: "یادداشت",
         },
 
         categoryPrefix: "دسته‌بندی:",
@@ -1310,6 +1662,11 @@ const faTranslate = {
       store: {
         title: "اطلاعات فروشگاه",
         description: "اطلاعات اصلی فروشگاه را مدیریت کنید",
+
+        defaults: {
+          storeName: "فروشگاه من",
+          ownerName: "مدیر فروشگاه",
+        },
 
         fields: {
           name: {
@@ -1378,8 +1735,7 @@ const faTranslate = {
           title: "سؤالات امنیتی",
           description:
             "این سؤالات برای بازیابی اطلاعات ورود در صورت فراموشی استفاده می‌شوند.",
-          hint:
-            "برای تغییر، ۳ سؤال جدید انتخاب کنید و به همه پاسخ دهید. در غیر این صورت، خالی بگذارید.",
+          hint: "برای تغییر، ۳ سؤال جدید انتخاب کنید و به همه پاسخ دهید. در غیر این صورت، خالی بگذارید.",
           currentTitle: "سؤالات فعلی",
           changeTitle: "تغییر سؤالات",
           changeToggle: "می‌خواهم سؤالات را تغییر دهم",
@@ -1394,8 +1750,7 @@ const faTranslate = {
           success: "اطلاعات حساب با موفقیت ذخیره شد.",
           successWithCredentials:
             "ذخیره شد. دفعه بعد با ایمیل و رمز عبور جدید وارد شوید.",
-          successWithSecurity:
-            "اطلاعات و سؤالات امنیتی با موفقیت ذخیره شد.",
+          successWithSecurity: "اطلاعات و سؤالات امنیتی با موفقیت ذخیره شد.",
         },
 
         errors: {
@@ -1403,7 +1758,8 @@ const faTranslate = {
           nameRequired: "نام مدیر را وارد کنید.",
           emailRequired: "ایمیل را وارد کنید.",
           emailInvalid: "فرمت ایمیل صحیح نیست.",
-          emailTypo: "ایمیل احتمالاً اشتباه است. منظورتان «{{suggestion}}» بود؟",
+          emailTypo:
+            "ایمیل احتمالاً اشتباه است. منظورتان «{{suggestion}}» بود؟",
           emailTypoSuggest: "آیا منظورتان «{{suggestion}}» بود؟",
           passwordRequired: "رمز عبور را وارد کنید.",
           passwordMin: "رمز عبور باید حداقل {{count}} کاراکتر باشد.",
@@ -1458,42 +1814,34 @@ const faTranslate = {
             name: "سبز زمردی",
             description: "پیشنهاد اصلی",
           },
-
           blue: {
             name: "آبی",
             description: "آرام و حرفه‌ای",
           },
-
           indigo: {
             name: "نیلی",
             description: "عمیق و متمرکز",
           },
-
           violet: {
             name: "بنفش",
             description: "مدرن و لوکس",
           },
-
           rose: {
             name: "رز",
             description: "ظریف و متفاوت",
           },
-
           red: {
             name: "قرمز",
             description: "پرشور و پرانرژی",
           },
-
           amber: {
             name: "کهربایی",
             description: "گرم و درخشان",
           },
-
           cyan: {
             name: "فیروزه‌ای",
             description: "تکنولوژیک و تازه",
           },
-
           teal: {
             name: "سبزآبی",
             description: "متین و متعادل",
@@ -1524,12 +1872,16 @@ const faTranslate = {
           description:
             "اطلاعات ذخیره‌شده در یک فایل Backup را دوباره وارد کنید.",
 
+          confirm:
+            "آیا مطمئن هستید؟ تمام اطلاعات فعلی با فایل Backup جایگزین می‌شود. این عملیات قابل بازگشت نیست.",
+
           restoring: "در حال بازیابی...",
           button: "انتخاب فایل Backup",
         },
 
         fileFormat: {
           label: "فرمت پشتیبان",
+          value: "JSON — پشتیبان کامل",
         },
 
         messages: {
@@ -1566,6 +1918,16 @@ const faTranslate = {
 
         deleteConfirm: "آیا از حذف دسته‌بندی «{{name}}» مطمئن هستید؟",
 
+        deleteModal: {
+          title: "حذف دسته‌بندی",
+          subtitle: "تأیید عملیات حذف",
+          message: "آیا از حذف دسته‌بندی «{{name}}» مطمئن هستید؟",
+          warning: "این عملیات قابل بازگشت نیست.",
+          cancel: "انصراف",
+          confirm: "حذف",
+          deleting: "در حال حذف...",
+        },
+
         messages: {
           added: "دسته‌بندی با موفقیت اضافه شد.",
           deleted: "دسته‌بندی با موفقیت حذف شد.",
@@ -1579,6 +1941,49 @@ const faTranslate = {
         },
       },
 
+      units: {
+        title: "واحدهای اندازه‌گیری",
+        description:
+          "مدیریت واحدهای مورد استفاده در محصولات (عدد، بسته، کارتن، کیلو، متر مربع و ...)",
+
+        form: {
+          placeholder: "نام واحد جدید",
+          add: "افزودن",
+        },
+
+        list: {
+          title: "واحدهای موجود",
+          count: "واحد",
+          empty: "هنوز واحدی وجود ندارد.",
+        },
+
+        actions: {
+          delete: "حذف واحد",
+        },
+
+        deleteModal: {
+          title: "حذف واحد",
+          subtitle: "تأیید عملیات حذف",
+          message: "آیا از حذف واحد «{{name}}» مطمئن هستید؟",
+          warning: "این عملیات قابل بازگشت نیست.",
+          cancel: "انصراف",
+          confirm: "حذف",
+          deleting: "در حال حذف...",
+        },
+
+        messages: {
+          added: "واحد با موفقیت اضافه شد.",
+          deleted: "واحد با موفقیت حذف شد.",
+        },
+
+        errors: {
+          load: "دریافت واحدها انجام نشد.",
+          add: "افزودن واحد انجام نشد.",
+          delete: "حذف واحد انجام نشد.",
+          nameRequired: "نام واحد الزامی است.",
+        },
+      },
+
       notifications: {
         title: "اعلان‌ها",
         description: "مدیریت اعلان‌های سیستم",
@@ -1588,17 +1993,14 @@ const faTranslate = {
             title: "موجودی کم",
             description: "هنگام کم شدن موجودی محصول اطلاع بده",
           },
-
           newSale: {
             title: "ثبت فروش",
             description: "نمایش اعلان هنگام ثبت فروش جدید",
           },
-
           credit: {
             title: "بدهی مشتری",
             description: "یادآوری فروش‌های نسیه",
           },
-
           successfulActions: {
             title: "عملیات موفق",
             description: "نمایش پیام موفقیت عملیات‌ها",
@@ -1641,12 +2043,10 @@ const faTranslate = {
           label: "ایمیل",
           placeholder: "example@email.com",
         },
-
         password: {
           label: "رمز عبور",
           placeholder: "رمز عبور خود را وارد کنید",
         },
-
         rememberMe: "مرا به خاطر بسپار",
       },
 
@@ -1665,8 +2065,10 @@ const faTranslate = {
         failed: "ورود به سیستم انجام نشد.",
       },
 
-      // ─────────── Setup (اولین بار) ───────────
       setup: {
+        badge: "راه‌اندازی",
+        stepLabel: "مرحله {{current}} از {{total}}",
+
         brand: {
           title: "به فروشگاه خود خوش آمدید",
           description: "برای شروع، حساب مدیر فروشگاه خود را بسازید",
@@ -1707,6 +2109,8 @@ const faTranslate = {
         },
 
         actions: {
+          next: "بعدی",
+          back: "بازگشت به مرحله قبل",
           create: "ساخت حساب و شروع",
           creating: "در حال ساخت...",
         },
@@ -1727,7 +2131,6 @@ const faTranslate = {
           "این اطلاعات فقط روی همین دستگاه ذخیره می‌شود. آن را در جای امنی نگه دارید.",
       },
 
-      // ─────────── بازیابی رمز عبور ───────────
       forgotPassword: {
         title: "بازیابی اطلاعات ورود",
         subtitle: "پاسخ سؤالات امنیتی خود را وارد کنید",
@@ -1736,8 +2139,7 @@ const faTranslate = {
 
         stepEmail: {
           title: "ایمیل خود را وارد کنید",
-          description:
-            "ایمیلی که هنگام ثبت‌نام استفاده کردید را وارد کنید",
+          description: "ایمیلی که هنگام ثبت‌نام استفاده کردید را وارد کنید",
           emailLabel: "ایمیل",
           emailPlaceholder: "example@email.com",
           submit: "بررسی ایمیل",
@@ -1746,8 +2148,7 @@ const faTranslate = {
 
         stepQuestions: {
           title: "به سؤالات امنیتی پاسخ دهید",
-          description:
-            "پاسخ‌ها به حروف بزرگ/کوچک و فاصله‌ها حساس نیستند",
+          description: "پاسخ‌ها به حروف بزرگ/کوچک و فاصله‌ها حساس نیستند",
           answerLabel: "پاسخ",
           answerPlaceholder: "پاسخ خود را وارد کنید",
           submit: "تأیید پاسخ‌ها",
@@ -1793,6 +2194,140 @@ const faTranslate = {
       security: "این بخش فقط برای مدیر فروشگاه است",
 
       footer: "Shop Manager • سیستم مدیریت فروشگاه",
+    },
+
+    // =====================================================
+    // Profile
+    // =====================================================
+
+    profile: {
+      title: "پروفایل من",
+      subtitle: "اطلاعات حساب و عکس پروفایل",
+      closeAria: "بستن",
+
+      photo: {
+        sectionTitle: "عکس مدیر فروشگاه",
+        sectionDescription:
+          "ابتدا عکس را انتخاب کنید و سپس چهره را داخل کادر تنظیم کنید. سیستم بعد از برش، گوشه‌ها را کمی نرم و تصویر را فشرده می‌کند.",
+        changeTitle: "تغییر عکس",
+        badge: "عکس پروفایل",
+        maxSize: "حداکثر ۵ MB",
+        selectPhoto: "انتخاب عکس",
+        cancelNew: "لغو عکس جدید",
+        removePhoto: "حذف عکس",
+        processing: "در حال پردازش...",
+        fileSizeLabel: "حجم نهایی:",
+        dropzone: {
+          title: "عکس را اینجا رها کنید",
+          description: "یا برای انتخاب از کامپیوتر کلیک کنید",
+        },
+      },
+
+      account: {
+        title: "اطلاعات حساب",
+        description: "اطلاعات واقعی حساب مدیر",
+        nameLabel: "نام مدیر",
+        emailLabel: "ایمیل",
+      },
+
+      footer: {
+        hint: "عکس ابتدا برش داده می‌شود و سپس برای نگهداری بهینه فشرده خواهد شد.",
+        cancel: "انصراف",
+        save: "ذخیره تغییرات",
+        saving: "در حال ذخیره...",
+      },
+
+      crop: {
+        title: "تنظیم عکس پروفایل",
+        subtitle: "چهره را داخل کادر قرار دهید",
+        closeAria: "بستن برش",
+        dragHint: "عکس را بکشید تا چهره در مرکز قرار بگیرد",
+        zoomLabel: "بزرگنمایی",
+        zoomAria: "بزرگنمایی تصویر",
+        cancel: "لغو",
+        confirm: "تأیید برش",
+        processing: "در حال پردازش...",
+        footerHint:
+          "صورت را با حرکت انگشت یا موس تنظیم کنید و بعد برش را تأیید کنید.",
+      },
+
+      errors: {
+        imageReadFailed: "خواندن تصویر امکان‌پذیر نیست.",
+        fileReadFailed: "خواندن فایل تصویر انجام نشد.",
+        preparationFailed:
+          "آماده‌سازی تصویر انجام نشد. لطفاً دوباره تلاش کنید.",
+        invalidCropArea:
+          "ناحیه برش معتبر نیست. لطفاً دوباره تلاش کنید.",
+        cropFailed:
+          "برش و پردازش عکس انجام نشد. لطفاً دوباره تلاش کنید.",
+        processFailed: "پردازش عکس انجام نشد.",
+        removeFailed: "حذف عکس انجام نشد.",
+        removeAvatarFailed: "حذف عکس پروفایل انجام نشد.",
+        saveFailed: "ذخیره اطلاعات پروفایل انجام نشد.",
+        saveFailedRetry:
+          "ذخیره اطلاعات پروفایل انجام نشد. لطفاً دوباره تلاش کنید.",
+      },
+
+      messages: {
+        cropSuccess:
+          "برش عکس با موفقیت انجام شد. برای نهایی شدن، ذخیره تغییرات را بزنید.",
+        removeSuccess: "عکس پروفایل با موفقیت حذف شد.",
+        saveSuccess: "اطلاعات پروفایل با موفقیت ذخیره شد.",
+      },
+    },
+
+    // =====================================================
+    // Database Errors
+    // =====================================================
+
+    db: {
+      units: {
+        nameRequired: "نام واحد الزامی است.",
+        invalidId: "شناسه واحد معتبر نیست.",
+        notFound: "واحد پیدا نشد.",
+        usedAsBase:
+          "این واحد به‌عنوان واحد پایه در محصولات استفاده شده است.",
+      },
+
+      categories: {
+        nameRequired: "نام دسته‌بندی الزامی است.",
+        invalidId: "شناسه دسته‌بندی معتبر نیست.",
+        notFound: "دسته‌بندی پیدا نشد.",
+        usedByProducts: "این دسته‌بندی در محصولات استفاده شده است.",
+      },
+
+      products: {
+        nameRequired: "نام محصول الزامی است.",
+        baseUnitRequired: "واحد پایه الزامی است.",
+        invalidId: "شناسه محصول معتبر نیست.",
+        notFound: "محصول پیدا نشد.",
+        hasSales: "این محصول دارای سابقه فروش است و قابل حذف نیست.",
+      },
+
+      purchases: {
+        quantityInvalid: "تعداد خریداری معتبر نیست.",
+        factorInvalid: "ضریب تبدیل معتبر نیست.",
+        priceInvalid: "قیمت خرید معتبر نیست.",
+      },
+
+      customers: {
+        nameRequired: "نام مشتری الزامی است.",
+        invalidId: "شناسه مشتری معتبر نیست.",
+        notFound: "مشتری پیدا نشد.",
+        hasHistory: "این مشتری دارای سابقه مالی است و قابل حذف نیست.",
+      },
+
+      shoppingList: {
+        nameRequired: "نام مورد خرید الزامی است.",
+        invalidId: "شناسه مورد خرید معتبر نیست.",
+        notFound: "مورد خرید پیدا نشد.",
+      },
+
+      expenses: {
+        amountNegative: "مبلغ هزینه نمی‌تواند منفی باشد.",
+        invalidId: "شناسه هزینه معتبر نیست.",
+        notFound: "هزینه پیدا نشد.",
+      },
     },
   },
 };

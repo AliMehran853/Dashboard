@@ -1,4 +1,5 @@
 import Dexie from 'dexie';
+import i18n from '../i18n';
 
 // =========================================================
 // Database
@@ -189,6 +190,8 @@ db.version(6).stores({
 // Constants
 // =========================================================
 
+// ⚠️ NOTE: These are DATA (stored in DB), not UI.
+// Do NOT translate them — they must remain stable across languages.
 export const defaultUnits = [
     'عدد', 'دانه', 'بوتل',
     'بسته', 'کارتن', 'بوجی', 'پلاستیک',
@@ -196,6 +199,7 @@ export const defaultUnits = [
     'لیتر', 'متر', 'متر مربع',
 ];
 
+// Already bilingual — used by components with i18n
 export const UNIT_CATEGORIES = [
     { value: 'count',   labelFa: 'تعداد', labelEn: 'Count' },
     { value: 'weight',  labelFa: 'وزن',   labelEn: 'Weight' },
@@ -270,10 +274,6 @@ const nowIso = () => new Date().toISOString();
 // Sale-Option Math (shared with UI)
 // =========================================================
 
-/**
- * Normalize a raw sale-option from a form/DB into a consistent shape.
- * Auto-computes minPrice & suggestedPrice from avgCost + targetMargin.
- */
 export const normalizeSaleOption = (opt, avgCost = 0, index = 0) => {
     const factor = Math.max(Number(opt?.factor) || 1, 0.0001);
     const price = Math.max(Number(opt?.price) || 0, 0);
@@ -295,9 +295,6 @@ export const normalizeSaleOption = (opt, avgCost = 0, index = 0) => {
     };
 };
 
-/**
- * Compute cost + profit + margin for a sale option against avgCost.
- */
 export const computeSaleOptionMetrics = (option, avgCost) => {
     const factor = Number(option?.factor) || 1;
     const price = Number(option?.price) || 0;
@@ -322,7 +319,7 @@ export const computeSaleOptionMetrics = (option, avgCost) => {
 export const addUnit = async (name, category = 'count') => {
     await initializeDatabase();
     const cleanName = String(name ?? '').trim();
-    if (!cleanName) throw new Error('نام واحد الزامی است.');
+    if (!cleanName) throw new Error(i18n.t('db.units.nameRequired'));
 
     const existing = await db.units.where('name').equalsIgnoreCase(cleanName).first();
     if (existing) return existing;
@@ -343,14 +340,14 @@ export const getUnits = async () => {
 export const deleteUnit = async (id) => {
     await initializeDatabase();
     const unitId = normalizeId(id);
-    if (!unitId) throw new Error('شناسه واحد معتبر نیست.');
+    if (!unitId) throw new Error(i18n.t('db.units.invalidId'));
 
     const unit = await db.units.get(unitId);
-    if (!unit) throw new Error('واحد پیدا نشد.');
+    if (!unit) throw new Error(i18n.t('db.units.notFound'));
 
     const usedAsBase = await db.products.where('baseUnit').equals(unit.name).count();
     if (usedAsBase > 0) {
-        throw new Error('این واحد به‌عنوان واحد پایه در محصولات استفاده شده است.');
+        throw new Error(i18n.t('db.units.usedAsBase'));
     }
 
     await db.units.delete(unitId);
@@ -367,7 +364,7 @@ export const deleteUnit = async (id) => {
 export const addCategory = async (name) => {
     await initializeDatabase();
     const cleanName = String(name ?? '').trim();
-    if (!cleanName) throw new Error('نام دسته‌بندی الزامی است.');
+    if (!cleanName) throw new Error(i18n.t('db.categories.nameRequired'));
 
     const existing = await db.categories.where('name').equalsIgnoreCase(cleanName).first();
     if (existing) return existing;
@@ -388,14 +385,14 @@ export const getCategories = async () => {
 export const deleteCategory = async (id) => {
     await initializeDatabase();
     const categoryId = normalizeId(id);
-    if (!categoryId) throw new Error('شناسه دسته‌بندی معتبر نیست.');
+    if (!categoryId) throw new Error(i18n.t('db.categories.invalidId'));
 
     const category = await db.categories.get(categoryId);
-    if (!category) throw new Error('دسته‌بندی پیدا نشد.');
+    if (!category) throw new Error(i18n.t('db.categories.notFound'));
 
     const usedByProducts = await db.products.where('category').equals(category.name).count();
     if (usedByProducts > 0) {
-        throw new Error('این دسته‌بندی در محصولات استفاده شده است.');
+        throw new Error(i18n.t('db.categories.usedByProducts'));
     }
 
     await db.categories.delete(categoryId);
@@ -412,8 +409,8 @@ export const deleteCategory = async (id) => {
 export const addProduct = async (product) => {
     await initializeDatabase();
 
-    if (!product?.name?.trim()) throw new Error('نام محصول الزامی است.');
-    if (!product?.baseUnit?.trim()) throw new Error('واحد پایه الزامی است.');
+    if (!product?.name?.trim()) throw new Error(i18n.t('db.products.nameRequired'));
+    if (!product?.baseUnit?.trim()) throw new Error(i18n.t('db.products.baseUnitRequired'));
 
     const now = nowIso();
 
@@ -434,7 +431,6 @@ export const addProduct = async (product) => {
         .filter((o) => o && o.unit && Number(o.factor) > 0)
         .map((o, idx) => normalizeSaleOption(o, costPerBase, idx));
 
-    // If none provided, auto-create one from base unit
     if (saleOptions.length === 0 && costPerBase > 0) {
         saleOptions.push(normalizeSaleOption(
             {
@@ -522,16 +518,16 @@ export const getProduct = async (id) => {
 export const updateProduct = async (id, changes) => {
     await initializeDatabase();
     const productId = normalizeId(id);
-    if (!productId) throw new Error('شناسه محصول معتبر نیست.');
+    if (!productId) throw new Error(i18n.t('db.products.invalidId'));
 
     const existing = await db.products.get(productId);
-    if (!existing) throw new Error('محصول پیدا نشد.');
+    if (!existing) throw new Error(i18n.t('db.products.notFound'));
 
     const patch = {};
 
     if (Object.prototype.hasOwnProperty.call(changes, 'name')) {
         const name = String(changes.name ?? '').trim();
-        if (!name) throw new Error('نام محصول الزامی است.');
+        if (!name) throw new Error(i18n.t('db.products.nameRequired'));
         patch.name = name;
     }
     if (Object.prototype.hasOwnProperty.call(changes, 'category')) {
@@ -544,7 +540,6 @@ export const updateProduct = async (id, changes) => {
         patch.minStock = Number(changes.minStock) || 0;
     }
 
-    // Sale options — recompute min/suggested from current avgCost
     if (Array.isArray(changes.saleOptions)) {
         const avgCost = Number(existing.avgCost) || 0;
         patch.saleOptions = changes.saleOptions
@@ -556,7 +551,6 @@ export const updateProduct = async (id, changes) => {
         }
     }
 
-    // Purchase options — editable list of templates
     if (Array.isArray(changes.purchaseOptions)) {
         patch.purchaseOptions = changes.purchaseOptions.map((po, idx) => ({
             id: po.id || `po_${Date.now()}_${idx}`,
@@ -568,7 +562,6 @@ export const updateProduct = async (id, changes) => {
         }));
     }
 
-    // Conversions — cross-unit ratios
     if (Array.isArray(changes.conversions)) {
         patch.conversions = changes.conversions.map((c, idx) => ({
             id: c.id || `conv_${Date.now()}_${idx}`,
@@ -578,9 +571,6 @@ export const updateProduct = async (id, changes) => {
             note: String(c.note || '').trim(),
         }));
     }
-
-    // NOTE: stock, avgCost, totalValue, baseUnit are NOT editable.
-    // They change only via purchases.
 
     await db.products.update(productId, { ...patch, updatedAt: nowIso() });
 
@@ -594,14 +584,14 @@ export const updateProduct = async (id, changes) => {
 export const deleteProduct = async (id) => {
     await initializeDatabase();
     const productId = normalizeId(id);
-    if (!productId) throw new Error('شناسه محصول معتبر نیست.');
+    if (!productId) throw new Error(i18n.t('db.products.invalidId'));
 
     const product = await db.products.get(productId);
-    if (!product) throw new Error('محصول پیدا نشد.');
+    if (!product) throw new Error(i18n.t('db.products.notFound'));
 
     const salesCount = await db.sales.where('productId').equals(productId).count();
     if (salesCount > 0) {
-        throw new Error('این محصول دارای سابقه فروش است و قابل حذف نیست.');
+        throw new Error(i18n.t('db.products.hasSales'));
     }
 
     await db.products.delete(productId);
@@ -619,17 +609,17 @@ export const getProductCount = async () => {
 };
 
 // =========================================================
-// Purchases (add stock + weighted average + refresh suggestions)
+// Purchases
 // =========================================================
 
 export const addPurchase = async (productId, purchase) => {
     await initializeDatabase();
 
     const id = normalizeId(productId);
-    if (!id) throw new Error('شناسه محصول معتبر نیست.');
+    if (!id) throw new Error(i18n.t('db.products.invalidId'));
 
     const product = await db.products.get(id);
-    if (!product) throw new Error('محصول پیدا نشد.');
+    if (!product) throw new Error(i18n.t('db.products.notFound'));
 
     const qty = Number(purchase?.quantity) || 0;
     const factor = Number(purchase?.factor) || 1;
@@ -637,15 +627,14 @@ export const addPurchase = async (productId, purchase) => {
     const unit = String(purchase?.unit || product.baseUnit).trim();
     const note = String(purchase?.note || '').trim();
 
-    if (qty <= 0) throw new Error('تعداد خریداری معتبر نیست.');
-    if (factor <= 0) throw new Error('ضریب تبدیل معتبر نیست.');
-    if (price < 0) throw new Error('قیمت خرید معتبر نیست.');
+    if (qty <= 0) throw new Error(i18n.t('db.purchases.quantityInvalid'));
+    if (factor <= 0) throw new Error(i18n.t('db.purchases.factorInvalid'));
+    if (price < 0) throw new Error(i18n.t('db.purchases.priceInvalid'));
 
     const receivedInBase = qty * factor;
     const totalPaid = qty * price;
     const costPerBase = price / factor;
 
-    // Weighted average
     const oldStock = Number(product.stock) || 0;
     const oldValue = Number(product.totalValue) || 0;
     const newStock = oldStock + receivedInBase;
@@ -670,7 +659,6 @@ export const addPurchase = async (productId, purchase) => {
 
     const purchaseId = await db.purchases.add(purchaseRecord);
 
-    // ═══ Recompute all sale-option suggestions from new avgCost ═══
     const existingOptions = Array.isArray(product.saleOptions) ? product.saleOptions : [];
     const refreshedOptions = existingOptions.map((o, idx) => {
         const margin = Number.isFinite(Number(o.targetMargin)) ? Number(o.targetMargin) : 25;
@@ -685,7 +673,6 @@ export const addPurchase = async (productId, purchase) => {
         };
     });
 
-    // ═══ Update purchase-options templates ═══
     const existingPurchaseOptions = Array.isArray(product.purchaseOptions)
         ? [...product.purchaseOptions]
         : [];
@@ -749,7 +736,7 @@ export const addCustomer = async (customer) => {
     await initializeDatabase();
     const name = customer?.name?.trim() || '';
     const phone = customer?.phone?.trim() || '';
-    if (!name) throw new Error('نام مشتری الزامی است.');
+    if (!name) throw new Error(i18n.t('db.customers.nameRequired'));
 
     let existing = null;
     if (phone) existing = await db.customers.where('phone').equals(phone).first();
@@ -779,15 +766,15 @@ export const getCustomer = async (id) => {
 export const updateCustomer = async (id, changes) => {
     await initializeDatabase();
     const customerId = normalizeId(id);
-    if (!customerId) throw new Error('شناسه مشتری معتبر نیست.');
+    if (!customerId) throw new Error(i18n.t('db.customers.invalidId'));
 
     const customer = await db.customers.get(customerId);
-    if (!customer) throw new Error('مشتری پیدا نشد.');
+    if (!customer) throw new Error(i18n.t('db.customers.notFound'));
 
     const patch = {};
     if (Object.prototype.hasOwnProperty.call(changes, 'name')) {
         const name = String(changes.name ?? '').trim();
-        if (!name) throw new Error('نام مشتری الزامی است.');
+        if (!name) throw new Error(i18n.t('db.customers.nameRequired'));
         patch.name = name;
     }
     if (Object.prototype.hasOwnProperty.call(changes, 'phone')) {
@@ -803,10 +790,10 @@ export const updateCustomer = async (id, changes) => {
 export const deleteCustomer = async (id) => {
     await initializeDatabase();
     const customerId = normalizeId(id);
-    if (!customerId) throw new Error('شناسه مشتری معتبر نیست.');
+    if (!customerId) throw new Error(i18n.t('db.customers.invalidId'));
 
     const customer = await db.customers.get(customerId);
-    if (!customer) throw new Error('مشتری پیدا نشد.');
+    if (!customer) throw new Error(i18n.t('db.customers.notFound'));
 
     const [salesCount, creditSalesCount, creditPaymentsCount] = await Promise.all([
         db.sales.where('customerId').equals(customerId).count(),
@@ -815,7 +802,7 @@ export const deleteCustomer = async (id) => {
     ]);
 
     if (salesCount + creditSalesCount + creditPaymentsCount > 0) {
-        throw new Error('این مشتری دارای سابقه مالی است و قابل حذف نیست.');
+        throw new Error(i18n.t('db.customers.hasHistory'));
     }
 
     await db.customers.delete(customerId);
@@ -825,7 +812,7 @@ export const deleteCustomer = async (id) => {
 };
 
 // =========================================================
-// Shopping List (FIXED — quantity, unit, note, priority normalize)
+// Shopping List
 // =========================================================
 
 const SHOPPING_ALLOWED_PRIORITIES = ['low', 'normal', 'high', 'urgent'];
@@ -842,7 +829,7 @@ const normalizeShoppingQuantity = (value) => {
 
 export const addShoppingItem = async (item) => {
     await initializeDatabase();
-    if (!item?.name?.trim()) throw new Error('نام مورد خرید الزامی است.');
+    if (!item?.name?.trim()) throw new Error(i18n.t('db.shoppingList.nameRequired'));
 
     const now = nowIso();
 
@@ -881,16 +868,16 @@ export const getShoppingItem = async (id) => {
 export const updateShoppingItem = async (id, changes) => {
     await initializeDatabase();
     const itemId = normalizeId(id);
-    if (!itemId) throw new Error('شناسه مورد خرید معتبر نیست.');
+    if (!itemId) throw new Error(i18n.t('db.shoppingList.invalidId'));
 
     const existing = await db.shoppingList.get(itemId);
-    if (!existing) throw new Error('مورد خرید پیدا نشد.');
+    if (!existing) throw new Error(i18n.t('db.shoppingList.notFound'));
 
     const patch = {};
 
     if (Object.prototype.hasOwnProperty.call(changes, 'name')) {
         const name = String(changes.name ?? '').trim();
-        if (!name) throw new Error('نام مورد خرید الزامی است.');
+        if (!name) throw new Error(i18n.t('db.shoppingList.nameRequired'));
         patch.name = name;
     }
 
@@ -929,10 +916,10 @@ export const updateShoppingItem = async (id, changes) => {
 export const deleteShoppingItem = async (id) => {
     await initializeDatabase();
     const itemId = normalizeId(id);
-    if (!itemId) throw new Error('شناسه مورد خرید معتبر نیست.');
+    if (!itemId) throw new Error(i18n.t('db.shoppingList.invalidId'));
 
     const existing = await db.shoppingList.get(itemId);
-    if (!existing) throw new Error('مورد خرید پیدا نشد.');
+    if (!existing) throw new Error(i18n.t('db.shoppingList.notFound'));
 
     await db.shoppingList.delete(itemId);
     dispatchEventSafe('shopping-list-updated');
@@ -943,7 +930,7 @@ export const deleteShoppingItem = async (id) => {
 export const toggleShoppingItem = async (id) => {
     await initializeDatabase();
     const item = await getShoppingItem(id);
-    if (!item) throw new Error('مورد خرید پیدا نشد.');
+    if (!item) throw new Error(i18n.t('db.shoppingList.notFound'));
     return updateShoppingItem(id, { completed: !Boolean(item.completed) });
 };
 
@@ -974,7 +961,7 @@ export const addExpense = async (expense) => {
         createdAt: now,
     };
 
-    if (newExpense.amount < 0) throw new Error('مبلغ هزینه نمی‌تواند منفی باشد.');
+    if (newExpense.amount < 0) throw new Error(i18n.t('db.expenses.amountNegative'));
 
     const id = await db.expenses.add(newExpense);
     dispatchEventSafe('expenses-updated');
@@ -990,10 +977,10 @@ export const getExpenses = async () => {
 export const deleteExpense = async (id) => {
     await initializeDatabase();
     const expenseId = normalizeId(id);
-    if (!expenseId) throw new Error('شناسه هزینه معتبر نیست.');
+    if (!expenseId) throw new Error(i18n.t('db.expenses.invalidId'));
 
     const existing = await db.expenses.get(expenseId);
-    if (!existing) throw new Error('هزینه پیدا نشد.');
+    if (!existing) throw new Error(i18n.t('db.expenses.notFound'));
 
     await db.expenses.delete(expenseId);
     dispatchEventSafe('expenses-updated');

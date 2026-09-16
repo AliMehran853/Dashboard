@@ -16,6 +16,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 import { compressProfileImage, formatImageSize } from "../../utils/imageUtils";
 
@@ -40,7 +41,7 @@ const SECTION_CLASS = `relative overflow-hidden rounded-3xl border border-[var(-
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-const prepareFileForCrop = (file) =>
+const prepareFileForCrop = (file, t) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -52,10 +53,10 @@ const prepareFileForCrop = (file) =>
           width: image.naturalWidth || image.width,
           height: image.naturalHeight || image.height,
         });
-      image.onerror = () => reject(new Error("خواندن تصویر امکان‌پذیر نیست."));
+      image.onerror = () => reject(new Error(t("profile.errors.imageReadFailed")));
       image.src = source;
     };
-    reader.onerror = () => reject(new Error("خواندن فایل تصویر انجام نشد."));
+    reader.onerror = () => reject(new Error(t("profile.errors.fileReadFailed")));
     reader.readAsDataURL(file);
   });
 
@@ -64,6 +65,7 @@ const prepareFileForCrop = (file) =>
 // =========================================================
 
 export default function ProfileModal({ isOpen, onClose }) {
+  const { t, i18n } = useTranslation();
   const { user, getAccount, updateAccount, removeProfileAvatar } = useAuth();
 
   const fileInputRef = useRef(null);
@@ -205,7 +207,7 @@ export default function ProfileModal({ isOpen, onClose }) {
     setSuccess("");
     setIsProcessing(true);
     try {
-      const prepared = await prepareFileForCrop(file);
+      const prepared = await prepareFileForCrop(file, t);
       setCropFile(file);
       setCropSource(prepared.source);
       setCropImageSize({ width: prepared.width, height: prepared.height });
@@ -215,8 +217,7 @@ export default function ProfileModal({ isOpen, onClose }) {
     } catch (fileError) {
       console.error("Crop Preparation Error:", fileError);
       setError(
-        fileError?.message ||
-          "آماده‌سازی تصویر انجام نشد. لطفاً دوباره تلاش کنید.",
+        fileError?.message || t("profile.errors.preparationFailed"),
       );
     } finally {
       setIsProcessing(false);
@@ -340,7 +341,7 @@ export default function ProfileModal({ isOpen, onClose }) {
 
     const cropArea = getSourceCropArea();
     if (!cropArea) {
-      setError("ناحیه برش معتبر نیست. لطفاً دوباره تلاش کنید.");
+      setError(t("profile.errors.invalidCropArea"));
       return;
     }
 
@@ -348,19 +349,17 @@ export default function ProfileModal({ isOpen, onClose }) {
     try {
       const result = await compressProfileImage(cropFile, cropArea);
       if (!result.success) {
-        setError(result.message || "پردازش عکس انجام نشد.");
+        setError(result.message || t("profile.errors.processFailed"));
         return;
       }
       setPreviewAvatar(result.dataUrl);
       setSelectedFile(cropFile);
       setCompressedSize(result.size);
       resetCrop();
-      setSuccess(
-        "برش عکس با موفقیت انجام شد. برای نهایی شدن، ذخیره تغییرات را بزنید.",
-      );
+      setSuccess(t("profile.messages.cropSuccess"));
     } catch (cropError) {
       console.error("Crop Processing Error:", cropError);
-      setError("برش و پردازش عکس انجام نشد. لطفاً دوباره تلاش کنید.");
+      setError(t("profile.errors.cropFailed"));
     } finally {
       setIsProcessing(false);
     }
@@ -388,17 +387,17 @@ export default function ProfileModal({ isOpen, onClose }) {
     try {
       const result = removeProfileAvatar();
       if (!result.success) {
-        setError(result.message || "حذف عکس انجام نشد.");
+        setError(result.message || t("profile.errors.removeFailed"));
         return;
       }
       setCurrentAvatar("");
       setPreviewAvatar("");
       setSelectedFile(null);
       setCompressedSize(0);
-      setSuccess("عکس پروفایل با موفقیت حذف شد.");
+      setSuccess(t("profile.messages.removeSuccess"));
     } catch (removeError) {
       console.error("Remove Avatar Error:", removeError);
-      setError("حذف عکس پروفایل انجام نشد.");
+      setError(t("profile.errors.removeAvatarFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -421,7 +420,7 @@ export default function ProfileModal({ isOpen, onClose }) {
       });
 
       if (!result.success) {
-        setError(result.message || "ذخیره اطلاعات پروفایل انجام نشد.");
+        setError(result.message || t("profile.errors.saveFailed"));
         return;
       }
 
@@ -431,11 +430,11 @@ export default function ProfileModal({ isOpen, onClose }) {
       setPreviewAvatar(result.user?.avatar || "");
       setSelectedFile(null);
       setCompressedSize(0);
-      setSuccess("اطلاعات پروفایل با موفقیت ذخیره شد.");
+      setSuccess(t("profile.messages.saveSuccess"));
       window.setTimeout(onClose, 250);
     } catch (saveError) {
       console.error("Profile Save Error:", saveError);
-      setError("ذخیره اطلاعات پروفایل انجام نشد. لطفاً دوباره تلاش کنید.");
+      setError(t("profile.errors.saveFailedRetry"));
     } finally {
       setIsSaving(false);
     }
@@ -473,7 +472,7 @@ export default function ProfileModal({ isOpen, onClose }) {
       >
         <div
           ref={modalRef}
-          dir="rtl"
+          dir={i18n.dir()}
           className="relative flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-[var(--glass-border)] bg-[var(--surface-elevated)] shadow-[var(--shadow-xl)] supports-[backdrop-filter]:bg-[var(--glass-bg)] supports-[backdrop-filter]:backdrop-blur-[28px] supports-[backdrop-filter]:backdrop-saturate-150 sm:max-h-[92vh]"
           onMouseDown={(event) => event.stopPropagation()}
         >
@@ -495,10 +494,10 @@ export default function ProfileModal({ isOpen, onClose }) {
                 </div>
                 <div className="min-w-0">
                   <h2 className="truncate text-base font-semibold text-[var(--text)] sm:text-lg">
-                    پروفایل من
+                    {t("profile.title")}
                   </h2>
                   <p className="mt-0.5 truncate text-xs text-[var(--text-muted)] sm:text-sm">
-                    اطلاعات حساب و عکس پروفایل
+                    {t("profile.subtitle")}
                   </p>
                 </div>
               </div>
@@ -507,7 +506,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                 type="button"
                 onClick={handleClose}
                 disabled={isProcessing || isSaving}
-                aria-label="بستن"
+                aria-label={t("profile.closeAria")}
                 className={`${ICON_BUTTON_CLASS} border-transparent bg-transparent hover:border-[var(--border-subtle)]`}
               >
                 <X size={20} />
@@ -529,7 +528,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                       {hasAvatar ? (
                         <img
                           src={previewAvatar}
-                          alt={user?.name || "پروفایل"}
+                          alt={user?.name || t("profile.title")}
                           className="h-full w-full object-cover"
                         />
                       ) : (
@@ -542,7 +541,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/55 text-white backdrop-blur-sm">
                           <LoaderCircle size={27} className="animate-spin" />
                           <span className="text-[11px] font-medium">
-                            در حال پردازش...
+                            {t("profile.photo.processing")}
                           </span>
                         </div>
                       )}
@@ -553,7 +552,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                       onClick={openFilePicker}
                       disabled={isProcessing || isSaving || isCropOpen}
                       className="absolute -bottom-2 -left-2 flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--surface-elevated)] bg-[var(--accent-500)] text-white shadow-[var(--shadow-accent)] transition-all duration-200 hover:scale-105 hover:bg-[var(--accent-600)] disabled:cursor-not-allowed disabled:opacity-50"
-                      title="تغییر عکس"
+                      title={t("profile.photo.changeTitle")}
                     >
                       <Camera size={18} />
                     </button>
@@ -563,20 +562,18 @@ export default function ProfileModal({ isOpen, onClose }) {
                     <div className="mb-3 flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1 text-xs font-medium text-[var(--accent-600)]">
                         <ImagePlus size={13} />
-                        عکس پروفایل
+                        {t("profile.photo.badge")}
                       </span>
                       <span className="rounded-full border border-[var(--border-subtle)] bg-[var(--surface-muted)] px-3 py-1 text-xs text-[var(--text-muted)]">
-                        حداکثر ۵ MB
+                        {t("profile.photo.maxSize")}
                       </span>
                     </div>
 
                     <h3 className="text-base font-medium text-[var(--text)]">
-                      عکس مدیر فروشگاه
+                      {t("profile.photo.sectionTitle")}
                     </h3>
                     <p className="mt-1.5 max-w-lg text-sm leading-6 text-[var(--text-muted)]">
-                      ابتدا عکس را انتخاب کنید و سپس چهره را داخل کادر تنظیم
-                      کنید. سیستم بعد از برش، گوشه‌ها را کمی نرم و تصویر را
-                      فشرده می‌کند.
+                      {t("profile.photo.sectionDescription")}
                     </p>
 
                     <div className="mt-4 flex flex-wrap gap-2">
@@ -587,7 +584,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                         className={PRIMARY_BUTTON_CLASS}
                       >
                         <Upload size={17} />
-                        انتخاب عکس
+                        {t("profile.photo.selectPhoto")}
                       </button>
 
                       {selectedFile && (
@@ -598,7 +595,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                           className={SECONDARY_BUTTON_CLASS}
                         >
                           <X size={16} />
-                          لغو عکس جدید
+                          {t("profile.photo.cancelNew")}
                         </button>
                       )}
 
@@ -610,7 +607,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                           className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/10 bg-red-500/[0.06] px-4 py-2.5 text-sm font-medium text-[var(--danger)] transition-all duration-200 hover:border-red-500/20 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <Trash2 size={16} />
-                          حذف عکس
+                          {t("profile.photo.removePhoto")}
                         </button>
                       )}
                     </div>
@@ -622,7 +619,8 @@ export default function ProfileModal({ isOpen, onClose }) {
                         </span>
                         <span>•</span>
                         <span className="font-medium text-[var(--accent-600)]">
-                          حجم نهایی: {formatImageSize(compressedSize)}
+                          {t("profile.photo.fileSizeLabel")}{" "}
+                          {formatImageSize(compressedSize)}
                         </span>
                       </div>
                     )}
@@ -644,10 +642,10 @@ export default function ProfileModal({ isOpen, onClose }) {
                     <ImagePlus size={20} />
                   </div>
                   <p className="text-sm font-medium text-[var(--text-secondary)]">
-                    عکس را اینجا رها کنید
+                    {t("profile.photo.dropzone.title")}
                   </p>
                   <p className="mt-1 text-xs text-[var(--text-muted)]">
-                    یا برای انتخاب از کامپیوتر کلیک کنید
+                    {t("profile.photo.dropzone.description")}
                   </p>
                 </div>
 
@@ -668,10 +666,10 @@ export default function ProfileModal({ isOpen, onClose }) {
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-base font-medium text-[var(--text)]">
-                      اطلاعات حساب
+                      {t("profile.account.title")}
                     </h3>
                     <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-                      اطلاعات واقعی حساب مدیر
+                      {t("profile.account.description")}
                     </p>
                   </div>
                 </div>
@@ -679,7 +677,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field
                     id="profile-name"
-                    label="نام مدیر"
+                    label={t("profile.account.nameLabel")}
                     icon={UserRound}
                     value={name}
                     onChange={setName}
@@ -687,7 +685,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                   />
                   <Field
                     id="profile-email"
-                    label="ایمیل"
+                    label={t("profile.account.emailLabel")}
                     icon={Mail}
                     value={email}
                     onChange={setEmail}
@@ -703,8 +701,7 @@ export default function ProfileModal({ isOpen, onClose }) {
             <div className="shrink-0 border-t border-[var(--border-subtle)] bg-[var(--surface)] px-4 py-4 sm:px-6">
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-center text-[11px] leading-5 text-[var(--text-soft)] sm:max-w-sm sm:text-start">
-                  عکس ابتدا برش داده می‌شود و سپس برای نگهداری بهینه فشرده خواهد
-                  شد.
+                  {t("profile.footer.hint")}
                 </p>
 
                 <div className="flex w-full gap-2 sm:w-auto">
@@ -714,7 +711,7 @@ export default function ProfileModal({ isOpen, onClose }) {
                     disabled={isProcessing || isSaving}
                     className={`${SECONDARY_BUTTON_CLASS} flex-1 sm:flex-none`}
                   >
-                    انصراف
+                    {t("profile.footer.cancel")}
                   </button>
                   <button
                     type="submit"
@@ -724,12 +721,12 @@ export default function ProfileModal({ isOpen, onClose }) {
                     {isSaving ? (
                       <>
                         <LoaderCircle size={17} className="animate-spin" />
-                        در حال ذخیره...
+                        {t("profile.footer.saving")}
                       </>
                     ) : (
                       <>
                         <Save size={17} />
-                        ذخیره تغییرات
+                        {t("profile.footer.save")}
                       </>
                     )}
                   </button>
@@ -834,7 +831,7 @@ function Field({
 }
 
 // =========================================================
-// Crop Editor (extracted, identical classes)
+// Crop Editor
 // =========================================================
 
 function CropEditor({
@@ -853,6 +850,8 @@ function CropEditor({
   onCancel,
   onConfirm,
 }) {
+  const { t } = useTranslation();
+
   const CROP_CORNERS = [
     "left-0 top-0 rounded-tl-xl border-l-4 border-t-4",
     "right-0 top-0 rounded-tr-xl border-r-4 border-t-4",
@@ -870,10 +869,10 @@ function CropEditor({
             </div>
             <div className="min-w-0">
               <h3 className="truncate text-base font-medium sm:text-lg">
-                تنظیم عکس پروفایل
+                {t("profile.crop.title")}
               </h3>
               <p className="mt-0.5 truncate text-[11px] text-slate-400">
-                چهره را داخل کادر قرار دهید
+                {t("profile.crop.subtitle")}
               </p>
             </div>
           </div>
@@ -882,7 +881,7 @@ function CropEditor({
             onClick={onCancel}
             disabled={isProcessing}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition-all duration-200 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-            aria-label="بستن برش"
+            aria-label={t("profile.crop.closeAria")}
           >
             <X size={20} />
           </button>
@@ -892,7 +891,7 @@ function CropEditor({
       <div className="min-h-0 flex-1 flex flex-col items-center justify-center gap-5 overflow-y-auto main-scrollbar px-4 py-5 sm:gap-6 sm:py-6">
         <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] text-slate-300">
           <Move size={14} />
-          عکس را بکشید تا چهره در مرکز قرار بگیرد
+          {t("profile.crop.dragHint")}
         </div>
 
         <div
@@ -909,7 +908,7 @@ function CropEditor({
           {cropSource && (
             <img
               src={cropSource}
-              alt="برش عکس پروفایل"
+              alt={t("profile.crop.title")}
               draggable={false}
               className="pointer-events-none absolute max-w-none select-none object-fill"
               style={{
@@ -945,7 +944,9 @@ function CropEditor({
 
         <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 px-4 py-4 backdrop-blur-sm">
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-medium text-white">بزرگنمایی</span>
+            <span className="text-sm font-medium text-white">
+              {t("profile.crop.zoomLabel")}
+            </span>
             <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-xs font-medium text-slate-300">
               {Math.round(cropZoom * 100)}%
             </span>
@@ -969,7 +970,7 @@ function CropEditor({
               value={cropZoom}
               onChange={(event) => onZoomChange(Number(event.target.value))}
               className="h-2 min-w-0 flex-1 cursor-pointer accent-[var(--accent-500)]"
-              aria-label="بزرگنمایی تصویر"
+              aria-label={t("profile.crop.zoomAria")}
             />
 
             <button
@@ -987,7 +988,7 @@ function CropEditor({
       <div className="shrink-0 border-t border-white/10 bg-[#070b14]/96 px-4 py-4 sm:px-6">
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-center text-[11px] leading-5 text-slate-500 sm:max-w-xs sm:text-start">
-            صورت را با حرکت انگشت یا موس تنظیم کنید و بعد برش را تأیید کنید.
+            {t("profile.crop.footerHint")}
           </p>
 
           <div className="flex w-full gap-2 sm:w-auto">
@@ -997,7 +998,7 @@ function CropEditor({
               disabled={isProcessing}
               className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none"
             >
-              لغو
+              {t("profile.crop.cancel")}
             </button>
 
             <button
@@ -1009,12 +1010,12 @@ function CropEditor({
               {isProcessing ? (
                 <>
                   <LoaderCircle size={17} className="animate-spin" />
-                  در حال پردازش...
+                  {t("profile.crop.processing")}
                 </>
               ) : (
                 <>
                   <Check size={17} />
-                  تأیید برش
+                  {t("profile.crop.confirm")}
                 </>
               )}
             </button>

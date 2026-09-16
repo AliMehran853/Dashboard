@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import {
     db,
     initializeDatabase,
@@ -71,16 +72,24 @@ const dispatchSaleUpdatedEvents = ({
 export const addSale = async (sale) => {
     await initializeDatabase();
 
-    if (!sale) throw new Error('اطلاعات فروش ارسال نشده است.');
+    if (!sale) {
+        throw new Error(i18n.t('sales.errors.noSaleData'));
+    }
 
     const productId = normalizeId(sale.productId);
-    if (!productId) throw new Error('محصول انتخاب نشده است.');
+    if (!productId) {
+        throw new Error(i18n.t('sales.form.errors.productRequired'));
+    }
 
     const quantity = normalizeNumber(sale.quantity);
-    if (quantity <= 0) throw new Error('تعداد باید بیشتر از صفر باشد.');
+    if (quantity <= 0) {
+        throw new Error(i18n.t('sales.form.errors.quantityInvalid'));
+    }
 
     const unitPrice = normalizeNumber(sale.unitPrice);
-    if (unitPrice < 0) throw new Error('قیمت فروش معتبر نیست.');
+    if (unitPrice < 0) {
+        throw new Error(i18n.t('sales.form.errors.priceInvalid'));
+    }
 
     const saleOptionId = sale.saleOptionId ? String(sale.saleOptionId) : null;
     const saleUnit = String(sale.saleUnit || '').trim();
@@ -98,7 +107,7 @@ export const addSale = async (sale) => {
     const category = sale.category?.trim() || '';
 
     if (paymentType === 'credit' && !customerName && !sale.customerId) {
-        throw new Error('برای فروش نسیه باید اطلاعات مشتری وارد شود.');
+        throw new Error(i18n.t('sales.form.errors.creditCustomerRequired'));
     }
 
     const saleDate = sale.date || new Date().toISOString();
@@ -115,17 +124,30 @@ export const addSale = async (sale) => {
         db.customers,
         async () => {
             const product = await db.products.get(productId);
-            if (!product) throw new Error('محصول پیدا نشد.');
+            if (!product) {
+                throw new Error(i18n.t('sales.errors.productNotFound'));
+            }
 
             const currentStock = normalizeNumber(product.stock);
 
             if (currentStock < quantityInBase) {
                 const baseUnit = product.baseUnit || '';
+
+                if (saleFactor !== 1) {
+                    throw new Error(
+                        i18n.t('sales.errors.insufficientStockWithFactor', {
+                            current: currentStock,
+                            requested: quantityInBase,
+                            unit: baseUnit,
+                        })
+                    );
+                }
+
                 throw new Error(
-                    `موجودی کافی نیست. موجودی فعلی: ${currentStock} ${baseUnit}` +
-                        (saleFactor !== 1
-                            ? ` (این فروش معادل ${quantityInBase} ${baseUnit} است)`
-                            : '')
+                    i18n.t('sales.errors.insufficientStock', {
+                        current: currentStock,
+                        unit: baseUnit,
+                    })
                 );
             }
 
@@ -133,7 +155,9 @@ export const addSale = async (sale) => {
 
             if (customerId) {
                 const existing = await db.customers.get(customerId);
-                if (!existing) throw new Error('مشتری پیدا نشد.');
+                if (!existing) {
+                    throw new Error(i18n.t('sales.errors.customerNotFound'));
+                }
             } else if (customerName || customerPhone) {
                 const customer = await addCustomer({
                     name: customerName,
@@ -144,7 +168,7 @@ export const addSale = async (sale) => {
             }
 
             if (paymentType === 'credit' && !customerId) {
-                throw new Error('برای فروش نسیه باید اطلاعات مشتری وارد شود.');
+                throw new Error(i18n.t('sales.form.errors.creditCustomerRequired'));
             }
 
             const total = quantity * unitPrice;
@@ -305,15 +329,7 @@ export const getTodayCashSalesStatistics = async () => {
 };
 
 // =========================================================
-// ✅ NEW: Pending Credit Summary
-//
-//   Computes the outstanding (unpaid) credit debt across all
-//   customers, plus the number of customers who still owe.
-//
-//   Strategy (defensive):
-//     1. If creditPayments have numeric `amount` → compute
-//        remaining = Σ(sales.amount) − Σ(payments.amount) per customer.
-//     2. Otherwise → fall back to creditSales.status !== 'paid'.
+// Pending Credit Summary
 // =========================================================
 
 export const getPendingCreditSummary = async () => {
@@ -327,14 +343,10 @@ export const getPendingCreditSummary = async () => {
     const salesList = Array.isArray(creditSales) ? creditSales : [];
     const paymentsList = Array.isArray(creditPayments) ? creditPayments : [];
 
-    // Does any payment record carry a usable `amount`?
     const hasPaymentAmounts = paymentsList.some(
         (p) => Number.isFinite(Number(p?.amount)) && Number(p.amount) > 0
     );
 
-    // -----------------------------------------------------
-    // Fallback: rely on creditSales.status only
-    // -----------------------------------------------------
     if (!hasPaymentAmounts) {
         const seen = new Set();
         let pendingAmount = 0;
@@ -360,9 +372,6 @@ export const getPendingCreditSummary = async () => {
         };
     }
 
-    // -----------------------------------------------------
-    // Full calculation: sales − payments, grouped per customer
-    // -----------------------------------------------------
     const debtByCustomer = new Map();
     for (const cs of salesList) {
         const cid = normalizeId(cs?.customerId);
@@ -405,13 +414,17 @@ export const deleteSale = async (id) => {
     await initializeDatabase();
 
     const saleId = normalizeId(id);
-    if (!saleId) throw new Error('شناسه فروش معتبر نیست.');
+    if (!saleId) {
+        throw new Error(i18n.t('sales.errors.invalidId'));
+    }
 
     let deletedSale = null;
 
     await db.transaction('rw', db.sales, db.products, db.creditSales, async () => {
         const sale = await db.sales.get(saleId);
-        if (!sale) throw new Error('فروش پیدا نشد.');
+        if (!sale) {
+            throw new Error(i18n.t('sales.errors.notFound'));
+        }
 
         deletedSale = sale;
 

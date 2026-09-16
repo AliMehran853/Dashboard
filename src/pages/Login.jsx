@@ -137,9 +137,7 @@ function LoadingScreen() {
             <div className="flex flex-col items-center gap-3">
                 <div className="h-7 w-7 animate-spin rounded-full border-2 border-[var(--border-strong)] border-t-[var(--accent-500)]" />
                 <span className="text-xs text-[var(--text-muted)]">
-                    {t('login.loading', {
-                        defaultValue: 'در حال آماده‌سازی...',
-                    })}
+                    {t('login.loading')}
                 </span>
             </div>
         </main>
@@ -616,10 +614,7 @@ function SecurityQuestionRow({
                     {index + 1}
                 </span>
                 <p className="text-[10.5px] font-medium text-[var(--text-muted)]">
-                    {t('login.setup.fields.questionN', {
-                        n: index + 1,
-                        defaultValue: `سؤال ${index + 1}`,
-                    })}
+                    {t('login.setup.fields.questionN', { n: index + 1 })}
                 </p>
             </div>
 
@@ -636,9 +631,7 @@ function SecurityQuestionRow({
                     className={SELECT_CLASS}
                 >
                     <option value="">
-                        {t('login.setup.fields.questionPlaceholder', {
-                            defaultValue: 'یک سؤال انتخاب کنید',
-                        })}
+                        {t('login.setup.fields.questionPlaceholder')}
                     </option>
                     {ALL_QUESTION_IDS.map((id) => {
                         if (usedIds.includes(id)) return null;
@@ -659,9 +652,7 @@ function SecurityQuestionRow({
                             answer: e.target.value,
                         })
                     }
-                    placeholder={t('login.setup.fields.answerPlaceholder', {
-                        defaultValue: 'پاسخ خود را وارد کنید',
-                    })}
+                    placeholder={t('login.setup.fields.answerPlaceholder')}
                     disabled={disabled || !question.id}
                     dir={isRTL ? 'rtl' : 'ltr'}
                     className={FIELD_CLASS}
@@ -721,40 +712,25 @@ function SetupPanel({ registerAccount, onSuccess }) {
         const cleanConfirm = confirmPassword.trim();
 
         if (!cleanEmail) {
-            setError(
-                t('login.setup.errors.emailRequired', {
-                    defaultValue: 'لطفاً ایمیل خود را وارد کنید.',
-                })
-            );
+            setError(t('login.setup.errors.emailRequired'));
             return false;
         }
 
         const typo = detectEmailTypo(cleanEmail);
         if (typo) {
             setError(
-                t('login.setup.errors.emailInvalid', {
-                    suggestion: typo,
-                    defaultValue: `ایمیل احتمالاً اشتباه است. منظورتان «${typo}» بود؟`,
-                })
+                t('settings.account.errors.emailTypo', { suggestion: typo })
             );
             return false;
         }
 
         if (!EMAIL_REGEX.test(cleanEmail)) {
-            setError(
-                t('login.setup.errors.emailInvalid', {
-                    defaultValue: 'فرمت ایمیل صحیح نیست.',
-                })
-            );
+            setError(t('login.setup.errors.emailInvalid'));
             return false;
         }
 
         if (!cleanPassword) {
-            setError(
-                t('login.setup.errors.passwordRequired', {
-                    defaultValue: 'لطفاً رمز عبور را وارد کنید.',
-                })
-            );
+            setError(t('login.setup.errors.passwordRequired'));
             return false;
         }
 
@@ -762,18 +738,13 @@ function SetupPanel({ registerAccount, onSuccess }) {
             setError(
                 t('login.setup.errors.passwordMin', {
                     count: MIN_PASSWORD_LENGTH,
-                    defaultValue: `رمز عبور باید حداقل ${MIN_PASSWORD_LENGTH} کاراکتر باشد.`,
                 })
             );
             return false;
         }
 
         if (cleanPassword !== cleanConfirm) {
-            setError(
-                t('login.setup.errors.passwordMismatch', {
-                    defaultValue: 'رمز عبور و تکرار آن یکسان نیستند.',
-                })
-            );
+            setError(t('login.setup.errors.passwordMismatch'));
             return false;
         }
 
@@ -800,37 +771,22 @@ function SetupPanel({ registerAccount, onSuccess }) {
         }));
 
         if (cleanQuestions.some((q) => !q.id)) {
-            return setError(
-                t('login.setup.errors.questionsRequired', {
-                    defaultValue: 'لطفاً هر ۳ سؤال امنیتی را انتخاب کنید.',
-                })
-            );
+            return setError(t('login.setup.errors.questionsRequired'));
         }
 
         if (cleanQuestions.some((q) => !q.answer)) {
-            return setError(
-                t('login.setup.errors.questionsRequired', {
-                    defaultValue: 'لطفاً به همه سؤالات امنیتی پاسخ دهید.',
-                })
-            );
+            return setError(t('login.setup.errors.questionsRequired'));
         }
 
         if (cleanQuestions.some((q) => q.answer.length < MIN_ANSWER_LENGTH)) {
             return setError(
-                t('login.setup.errors.answerMin', {
-                    count: MIN_ANSWER_LENGTH,
-                    defaultValue: `پاسخ هر سؤال باید حداقل ${MIN_ANSWER_LENGTH} کاراکتر باشد.`,
-                })
+                t('login.setup.errors.answerMin', { count: MIN_ANSWER_LENGTH })
             );
         }
 
         const ids = cleanQuestions.map((q) => q.id);
         if (new Set(ids).size !== ids.length) {
-            return setError(
-                t('login.setup.errors.questionsDuplicate', {
-                    defaultValue: 'سؤالات امنیتی نباید تکراری باشند.',
-                })
-            );
+            return setError(t('login.setup.errors.questionsDuplicate'));
         }
 
         setIsLoading(true);
@@ -844,10 +800,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
 
             if (!result?.success) {
                 setError(
-                    result?.message ||
-                    t('login.setup.errors.saveFailed', {
-                        defaultValue: 'ذخیره اطلاعات حساب انجام نشد.',
-                    })
+                    result?.message || t('login.setup.errors.saveFailed')
                 );
                 setIsLoading(false);
                 return;
@@ -856,11 +809,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
             onSuccess?.();
         } catch (err) {
             console.error('Setup failed:', err);
-            setError(
-                t('login.setup.errors.saveFailed', {
-                    defaultValue: 'ذخیره اطلاعات حساب انجام نشد.',
-                })
-            );
+            setError(t('login.setup.errors.saveFailed'));
             setIsLoading(false);
         }
     };
@@ -879,14 +828,10 @@ function SetupPanel({ registerAccount, onSuccess }) {
     return (
         <CardShell
             icon={UserPlus}
-            title={t('login.setup.brand.title', {
-                defaultValue: 'به فروشگاه خود خوش آمدید',
-            })}
-            description={t('login.setup.brand.description', {
-                defaultValue: 'برای شروع، حساب مدیر فروشگاه خود را بسازید',
-            })}
+            title={t('login.setup.brand.title')}
+            description={t('login.setup.brand.description')}
             accent="setup"
-            badge={t('login.setup.badge', { defaultValue: 'راه‌اندازی' })}
+            badge={t('login.setup.badge')}
         >
             <StepIndicator
                 current={step}
@@ -894,7 +839,6 @@ function SetupPanel({ registerAccount, onSuccess }) {
                 label={t('login.setup.stepLabel', {
                     current: step,
                     total: TOTAL_SETUP_STEPS,
-                    defaultValue: `مرحله ${step} از ${TOTAL_SETUP_STEPS}`,
                 })}
             />
 
@@ -910,9 +854,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
                     {/* Email */}
                     <div>
                         <FieldLabel>
-                            {t('login.setup.fields.email.label', {
-                                defaultValue: 'ایمیل',
-                            })}
+                            {t('login.setup.fields.email.label')}
                         </FieldLabel>
                         <div className="relative">
                             <Mail
@@ -930,8 +872,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
                                     if (error) setError('');
                                 }}
                                 placeholder={t(
-                                    'login.setup.fields.email.placeholder',
-                                    { defaultValue: 'example@email.com' }
+                                    'login.setup.fields.email.placeholder'
                                 )}
                                 autoComplete={AUTOCOMPLETE_EMAIL}
                                 dir="ltr"
@@ -950,10 +891,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
                                     <p className="text-[10.5px] leading-4 text-amber-700 dark:text-amber-300">
                                         {t(
                                             'settings.account.errors.emailTypoSuggest',
-                                            {
-                                                suggestion: emailSuggestion,
-                                                defaultValue: `آیا منظورتان «${emailSuggestion}» بود؟`,
-                                            }
+                                            { suggestion: emailSuggestion }
                                         )}
                                     </p>
                                     <button
@@ -963,11 +901,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
                                         className="mt-1 text-[10px] font-medium text-amber-700 underline-offset-2 hover:underline dark:text-amber-300"
                                     >
                                         {t(
-                                            'settings.account.actions.fixTypo',
-                                            {
-                                                defaultValue:
-                                                    'استفاده از این ایمیل',
-                                            }
+                                            'settings.account.actions.fixTypo'
                                         )}
                                     </button>
                                 </div>
@@ -977,9 +911,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
 
                     <PasswordField
                         id="setup-password"
-                        label={t('login.setup.fields.password.label', {
-                            defaultValue: 'رمز عبور',
-                        })}
+                        label={t('login.setup.fields.password.label')}
                         value={password}
                         onChange={(e) => {
                             setPassword(e.target.value);
@@ -987,10 +919,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
                         }}
                         placeholder={t(
                             'login.setup.fields.password.placeholder',
-                            {
-                                count: MIN_PASSWORD_LENGTH,
-                                defaultValue: `حداقل ${MIN_PASSWORD_LENGTH} کاراکتر`,
-                            }
+                            { count: MIN_PASSWORD_LENGTH }
                         )}
                         show={showPassword}
                         onToggleShow={() => setShowPassword((p) => !p)}
@@ -1001,8 +930,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
                     <PasswordField
                         id="setup-confirm"
                         label={t(
-                            'login.setup.fields.confirmPassword.label',
-                            { defaultValue: 'تکرار رمز عبور' }
+                            'login.setup.fields.confirmPassword.label'
                         )}
                         value={confirmPassword}
                         onChange={(e) => {
@@ -1010,11 +938,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
                             if (error) setError('');
                         }}
                         placeholder={t(
-                            'login.setup.fields.confirmPassword.placeholder',
-                            {
-                                defaultValue:
-                                    'رمز عبور را دوباره وارد کنید',
-                            }
+                            'login.setup.fields.confirmPassword.placeholder'
                         )}
                         show={showConfirm}
                         onToggleShow={() => setShowConfirm((p) => !p)}
@@ -1025,12 +949,8 @@ function SetupPanel({ registerAccount, onSuccess }) {
                     <div className="pt-1">
                         <SubmitButton
                             isLoading={isLoading}
-                            label={t('login.setup.actions.next', {
-                                defaultValue: 'بعدی',
-                            })}
-                            loadingLabel={t('login.setup.actions.next', {
-                                defaultValue: 'بعدی',
-                            })}
+                            label={t('login.setup.actions.next')}
+                            loadingLabel={t('login.setup.actions.next')}
                             isRTL={isRTL}
                             type="submit"
                         />
@@ -1052,10 +972,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
                             className="mt-0.5 shrink-0 text-[var(--accent-500)]"
                         />
                         <p className="text-[10.5px] leading-4 text-[var(--text-muted)]">
-                            {t('login.setup.sections.securityHint', {
-                                defaultValue:
-                                    'اگر رمز عبور را فراموش کنید، با پاسخ به این سؤالات بازیابی می‌شود.',
-                            })}
+                            {t('login.setup.sections.securityHint')}
                         </p>
                     </div>
 
@@ -1085,21 +1002,14 @@ function SetupPanel({ registerAccount, onSuccess }) {
                     <div className="space-y-1 pt-1">
                         <SubmitButton
                             isLoading={isLoading}
-                            label={t('login.setup.actions.create', {
-                                defaultValue: 'ساخت حساب',
-                            })}
-                            loadingLabel={t(
-                                'login.setup.actions.creating',
-                                { defaultValue: 'در حال ساخت...' }
-                            )}
+                            label={t('login.setup.actions.create')}
+                            loadingLabel={t('login.setup.actions.creating')}
                             isRTL={isRTL}
                         />
                         <BackButton
                             onClick={goBack}
                             disabled={isLoading}
-                            label={t('login.setup.actions.back', {
-                                defaultValue: 'بازگشت به مرحله قبل',
-                            })}
+                            label={t('login.setup.actions.back')}
                         />
                     </div>
                 </form>
@@ -1109,12 +1019,7 @@ function SetupPanel({ registerAccount, onSuccess }) {
             <div className="mt-3 border-t border-[var(--border-subtle)] pt-2.5">
                 <div className="flex items-center justify-center gap-1.5 text-center text-[10px] leading-4 text-[var(--text-soft)]">
                     <LockKeyhole size={11} className="shrink-0" />
-                    <span>
-                        {t('login.setup.security', {
-                            defaultValue:
-                                'فقط روی همین دستگاه ذخیره می‌شود.',
-                        })}
-                    </span>
+                    <span>{t('login.setup.security')}</span>
                 </div>
             </div>
         </CardShell>
@@ -1169,8 +1074,7 @@ function LoginPanel({ login, onSuccess }) {
 
             if (!result?.success) {
                 setError(
-                    result?.message ||
-                    t('login.errors.invalidCredentials')
+                    result?.message || t('login.errors.invalidCredentials')
                 );
                 setIsLoading(false);
                 return;
@@ -1392,9 +1296,7 @@ function ForgotPasswordModal({ onClose }) {
 
         if (!cleanEmail) {
             return setEmailError(
-                t('login.forgotPassword.errors.emailRequired', {
-                    defaultValue: 'ایمیل را وارد کنید.',
-                })
+                t('login.forgotPassword.errors.emailRequired')
             );
         }
 
@@ -1406,9 +1308,7 @@ function ForgotPasswordModal({ onClose }) {
             if (!result?.success) {
                 setEmailError(
                     result?.message ||
-                    t('login.forgotPassword.errors.emailNotFound', {
-                        defaultValue: 'ایمیلی با این مشخصات پیدا نشد.',
-                    })
+                    t('login.forgotPassword.errors.emailNotFound')
                 );
                 setIsBusy(false);
                 return;
@@ -1430,9 +1330,7 @@ function ForgotPasswordModal({ onClose }) {
 
         if (answers.some((a) => !String(a || '').trim())) {
             return setQuestionsError(
-                t('login.forgotPassword.errors.answersRequired', {
-                    defaultValue: 'همه پاسخ‌ها الزامی است.',
-                })
+                t('login.forgotPassword.errors.answersRequired')
             );
         }
 
@@ -1444,9 +1342,7 @@ function ForgotPasswordModal({ onClose }) {
             if (!result?.success) {
                 setQuestionsError(
                     result?.message ||
-                    t('login.forgotPassword.errors.answersIncorrect', {
-                        defaultValue: 'پاسخ یک یا چند سؤال صحیح نیست.',
-                    })
+                    t('login.forgotPassword.errors.answersIncorrect')
                 );
                 setIsBusy(false);
                 return;
@@ -1504,28 +1400,23 @@ function ForgotPasswordModal({ onClose }) {
                         </div>
                         <div className="min-w-0">
                             <h3 className="truncate text-sm font-semibold text-[var(--text)]">
-                                {t('login.forgotPassword.title', {
-                                    defaultValue: 'بازیابی اطلاعات ورود',
-                                })}
+                                {t('login.forgotPassword.title')}
                             </h3>
                             <p className="mt-0.5 truncate text-[10.5px] text-[var(--text-muted)]">
                                 {step === 'email' &&
                                     t('login.forgotPassword.step', {
                                         current: 1,
                                         total: 3,
-                                        defaultValue: 'مرحله ۱ از ۳',
                                     })}
                                 {step === 'questions' &&
                                     t('login.forgotPassword.step', {
                                         current: 2,
                                         total: 3,
-                                        defaultValue: 'مرحله ۲ از ۳',
                                     })}
                                 {step === 'result' &&
                                     t('login.forgotPassword.step', {
                                         current: 3,
                                         total: 3,
-                                        defaultValue: 'مرحله ۳ از ۳',
                                     })}
                             </p>
                         </div>
@@ -1534,7 +1425,7 @@ function ForgotPasswordModal({ onClose }) {
                         type="button"
                         onClick={onClose}
                         disabled={isBusy}
-                        aria-label={t('common.close', { defaultValue: 'بستن' })}
+                        aria-label={t('common.close')}
                         className="ui-icon-button h-8 w-8 shrink-0"
                     >
                         <X size={15} />
@@ -1546,17 +1437,11 @@ function ForgotPasswordModal({ onClose }) {
                         <form onSubmit={handleEmailSubmit} className="space-y-3.5">
                             <div>
                                 <h4 className="text-[13.5px] font-semibold text-[var(--text)]">
-                                    {t('login.forgotPassword.stepEmail.title', {
-                                        defaultValue: 'ایمیل خود را وارد کنید',
-                                    })}
+                                    {t('login.forgotPassword.stepEmail.title')}
                                 </h4>
                                 <p className="mt-1 text-[11px] leading-4 text-[var(--text-muted)]">
                                     {t(
-                                        'login.forgotPassword.stepEmail.description',
-                                        {
-                                            defaultValue:
-                                                'ایمیلی که هنگام ثبت‌نام استفاده کردید را وارد کنید',
-                                        }
+                                        'login.forgotPassword.stepEmail.description'
                                     )}
                                 </p>
                             </div>
@@ -1566,8 +1451,7 @@ function ForgotPasswordModal({ onClose }) {
                             <div>
                                 <FieldLabel>
                                     {t(
-                                        'login.forgotPassword.stepEmail.emailLabel',
-                                        { defaultValue: 'ایمیل' }
+                                        'login.forgotPassword.stepEmail.emailLabel'
                                     )}
                                 </FieldLabel>
                                 <div className="relative">
@@ -1585,8 +1469,7 @@ function ForgotPasswordModal({ onClose }) {
                                             if (emailError) setEmailError('');
                                         }}
                                         placeholder={t(
-                                            'login.forgotPassword.stepEmail.emailPlaceholder',
-                                            { defaultValue: 'example@email.com' }
+                                            'login.forgotPassword.stepEmail.emailPlaceholder'
                                         )}
                                         autoComplete="off"
                                         dir="ltr"
@@ -1603,12 +1486,10 @@ function ForgotPasswordModal({ onClose }) {
                             >
                                 {isBusy
                                     ? t(
-                                          'login.forgotPassword.stepEmail.checking',
-                                          { defaultValue: 'در حال بررسی...' }
+                                          'login.forgotPassword.stepEmail.checking'
                                       )
                                     : t(
-                                          'login.forgotPassword.stepEmail.submit',
-                                          { defaultValue: 'بررسی ایمیل' }
+                                          'login.forgotPassword.stepEmail.submit'
                                       )}
                             </button>
 
@@ -1624,20 +1505,12 @@ function ForgotPasswordModal({ onClose }) {
                             <div>
                                 <h4 className="text-[13.5px] font-semibold text-[var(--text)]">
                                     {t(
-                                        'login.forgotPassword.stepQuestions.title',
-                                        {
-                                            defaultValue:
-                                                'به سؤالات امنیتی پاسخ دهید',
-                                        }
+                                        'login.forgotPassword.stepQuestions.title'
                                     )}
                                 </h4>
                                 <p className="mt-1 text-[11px] leading-4 text-[var(--text-muted)]">
                                     {t(
-                                        'login.forgotPassword.stepQuestions.description',
-                                        {
-                                            defaultValue:
-                                                'پاسخ‌ها به حروف بزرگ/کوچک و فاصله‌ها حساس نیستند',
-                                        }
+                                        'login.forgotPassword.stepQuestions.description'
                                     )}
                                 </p>
                             </div>
@@ -1664,11 +1537,7 @@ function ForgotPasswordModal({ onClose }) {
                                                     setQuestionsError('');
                                             }}
                                             placeholder={t(
-                                                'login.forgotPassword.stepQuestions.answerPlaceholder',
-                                                {
-                                                    defaultValue:
-                                                        'پاسخ خود را وارد کنید',
-                                                }
+                                                'login.forgotPassword.stepQuestions.answerPlaceholder'
                                             )}
                                             dir={isRTL ? 'rtl' : 'ltr'}
                                             disabled={isBusy}
@@ -1687,18 +1556,10 @@ function ForgotPasswordModal({ onClose }) {
                                 >
                                     {isBusy
                                         ? t(
-                                              'login.forgotPassword.stepQuestions.verifying',
-                                              {
-                                                  defaultValue:
-                                                      'در حال بررسی...',
-                                              }
+                                              'login.forgotPassword.stepQuestions.verifying'
                                           )
                                         : t(
-                                              'login.forgotPassword.stepQuestions.submit',
-                                              {
-                                                  defaultValue:
-                                                      'تأیید پاسخ‌ها',
-                                              }
+                                              'login.forgotPassword.stepQuestions.submit'
                                           )}
                                 </button>
                                 <button
@@ -1726,8 +1587,7 @@ function ForgotPasswordModal({ onClose }) {
                                     )}
                                     <span>
                                         {t(
-                                            'login.forgotPassword.stepQuestions.back',
-                                            { defaultValue: 'بازگشت' }
+                                            'login.forgotPassword.stepQuestions.back'
                                         )}
                                     </span>
                                 </button>
@@ -1752,57 +1612,39 @@ function ForgotPasswordModal({ onClose }) {
                                 </div>
                                 <h4 className="text-[13.5px] font-semibold text-[var(--text)]">
                                     {t(
-                                        'login.forgotPassword.stepResult.title',
-                                        {
-                                            defaultValue:
-                                                'اطلاعات حساب شما',
-                                        }
+                                        'login.forgotPassword.stepResult.title'
                                     )}
                                 </h4>
                                 <p className="mt-1 text-[11px] leading-4 text-[var(--text-muted)]">
                                     {t(
-                                        'login.forgotPassword.stepResult.description',
-                                        {
-                                            defaultValue:
-                                                'این اطلاعات را در جای امنی ذخیره کنید',
-                                        }
+                                        'login.forgotPassword.stepResult.description'
                                     )}
                                 </p>
                             </div>
 
                             <ResultRow
                                 label={t(
-                                    'login.forgotPassword.stepResult.emailLabel',
-                                    { defaultValue: 'ایمیل' }
+                                    'login.forgotPassword.stepResult.emailLabel'
                                 )}
                                 value={revealedEmail}
                                 copied={copiedField === 'email'}
                                 onCopy={() => handleCopy(revealedEmail, 'email')}
-                                copyLabel={t('common.copy', {
-                                    defaultValue: 'کپی',
-                                })}
-                                copiedLabel={t('common.copied', {
-                                    defaultValue: 'کپی شد',
-                                })}
+                                copyLabel={t('common.copy')}
+                                copiedLabel={t('common.copied')}
                                 dir="ltr"
                             />
 
                             <ResultRow
                                 label={t(
-                                    'login.forgotPassword.stepResult.passwordLabel',
-                                    { defaultValue: 'رمز عبور' }
+                                    'login.forgotPassword.stepResult.passwordLabel'
                                 )}
                                 value={revealedPassword}
                                 copied={copiedField === 'password'}
                                 onCopy={() =>
                                     handleCopy(revealedPassword, 'password')
                                 }
-                                copyLabel={t('common.copy', {
-                                    defaultValue: 'کپی',
-                                })}
-                                copiedLabel={t('common.copied', {
-                                    defaultValue: 'کپی شد',
-                                })}
+                                copyLabel={t('common.copy')}
+                                copiedLabel={t('common.copied')}
                                 dir="ltr"
                                 mono
                             />
@@ -1814,11 +1656,7 @@ function ForgotPasswordModal({ onClose }) {
                                 />
                                 <p className="text-[10.5px] leading-4 text-amber-700 dark:text-amber-300">
                                     {t(
-                                        'login.forgotPassword.stepResult.warning',
-                                        {
-                                            defaultValue:
-                                                'پس از بستن این پنجره، دیگر نمی‌توانید این اطلاعات را ببینید.',
-                                        }
+                                        'login.forgotPassword.stepResult.warning'
                                     )}
                                 </p>
                             </div>
@@ -1829,10 +1667,7 @@ function ForgotPasswordModal({ onClose }) {
                                 disabled={isBusy}
                                 className="ui-button-primary h-11 w-full"
                             >
-                                {t(
-                                    'login.forgotPassword.stepResult.close',
-                                    { defaultValue: 'بستن' }
-                                )}
+                                {t('login.forgotPassword.stepResult.close')}
                             </button>
                         </div>
                     )}
@@ -1849,8 +1684,7 @@ function ForgotPasswordModal({ onClose }) {
                                 </div>
                                 <h4 className="text-[13.5px] font-semibold text-[var(--text)]">
                                     {t(
-                                        'login.forgotPassword.fallback.button',
-                                        { defaultValue: 'بازنشانی حساب' }
+                                        'login.forgotPassword.fallback.button'
                                     )}
                                 </h4>
                             </div>
@@ -1858,11 +1692,7 @@ function ForgotPasswordModal({ onClose }) {
                             <div className="rounded-xl border border-rose-500/20 bg-rose-500/[0.06] px-3 py-2.5">
                                 <p className="text-[11px] leading-4 text-rose-700 dark:text-rose-300">
                                     {t(
-                                        'login.forgotPassword.fallback.confirm',
-                                        {
-                                            defaultValue:
-                                                'آیا مطمئن هستید؟ حساب کاربری حذف می‌شود و باید دوباره ثبت‌نام کنید. اطلاعات فروشگاه حفظ می‌شود.',
-                                        }
+                                        'login.forgotPassword.fallback.confirm'
                                     )}
                                 </p>
                             </div>
@@ -1875,11 +1705,7 @@ function ForgotPasswordModal({ onClose }) {
                                     className="ui-button-danger h-11 w-full"
                                 >
                                     {t(
-                                        'login.forgotPassword.fallback.confirmButton',
-                                        {
-                                            defaultValue:
-                                                'بله، حساب را بازنشانی کن',
-                                        }
+                                        'login.forgotPassword.fallback.confirmButton'
                                     )}
                                 </button>
                                 <button
@@ -1905,8 +1731,7 @@ function ForgotPasswordModal({ onClose }) {
                                     )}
                                     <span>
                                         {t(
-                                            'login.forgotPassword.fallback.cancel',
-                                            { defaultValue: 'انصراف' }
+                                            'login.forgotPassword.fallback.cancel'
                                         )}
                                     </span>
                                 </button>
@@ -1979,10 +1804,7 @@ function FallbackReset({ onTrigger, disabled }) {
     return (
         <div className="mt-2 border-t border-[var(--border-subtle)] pt-3.5">
             <p className="mb-2 text-[10.5px] leading-4 text-[var(--text-muted)]">
-                {t('login.forgotPassword.fallback.description', {
-                    defaultValue:
-                        'اگر پاسخ سؤالات را هم فراموش کرده‌اید، باید حساب را بازنشانی کنید. تمام اطلاعات فروشگاه (محصولات، فروش‌ها) حفظ می‌شود ولی اطلاعات ورود پاک می‌شود.',
-                })}
+                {t('login.forgotPassword.fallback.description')}
             </p>
             <button
                 type="button"
@@ -1990,9 +1812,7 @@ function FallbackReset({ onTrigger, disabled }) {
                 disabled={disabled}
                 className="ui-button-danger h-10 w-full text-[12.5px]"
             >
-                {t('login.forgotPassword.fallback.button', {
-                    defaultValue: 'بازنشانی حساب',
-                })}
+                {t('login.forgotPassword.fallback.button')}
             </button>
         </div>
     );
